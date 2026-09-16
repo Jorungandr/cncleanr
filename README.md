@@ -1,5 +1,7 @@
 # cncleanr
 
+[![R-CMD-check](https://github.com/Jorungandr/cncleanr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Jorungandr/cncleanr/actions/workflows/R-CMD-check.yaml)
+
 `cncleanr` safely parses compact numeric values commonly found in Chinese
 tables and spreadsheets. The first development version is deliberately small:
 it parses values, reports ambiguous input, and does not modify data frames
@@ -25,3 +27,12 @@ values.
 
 The package has a dependency-free base R check suite under `tests/parser.R`
 and a more detailed development suite under `tests/testthat/`.
+
+## Installation
+
+Install the released package from GitHub with `pak`:
+
+```r
+install.packages("pak")
+pak::pak("Jorungandr/cncleanr@v0.1.0")
+```

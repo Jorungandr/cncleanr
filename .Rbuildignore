@@ -1,4 +1,5 @@
 ^cncleanr\.Rproj$
 ^\.Rproj\.user$
 ^\.git$
+^\.github$
 ^docs$
