@@ -10,6 +10,33 @@ test_that("qualified quantities preserve their semantics", {
   )
 })
 
+test_that("common inequality phrases have precise boundary semantics", {
+  result <- parse_cn_quantity(c(
+    "大于3万", "小于3万", "不大于3万", "不小于3万", "10万+", "50余"
+  ))
+
+  expect_equal(result$value, c(3e4, 3e4, 3e4, 3e4, 1e5, 50))
+  expect_equal(
+    result$qualifier,
+    c("greater_than", "less_than", "at_most", "at_least", "at_least", "greater_than")
+  )
+})
+
+test_that("ASCII, Unicode, and full-width comparison signs are supported", {
+  result <- parse_cn_quantity(c(
+    ">3万", "<3万", ">=3万", "<=3万", "≥3万", "≤3万", "＞３万", "＜＝３万"
+  ))
+
+  expect_equal(result$value, rep(3e4, 8L))
+  expect_equal(
+    result$qualifier,
+    c(
+      "greater_than", "less_than", "at_least", "at_most",
+      "at_least", "at_most", "greater_than", "at_most"
+    )
+  )
+})
+
 test_that("quantity parser handles missing, numeric, and invalid input", {
   expect_equal(
     parse_cn_quantity(c(NA, "暂无"))$qualifier,

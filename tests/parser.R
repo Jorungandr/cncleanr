@@ -48,3 +48,19 @@ stopifnot(
   identical(range$lower, c(3e4, 1e5)),
   identical(range$upper, c(5e4, Inf))
 )
+
+inequality <- parse_cn_quantity(c(
+  "\u5927\u4e8e3\u4e07", "\u5c0f\u4e8e3\u4e07", "\u4e0d\u5927\u4e8e3\u4e07", "\u4e0d\u5c0f\u4e8e3\u4e07", "10\u4e07+", "50\u4f59"
+))
+stopifnot(
+  identical(
+    inequality$qualifier,
+    c("greater_than", "less_than", "at_most", "at_least", "at_least", "greater_than")
+  )
+)
+
+scientific_range <- parse_cn_range(c("1e-3", "1e-3-2e-3", "-5--3"))
+stopifnot(
+  identical(scientific_range$lower, c(1e-3, 1e-3, -5)),
+  identical(scientific_range$upper, c(1e-3, 2e-3, -3))
+)

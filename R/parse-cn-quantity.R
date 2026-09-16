@@ -1,8 +1,8 @@
 #' Parse Qualified Quantities Used in Chinese Data
 #'
-#' Parses exact values and values qualified by language such as `"\u7ea63\u4e07"`,
-#' `"\u8d85\u8fc72\u4ebf"`, `"\u4e0d\u5c11\u4e8e5\u4e07"`, or `"10%\u4ee5\u4e0b"`. The qualifier is
-#' retained instead of silently discarded.
+#' Parses exact values and values qualified by language or symbols, such as
+#' `"\u7ea63\u4e07"`, `"\u5927\u4e8e2\u4ebf"`, `"\u4e0d\u5c0f\u4e8e5\u4e07"`, `"10\u4e07+"`, or `"50\u4f59"`.
+#' The qualifier is retained instead of silently discarded.
 #'
 #' @inheritParams parse_cn_number
 #'
@@ -11,7 +11,7 @@
 #'   `less_than`, and `at_most`. Missing values have a missing qualifier.
 #'
 #' @examples
-#' parse_cn_quantity(c("\u7ea63\u4e07", "\u8d85\u8fc72\u4ebf", "10%\u4ee5\u4e0b"))
+#' parse_cn_quantity(c("\u7ea63\u4e07", "\u5927\u4e8e2\u4ebf", "\u4e0d\u5c0f\u4e8e5\u4e07", "10\u4e07+", "50\u4f59"))
 #'
 #' @export
 parse_cn_quantity <- function(
@@ -46,15 +46,16 @@ parse_cn_quantity <- function(
   conflict <- rep(FALSE, length(cleaned))
 
   prefix_rules <- c(
-    at_most = "^(?:\u4e0d\u8d85\u8fc7|\u4e0d\u9ad8\u4e8e|\u81f3\u591a)",
-    at_least = "^(?:\u4e0d\u5c11\u4e8e|\u4e0d\u4f4e\u4e8e|\u81f3\u5c11)",
-    greater_than = "^(?:\u8d85\u8fc7|\u8d85\u51fa|\u5927\u4e8e|\u9ad8\u4e8e|\u591a\u4e8e)",
-    less_than = "^(?:\u4f4e\u4e8e|\u5c0f\u4e8e|\u4e0d\u8db3|\u5c11\u4e8e)",
+    at_most = "^(?:\u4e0d\u8d85\u8fc7|\u4e0d\u9ad8\u4e8e|\u4e0d\u5927\u4e8e|\u4e0d\u591a\u4e8e|\u81f3\u591a|<=|\u2264|\u2266)",
+    at_least = "^(?:\u4e0d\u5c11\u4e8e|\u4e0d\u4f4e\u4e8e|\u4e0d\u5c0f\u4e8e|\u81f3\u5c11|>=|\u2265|\u2267)",
+    greater_than = "^(?:\u8d85\u8fc7|\u8d85\u51fa|\u5927\u4e8e|\u9ad8\u4e8e|\u591a\u4e8e|>(?!=))",
+    less_than = "^(?:\u4f4e\u4e8e|\u5c0f\u4e8e|\u4e0d\u8db3|\u5c11\u4e8e|<(?!=))",
     approx = "^(?:\u5927\u7ea6|\u7ea6\u4e3a|\u5927\u6982|\u7ea6|\u8fd1)"
   )
   suffix_rules <- c(
-    at_least = "\u4ee5\u4e0a$",
+    at_least = "(?:\u4ee5\u4e0a|\\+)$",
     at_most = "\u4ee5\u4e0b$",
+    greater_than = "\u4f59$",
     approx = "\u5de6\u53f3$"
   )
 

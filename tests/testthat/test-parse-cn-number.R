@@ -19,6 +19,10 @@ test_that("currency prefixes, colloquial suffixes, and exponents are parsed", {
   )
   expect_warning(parse_cn_number("￥3%"), "Failed to parse 1 value")
   expect_warning(parse_cn_number("1e308万"), "Failed to parse 1 value")
+  expect_error(
+    parse_cn_number("1e308万", strict = TRUE),
+    "value is outside the finite double range"
+  )
 })
 
 test_that("percentages and full-width characters are normalized", {

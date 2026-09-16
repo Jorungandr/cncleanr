@@ -165,8 +165,8 @@ parse_cn_number <- function(
 normalize_cn_number_text <- function(x) {
   x <- enc2utf8(x)
   x <- chartr(
-    "\uff0d\uff10\uff11\uff12\uff13\uff14\uff15\uff16\uff17\uff18\uff19\uff0e\uff0c\uff05\uff0b\uff08\uff09\uffe5",
-    "-0123456789.,%+()\u00a5",
+    "\uff0d\uff10\uff11\uff12\uff13\uff14\uff15\uff16\uff17\uff18\uff19\uff0e\uff0c\uff05\uff0b\uff08\uff09\uffe5\uff1c\uff1e\uff1d",
+    "-0123456789.,%+()\u00a5<>=",
     x
   )
   gsub("[[:space:]\u3000]+", "", x, perl = TRUE)
@@ -178,10 +178,12 @@ format_cn_parse_failure <- function(problems) {
   if (count > 5L) {
     positions <- paste0(positions, ", ...")
   }
-  sprintf(
+  summary <- sprintf(
     "Failed to parse %d value%s at positions %s.",
     count,
     if (count == 1L) "" else "s",
     positions
   )
+  first_reason <- sub("[.]$", "", problems$reason[[1L]])
+  paste0(summary, " First problem: ", first_reason, ".")
 }

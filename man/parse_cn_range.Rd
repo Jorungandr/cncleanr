@@ -27,7 +27,8 @@ A data frame with columns \code{lower}, \code{upper}, \code{lower_inclusive}, an
 \description{
 Converts closed ranges such as \code{"3\\u4e07-5\\u4e07"} and open bounds such as
 \code{"10\\u4e07\\u5143\\u4ee5\\u4e0a"} into explicit lower and upper bounds. A shared suffix in
-\code{"3-5\\u4e07"} is applied to both endpoints.
+\code{"3-5\\u4e07"} is applied to both endpoints. Signs used by negative numbers and
+scientific notation are distinguished from range separators.
 }
 \examples{
 parse_cn_range(c("3\u4e07-5\u4e07", "3-5\u4e07", "10\u4e07\u5143\u4ee5\u4e0a"))

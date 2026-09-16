@@ -51,6 +51,13 @@ parse_cn_quantity(c("3万", "约3万", "超过2亿", "不少于5万", "10%以下
 
 Possible qualifiers are `exact`, `approx`, `greater_than`, `at_least`, `less_than`, and `at_most`.
 
+Common inequality forms have explicit boundary semantics:
+
+- `大于3万` and `小于3万` exclude the boundary;
+- `不大于3万` and `不小于3万` include the boundary;
+- `<`, `>`, `<=`, `>=`, `≤`, `≥`, and their full-width forms are supported;
+- `10万+` means at least 100,000, while `50余` means greater than 50.
+
 ## Numeric ranges
 
 `parse_cn_range()` returns explicit bounds and indicates whether each boundary is inclusive.
@@ -65,6 +72,7 @@ parse_cn_range(c("3万-5万", "3-5万", "10万元以上", "低于2亿"))
 ```
 
 A shared suffix in a form such as `3-5万` is applied to both endpoints of the numeric range. Reversed ranges and invalid endpoints are reported as problems.
+Signs in scientific notation are not treated as range separators, so both `1e-3` and `1e-3-2e-3` are parsed correctly.
 
 ## Inspecting problems
 

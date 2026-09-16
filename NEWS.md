@@ -1,3 +1,13 @@
+# cncleanr 0.2.1
+
+* Fixes `parse_cn_range()` so minus signs in scientific notation and negative
+  endpoints are not mistaken for range separators.
+* Supports strict and inclusive inequality phrases including `大于`, `小于`,
+  `不大于`, and `不小于`, plus comparison symbols.
+* Interprets a trailing `+` as `at_least` and `余` as `greater_than`.
+* Adds the first concrete failure reason to batch warnings and strict errors.
+* Expands regression coverage for exact values, bounds, and signed ranges.
+
 # cncleanr 0.2.0
 
 * Adds `parse_cn_quantity()` to retain approximate and inequality semantics.

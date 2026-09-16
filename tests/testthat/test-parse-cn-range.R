@@ -7,6 +7,26 @@ test_that("closed ranges and shared suffixes are parsed", {
   expect_true(all(result$upper_inclusive))
 })
 
+test_that("exponent signs and negative signs are not mistaken for separators", {
+  result <- parse_cn_range(c("1e-3", "1e-3-2e-3", "-5--3"))
+
+  expect_equal(result$lower, c(1e-3, 1e-3, -5))
+  expect_equal(result$upper, c(1e-3, 2e-3, -3))
+  expect_true(all(result$lower_inclusive))
+  expect_true(all(result$upper_inclusive))
+})
+
+test_that("requested inequality forms map to correct open and closed bounds", {
+  result <- parse_cn_range(c(
+    "大于3万", "小于3万", "不大于3万", "不小于3万", "10万+", "50余"
+  ))
+
+  expect_equal(result$lower, c(3e4, -Inf, -Inf, 3e4, 1e5, 50))
+  expect_equal(result$upper, c(Inf, 3e4, 3e4, Inf, Inf, Inf))
+  expect_equal(result$lower_inclusive, c(FALSE, FALSE, FALSE, TRUE, TRUE, FALSE))
+  expect_equal(result$upper_inclusive, c(FALSE, FALSE, TRUE, FALSE, FALSE, FALSE))
+})
+
 test_that("open bounds and exact values are represented explicitly", {
   result <- parse_cn_range(
     c("10万元以上", "超过2亿", "低于5000", "3万", NA)
@@ -27,5 +47,8 @@ test_that("invalid and reversed ranges report problems", {
   )
   expect_equal(cn_problems(result)$index, 1:2)
   expect_equal(result$lower[[3L]], 2e4)
-  expect_error(parse_cn_range("5万-3万", strict = TRUE), "Failed to parse")
+  expect_error(
+    parse_cn_range("5万-3万", strict = TRUE),
+    "range lower bound is greater than its upper bound"
+  )
 })
