@@ -34,6 +34,39 @@ test_that("percentages and full-width characters are normalized", {
   )
 })
 
+test_that("PDF signs and full-width exponent letters are normalized", {
+  input <- c("−3万", "﹣3万", "–3万", "１．２Ｅ５", "１．２ｅ５")
+
+  expect_equal(parse_cn_number(input), c(-3e4, -3e4, -3e4, 1.2e5, 1.2e5))
+})
+
+test_that("valid Unicode whitespace grouping is accepted", {
+  input <- c(
+    "1 234", "1\u00a0234", "1\u202f234", "1\u3000234",
+    "12 345 678.5万元"
+  )
+
+  expect_equal(
+    parse_cn_number(input),
+    c(1234, 1234, 1234, 1234, 12345678.5 * 1e4)
+  )
+})
+
+test_that("malformed whitespace grouping is rejected instead of concatenated", {
+  input <- c("1 2", "12 34", "1 23 456", "1 234")
+  result <- NULL
+
+  expect_warning(
+    result <- parse_cn_number(input),
+    "digits use invalid whitespace grouping"
+  )
+  expect_equal(as.numeric(result), c(NA_real_, NA_real_, NA_real_, 1234))
+  expect_equal(cn_problems(result)$index, 1:3)
+  expect_true(all(
+    cn_problems(result)$reason == "digits use invalid whitespace grouping"
+  ))
+})
+
 test_that("ordinary and accounting negatives are parsed", {
   expect_equal(
     parse_cn_number(c("-3.2亿", "(2.5万)", "+12")),

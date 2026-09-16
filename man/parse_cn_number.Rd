@@ -29,7 +29,8 @@ columns \code{index}, \code{value}, and \code{reason}.
 Converts character values such as \code{"1.25\\u4e07"}, \code{"\\uffe53\\u4ebf"},
 \code{"1.2e5"}, and \code{"12.5\%"}
 to doubles. Parsing is deliberately conservative: every non-missing value
-must match the supported syntax in full.
+must match the supported syntax in full. Spaces between digits are accepted
+only when they form valid three-digit grouping.
 }
 \examples{
 parse_cn_number(c("1.25\u4e07", "3\u4ebf\u5143", "12.5\%", "\u6682\u65e0"))

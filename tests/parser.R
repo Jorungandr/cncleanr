@@ -64,3 +64,21 @@ stopifnot(
   identical(scientific_range$lower, c(1e-3, 1e-3, -5)),
   identical(scientific_range$upper, c(1e-3, 2e-3, -3))
 )
+
+normalized <- parse_cn_number(c(
+  "\u22123\u4e07", "\ufe633\u4e07", "\u20133\u4e07", "\uff11\uff0e\uff12\uff25\uff15", "1\u00a0234"
+))
+stopifnot(identical(normalized, c(-3e4, -3e4, -3e4, 1.2e5, 1234)))
+
+bad_spacing <- suppressWarnings(parse_cn_number(c("1 2", "1 234")))
+stopifnot(
+  is.na(bad_spacing[[1L]]),
+  identical(bad_spacing[[2L]], 1234),
+  identical(cn_problems(bad_spacing)$reason, "digits use invalid whitespace grouping")
+)
+
+yu <- parse_cn_quantity(c("50\u4f59", "10\u4e07\u4f59", "50\u4f59\u4e07", "50\u4f59\u4e07\u5143"))
+stopifnot(
+  identical(yu$value, c(50, 1e5, 5e5, 5e5)),
+  identical(yu$qualifier, rep("greater_than", 4L))
+)

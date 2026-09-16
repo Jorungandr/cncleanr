@@ -27,10 +27,11 @@ A data frame with double column \code{value} and character column
 }
 \description{
 Parses exact values and values qualified by language or symbols, such as
-\code{"\\u7ea63\\u4e07"}, \code{"\\u5927\\u4e8e2\\u4ebf"}, \code{"\\u4e0d\\u5c0f\\u4e8e5\\u4e07"}, \code{"10\\u4e07+"}, or \code{"50\\u4f59"}.
+\code{"\\u7ea63\\u4e07"}, \code{"\\u5927\\u4e8e2\\u4ebf"}, \code{"\\u4e0d\\u5c0f\\u4e8e5\\u4e07"}, \code{"10\\u4e07+"}, \code{"50\\u4f59"}, or
+\code{"50\\u4f59\\u4e07\\u5143"}.
 The qualifier is retained instead of silently discarded.
 }
 \examples{
-parse_cn_quantity(c("\u7ea63\u4e07", "\u5927\u4e8e2\u4ebf", "\u4e0d\u5c0f\u4e8e5\u4e07", "10\u4e07+", "50\u4f59"))
+parse_cn_quantity(c("\u7ea63\u4e07", "\u5927\u4e8e2\u4ebf", "10\u4e07+", "50\u4f59", "50\u4f59\u4e07\u5143"))
 
 }

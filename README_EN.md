@@ -31,9 +31,12 @@ Common supported forms include:
 - `万`, `亿`, and `万亿` magnitude suffixes;
 - `元`, `人民币`, `￥`, `¥`, `RMB`, `CNY`, `块`, and `块钱` currencies;
 - percentages and scientific notation;
-- full-width digits, punctuation, and whitespace;
+- full-width digits, punctuation, exponent letters, and common PDF minus signs;
+- valid three-digit grouping with regular, non-breaking, narrow, or ideographic spaces;
 - regular negative signs and accounting parentheses;
 - configurable missing-value markers.
+
+Whitespace between digits is accepted only when it forms valid three-digit grouping: `1 234` becomes `1234`, while `1 2` and `12 34` are reported instead of being silently concatenated.
 
 ## Qualified quantities
 
@@ -56,7 +59,8 @@ Common inequality forms have explicit boundary semantics:
 - `大于3万` and `小于3万` exclude the boundary;
 - `不大于3万` and `不小于3万` include the boundary;
 - `<`, `>`, `<=`, `>=`, `≤`, `≥`, and their full-width forms are supported;
-- `10万+` means at least 100,000, while `50余` means greater than 50.
+- `10万+` means at least 100,000;
+- `50余`, `10万余`, `50余万`, and `50余万元` all retain a `greater_than` qualifier.
 
 ## Numeric ranges
 

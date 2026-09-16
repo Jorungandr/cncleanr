@@ -22,6 +22,15 @@ test_that("common inequality phrases have precise boundary semantics", {
   )
 })
 
+test_that("yu before or after a unit consistently means greater than", {
+  result <- parse_cn_quantity(c(
+    "50余", "10万余", "50余万", "50余元", "50余万元"
+  ))
+
+  expect_equal(result$value, c(50, 1e5, 5e5, 50, 5e5))
+  expect_equal(result$qualifier, rep("greater_than", 5L))
+})
+
 test_that("ASCII, Unicode, and full-width comparison signs are supported", {
   result <- parse_cn_quantity(c(
     ">3万", "<3万", ">=3万", "<=3万", "≥3万", "≤3万", "＞３万", "＜＝３万"

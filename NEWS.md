@@ -1,3 +1,14 @@
+# cncleanr 0.2.2
+
+* Normalizes common PDF minus characters and full-width exponent letters.
+* Supports regular, non-breaking, narrow no-break, and ideographic spaces in
+  valid three-digit number grouping.
+* Rejects malformed whitespace grouping instead of silently concatenating
+  digits.
+* Supports `余` before magnitude and currency suffixes, including `50余万`,
+  `50余元`, and `50余万元`.
+* Expands regression coverage for copied PDF, spreadsheet, and web text.
+
 # cncleanr 0.2.1
 
 * Fixes `parse_cn_range()` so minus signs in scientific notation and negative

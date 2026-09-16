@@ -27,6 +27,17 @@ test_that("requested inequality forms map to correct open and closed bounds", {
   expect_equal(result$upper_inclusive, c(FALSE, FALSE, TRUE, FALSE, FALSE, FALSE))
 })
 
+test_that("yu forms create consistent open lower bounds", {
+  result <- parse_cn_range(c(
+    "50余", "10万余", "50余万", "50余元", "50余万元"
+  ))
+
+  expect_equal(result$lower, c(50, 1e5, 5e5, 50, 5e5))
+  expect_equal(result$upper, rep(Inf, 5L))
+  expect_false(any(result$lower_inclusive))
+  expect_false(any(result$upper_inclusive))
+})
+
 test_that("open bounds and exact values are represented explicitly", {
   result <- parse_cn_range(
     c("10万元以上", "超过2亿", "低于5000", "3万", NA)

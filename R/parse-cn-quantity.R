@@ -1,7 +1,8 @@
 #' Parse Qualified Quantities Used in Chinese Data
 #'
 #' Parses exact values and values qualified by language or symbols, such as
-#' `"\u7ea63\u4e07"`, `"\u5927\u4e8e2\u4ebf"`, `"\u4e0d\u5c0f\u4e8e5\u4e07"`, `"10\u4e07+"`, or `"50\u4f59"`.
+#' `"\u7ea63\u4e07"`, `"\u5927\u4e8e2\u4ebf"`, `"\u4e0d\u5c0f\u4e8e5\u4e07"`, `"10\u4e07+"`, `"50\u4f59"`, or
+#' `"50\u4f59\u4e07\u5143"`.
 #' The qualifier is retained instead of silently discarded.
 #'
 #' @inheritParams parse_cn_number
@@ -11,7 +12,7 @@
 #'   `less_than`, and `at_most`. Missing values have a missing qualifier.
 #'
 #' @examples
-#' parse_cn_quantity(c("\u7ea63\u4e07", "\u5927\u4e8e2\u4ebf", "\u4e0d\u5c0f\u4e8e5\u4e07", "10\u4e07+", "50\u4f59"))
+#' parse_cn_quantity(c("\u7ea63\u4e07", "\u5927\u4e8e2\u4ebf", "10\u4e07+", "50\u4f59", "50\u4f59\u4e07\u5143"))
 #'
 #' @export
 parse_cn_quantity <- function(
@@ -70,8 +71,19 @@ parse_cn_quantity <- function(
       function(pattern) grepl(pattern, cleaned[[i]], perl = TRUE),
       logical(1)
     )]
+    infix_pattern <- paste0(
+      "^(.+)\u4f59(",
+      "(?:\u4e07\u4ebf|\u4e07|\u4ebf)(?:\u4eba\u6c11\u5e01|\u5757\u94b1|\u5143|\u5757)?|",
+      "(?:\u4eba\u6c11\u5e01|\u5757\u94b1|\u5143|\u5757)",
+      ")$"
+    )
+    infix_fields <- regmatches(
+      cleaned[[i]],
+      regexec(infix_pattern, cleaned[[i]], perl = TRUE)
+    )[[1L]]
+    has_infix_yu <- length(infix_fields) > 0L
 
-    if (length(prefix_hits) + length(suffix_hits) > 1L) {
+    if (length(prefix_hits) + length(suffix_hits) + has_infix_yu > 1L) {
       conflict[[i]] <- TRUE
       qualifier[[i]] <- NA_character_
       next
@@ -82,6 +94,9 @@ parse_cn_quantity <- function(
     } else if (length(suffix_hits) == 1L) {
       qualifier[[i]] <- suffix_hits
       cleaned[[i]] <- sub(suffix_rules[[suffix_hits]], "", cleaned[[i]], perl = TRUE)
+    } else if (has_infix_yu) {
+      qualifier[[i]] <- "greater_than"
+      cleaned[[i]] <- paste0(infix_fields[[2L]], infix_fields[[3L]])
     }
   }
 

@@ -3,7 +3,8 @@
 #' Converts character values such as `"1.25\u4e07"`, `"\uffe53\u4ebf"`,
 #' `"1.2e5"`, and `"12.5%"`
 #' to doubles. Parsing is deliberately conservative: every non-missing value
-#' must match the supported syntax in full.
+#' must match the supported syntax in full. Spaces between digits are accepted
+#' only when they form valid three-digit grouping.
 #'
 #' @param x A character, factor, or numeric vector.
 #' @param na A character vector containing values that should be interpreted as
@@ -52,6 +53,7 @@ parse_cn_number <- function(
 
   input_names <- names(x)
   original <- x
+  invalid_spacing <- has_invalid_cn_digit_spacing(x)
   normalized <- normalize_cn_number_text(x)
   normalized_na <- normalize_cn_number_text(na)
   is_missing <- is.na(normalized) | normalized %in% normalized_na
@@ -80,6 +82,9 @@ parse_cn_number <- function(
   matches <- regmatches(work, regexec(pattern, work, perl = TRUE))
   matched <- lengths(matches) > 0L
   reasons <- rep("value does not match the supported number syntax", length(work))
+  invalid_work_spacing <- invalid_spacing[active]
+  matched[invalid_work_spacing] <- FALSE
+  reasons[invalid_work_spacing] <- "digits use invalid whitespace grouping"
 
   for (i in which(matched)) {
     fields <- matches[[i]]
@@ -163,13 +168,39 @@ parse_cn_number <- function(
 }
 
 normalize_cn_number_text <- function(x) {
+  x <- normalize_cn_number_characters(x)
+  gsub("[[:space:]\u3000\u00a0\u202f]+", "", x, perl = TRUE)
+}
+
+normalize_cn_number_characters <- function(x) {
   x <- enc2utf8(x)
   x <- chartr(
-    "\uff0d\uff10\uff11\uff12\uff13\uff14\uff15\uff16\uff17\uff18\uff19\uff0e\uff0c\uff05\uff0b\uff08\uff09\uffe5\uff1c\uff1e\uff1d",
-    "-0123456789.,%+()\u00a5<>=",
+    "\uff0d\uff10\uff11\uff12\uff13\uff14\uff15\uff16\uff17\uff18\uff19\uff0e\uff0c\uff05\uff0b\uff08\uff09\uffe5\uff1c\uff1e\uff1d\uff25\uff45",
+    "-0123456789.,%+()\u00a5<>=Ee",
     x
   )
-  gsub("[[:space:]\u3000]+", "", x, perl = TRUE)
+  gsub("[\u2212\ufe63\u2013]", "-", x, perl = TRUE)
+}
+
+has_invalid_cn_digit_spacing <- function(x) {
+  x <- normalize_cn_number_characters(x)
+  spacing <- "[[:space:]\u3000\u00a0\u202f]"
+  has_digit_spacing <- grepl(
+    paste0("[0-9]", spacing, "+[0-9]"),
+    x,
+    perl = TRUE
+  )
+  valid_grouping <- grepl(
+    paste0(
+      "^[^0-9]*",
+      "[0-9]{1,3}(?:", spacing, "+[0-9]{3})+",
+      "(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?",
+      "[^0-9]*$"
+    ),
+    x,
+    perl = TRUE
+  )
+  has_digit_spacing & !valid_grouping
 }
 
 format_cn_parse_failure <- function(problems) {
