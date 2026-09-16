@@ -6,7 +6,7 @@
 
 `cncleanr` safely parses compact numbers, qualified quantities, and numeric ranges commonly found in Chinese tables, web pages, and statistical reports.
 
-It does not merely extract the first number it encounters. A non-missing value that cannot be interpreted in full becomes `NA`, produces a warning, and records a structured reason, preventing dirty input from being silently converted into an incorrect result.
+It does not merely extract the first number it encounters. A non-missing value that cannot be interpreted in full becomes `NA`, produces a warning, and records a structured reason.
 
 ## Installation
 
@@ -37,7 +37,7 @@ Common supported forms include:
 
 ## Qualified quantities
 
-`parse_cn_quantity()` retains the meaning of qualifiers instead of discarding words such as “approximately” or “greater than.”
+`parse_cn_quantity()` retains the meaning of approximate values and fuzzy qualifiers in the original text.
 
 ```r
 parse_cn_quantity(c("3万", "约3万", "超过2亿", "不少于5万", "10%以下"))
@@ -53,7 +53,7 @@ Possible qualifiers are `exact`, `approx`, `greater_than`, `at_least`, `less_tha
 
 ## Numeric ranges
 
-`parse_cn_range()` returns explicit bounds and their inclusivity instead of inventing a midpoint.
+`parse_cn_range()` returns explicit bounds and indicates whether each boundary is inclusive.
 
 ```r
 parse_cn_range(c("3万-5万", "3-5万", "10万元以上", "低于2亿"))
@@ -64,7 +64,7 @@ parse_cn_range(c("3万-5万", "3-5万", "10万元以上", "低于2亿"))
 #> 4  -Inf 2e+08           FALSE           FALSE
 ```
 
-A shared suffix in a form such as `3-5万` is applied to both endpoints. Reversed ranges and invalid endpoints are reported as problems.
+A shared suffix in a form such as `3-5万` is applied to both endpoints of the numeric range. Reversed ranges and invalid endpoints are reported as problems.
 
 ## Inspecting problems
 
@@ -76,7 +76,7 @@ cn_problems(result)
 #> 2     3   abc value does not match the supported number syntax
 ```
 
-Use `strict = TRUE` to turn any parsing failure into an error:
+Set the `strict = TRUE` argument to turn any parsing failure into an error:
 
 ```r
 parse_cn_number(c("2万", "abc"), strict = TRUE)
