@@ -1,12 +1,13 @@
 Package: cncleanr
 Title: Parse Compact Numbers in Chinese Data
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: 
     person("皓天", "刘", , "wyvern06@163.com", role = c("aut", "cre"))
-Description: Parses compact numeric values commonly found in Chinese tables
-    and spreadsheets. It handles Chinese magnitude suffixes, percentages,
-    full-width characters, financial negatives, and configurable missing-value
-    markers while reporting values that cannot be parsed safely.
+Description: Parses compact numeric values, qualified quantities, and ranges
+    commonly found in Chinese tables and spreadsheets. It handles Chinese
+    magnitude suffixes, currencies, percentages, full-width characters,
+    financial negatives, and configurable missing-value markers while
+    reporting values that cannot be parsed safely.
 License: MIT + file LICENSE
 URL: https://github.com/Jorungandr/cncleanr
 BugReports: https://github.com/Jorungandr/cncleanr/issues

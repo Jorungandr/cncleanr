@@ -13,6 +13,10 @@ stopifnot(
     parse_cn_number(c("-3.2\u4ebf", "(2.5\u4e07)", "+12")),
     c(-3.2e8, -25000, 12)
   ),
+  identical(
+    parse_cn_number(c("\uffe53.5\u4e07", "\u4eba\u6c11\u5e012\u4ebf", "1.2e5")),
+    c(35000, 2e8, 120000)
+  ),
   all(is.na(parse_cn_number(c(NA, "\u6682\u65e0", "\u2014"))))
 )
 
@@ -32,3 +36,15 @@ strict_failed <- tryCatch(
   error = function(error) TRUE
 )
 stopifnot(strict_failed)
+
+quantity <- parse_cn_quantity(c("\u7ea63\u4e07", "\u4e0d\u5c11\u4e8e5\u4e07"))
+stopifnot(
+  identical(quantity$value, c(3e4, 5e4)),
+  identical(quantity$qualifier, c("approx", "at_least"))
+)
+
+range <- parse_cn_range(c("3-5\u4e07", "10\u4e07\u5143\u4ee5\u4e0a"))
+stopifnot(
+  identical(range$lower, c(3e4, 1e5)),
+  identical(range$upper, c(5e4, Inf))
+)

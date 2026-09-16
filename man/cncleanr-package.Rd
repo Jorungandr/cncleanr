@@ -10,6 +10,14 @@
 and spreadsheets. It favors explicit rules and visible parse failures over
 guessing.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/Jorungandr/cncleanr}
+  \item Report bugs at \url{https://github.com/Jorungandr/cncleanr/issues}
+}
+
+}
 \author{
 \strong{Maintainer}: 皓天 刘 \email{wyvern06@163.com}
 

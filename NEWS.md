@@ -1,3 +1,12 @@
+# cncleanr 0.2.0
+
+* Adds `parse_cn_quantity()` to retain approximate and inequality semantics.
+* Adds `parse_cn_range()` for closed ranges and open-ended bounds.
+* Adds `cn_problems()` for stable access to structured parsing failures.
+* Supports currency prefixes and suffixes, colloquial currency units, and
+  scientific notation in `parse_cn_number()`.
+* Provides separate Chinese and English README files.
+
 # cncleanr 0.1.0
 
 * Adds `parse_cn_number()` for compact Chinese numeric values.

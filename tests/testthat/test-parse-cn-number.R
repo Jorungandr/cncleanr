@@ -7,6 +7,20 @@ test_that("Chinese magnitude suffixes and currency suffixes are parsed", {
   )
 })
 
+test_that("currency prefixes, colloquial suffixes, and exponents are parsed", {
+  input <- c(
+    "￥3.5万", "人民币2亿", "RMB 12", "cny1,200", "3万块", "1.2e5",
+    "-￥3万", "￥-3万", "(￥3万)"
+  )
+
+  expect_equal(
+    parse_cn_number(input),
+    c(35000, 2e8, 12, 1200, 30000, 120000, -30000, -30000, -30000)
+  )
+  expect_warning(parse_cn_number("￥3%"), "Failed to parse 1 value")
+  expect_warning(parse_cn_number("1e308万"), "Failed to parse 1 value")
+})
+
 test_that("percentages and full-width characters are normalized", {
   input <- c("12.5%", "１２．５％", "３，０００万", " 1 234.5 万元 ")
 
@@ -67,4 +81,12 @@ test_that("unsupported input types and invalid arguments fail clearly", {
   expect_error(parse_cn_number(list("1万")), "character, factor, or numeric")
   expect_error(parse_cn_number("1万", strict = NA), "single TRUE or FALSE")
   expect_error(parse_cn_number("1万", na = 1), "character vector")
+})
+
+test_that("cn_problems returns a stable problem schema", {
+  failed <- suppressWarnings(parse_cn_number(c("bad", "2万")))
+
+  expect_equal(names(cn_problems(failed)), c("index", "value", "reason"))
+  expect_equal(cn_problems(failed)$index, 1L)
+  expect_equal(nrow(cn_problems(parse_cn_number("2万"))), 0L)
 })

@@ -1,7 +1,7 @@
 #' Parse Compact Numbers Used in Chinese Data
 #'
-#' Converts character values such as `"1.25\u4e07"`, `"3\u4ebf\u5143"`,
-#' and `"12.5%"`
+#' Converts character values such as `"1.25\u4e07"`, `"\uffe53\u4ebf"`,
+#' `"1.2e5"`, and `"12.5%"`
 #' to doubles. Parsing is deliberately conservative: every non-missing value
 #' must match the supported syntax in full.
 #'
@@ -70,9 +70,11 @@ parse_cn_number <- function(
 
   pattern <- paste0(
     "^([+-]?)",
-    "((?:[0-9]{1,3}(?:,[0-9]{3})+|[0-9]+)(?:\\.[0-9]+)?|\\.[0-9]+)",
+    "(\u00a5|\u4eba\u6c11\u5e01|(?i:RMB|CNY))?",
+    "([+-]?)",
+    "((?:(?:[0-9]{1,3}(?:,[0-9]{3})+|[0-9]+)(?:\\.[0-9]+)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)?)",
     "(\u4e07\u4ebf|\u4e07|\u4ebf)?",
-    "(\u5143|\u4eba\u6c11\u5e01)?",
+    "(\u4eba\u6c11\u5e01|\u5757\u94b1|\u5143|\u5757)?",
     "(%)?$"
   )
   matches <- regmatches(work, regexec(pattern, work, perl = TRUE))
@@ -81,19 +83,31 @@ parse_cn_number <- function(
 
   for (i in which(matched)) {
     fields <- matches[[i]]
-    sign <- fields[[2L]]
-    number_text <- fields[[3L]]
-    unit <- fields[[4L]]
-    percent <- fields[[6L]]
+    sign_before <- fields[[2L]]
+    currency_prefix <- fields[[3L]]
+    sign_after <- fields[[4L]]
+    number_text <- fields[[5L]]
+    unit <- fields[[6L]]
+    currency_suffix <- fields[[7L]]
+    percent <- fields[[8L]]
+    has_sign <- nzchar(sign_before) || nzchar(sign_after)
 
-    if (accounting[[i]] && nzchar(sign)) {
+    if (nzchar(sign_before) && nzchar(sign_after)) {
+      matched[[i]] <- FALSE
+      reasons[[i]] <- "a value cannot contain more than one explicit sign"
+      next
+    }
+    if (accounting[[i]] && has_sign) {
       matched[[i]] <- FALSE
       reasons[[i]] <- "accounting parentheses cannot contain an explicit sign"
       next
     }
-    if (nzchar(percent) && nzchar(unit)) {
+    if (
+      nzchar(percent) &&
+        (nzchar(unit) || nzchar(currency_prefix) || nzchar(currency_suffix))
+    ) {
       matched[[i]] <- FALSE
-      reasons[[i]] <- "percentages cannot also use a magnitude suffix"
+      reasons[[i]] <- "percentages cannot also use currency or a magnitude suffix"
       next
     }
 
@@ -112,6 +126,12 @@ parse_cn_number <- function(
       1
     )
     value <- value * multiplier
+    if (!is.finite(value)) {
+      matched[[i]] <- FALSE
+      reasons[[i]] <- "value is outside the finite double range"
+      next
+    }
+    sign <- if (nzchar(sign_before)) sign_before else sign_after
     if (identical(sign, "-") || accounting[[i]]) {
       value <- -value
     }

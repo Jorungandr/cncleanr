@@ -26,8 +26,8 @@ values occur in non-strict mode, the result has a \code{problems} attribute with
 columns \code{index}, \code{value}, and \code{reason}.
 }
 \description{
-Converts character values such as \code{"1.25\\u4e07"}, \code{"3\\u4ebf\\u5143"},
-and \code{"12.5\%"}
+Converts character values such as \code{"1.25\\u4e07"}, \code{"\\uffe53\\u4ebf"},
+\code{"1.2e5"}, and \code{"12.5\%"}
 to doubles. Parsing is deliberately conservative: every non-missing value
 must match the supported syntax in full.
 }
