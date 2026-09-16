@@ -1,0 +1,16 @@
+Package: cncleanr
+Title: Parse Compact Numbers in Chinese Data
+Version: 0.0.0.9000
+Authors@R: 
+    person("皓天", "刘", , "wyvern06@163.com", role = c("aut", "cre"))
+Description: Parses compact numeric values commonly found in Chinese tables
+    and spreadsheets. It handles Chinese magnitude suffixes, percentages,
+    full-width characters, financial negatives, and configurable missing-value
+    markers while reporting values that cannot be parsed safely.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+Suggests:
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Config/roxygen2/version: 8.1.0

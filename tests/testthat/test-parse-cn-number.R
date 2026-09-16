@@ -1,0 +1,70 @@
+test_that("Chinese magnitude suffixes and currency suffixes are parsed", {
+  input <- c("1.25万", "3亿元", "1.2万亿", "1,234.5万", "42人民币", "7元")
+
+  expect_equal(
+    parse_cn_number(input),
+    c(12500, 3e8, 1.2e12, 12345000, 42, 7)
+  )
+})
+
+test_that("percentages and full-width characters are normalized", {
+  input <- c("12.5%", "１２．５％", "３，０００万", " 1 234.5 万元 ")
+
+  expect_equal(
+    parse_cn_number(input),
+    c(0.125, 0.125, 3e7, 12345000)
+  )
+})
+
+test_that("ordinary and accounting negatives are parsed", {
+  expect_equal(
+    parse_cn_number(c("-3.2亿", "(2.5万)", "+12")),
+    c(-3.2e8, -25000, 12)
+  )
+})
+
+test_that("default and custom missing markers are respected", {
+  input <- c(NA, "", "NA", "N/A", "暂无", "未公布", "—", "–", "-", "...", "…")
+
+  expect_equal(parse_cn_number(input), rep(NA_real_, length(input)))
+  expect_equal(parse_cn_number(c("保密", "2"), na = "保密"), c(NA_real_, 2))
+})
+
+test_that("numeric and factor inputs work and names are preserved", {
+  numeric_input <- c(a = 1, b = NA_real_, c = -2.5)
+  factor_input <- factor(c("1万", "2亿"))
+
+  expect_equal(parse_cn_number(numeric_input), numeric_input)
+  expect_equal(parse_cn_number(factor_input), c(1e4, 2e8))
+  expect_equal(parse_cn_number(character()), numeric())
+})
+
+test_that("invalid and ambiguous values are visible in non-strict mode", {
+  input <- c("3万-5万", "约3万", "abc", "3万%", "2万")
+
+  output <- NULL
+  expect_warning(
+    output <- parse_cn_number(input),
+    "Failed to parse 4 values"
+  )
+  expect_equal(as.numeric(output), c(NA_real_, NA_real_, NA_real_, NA_real_, 2e4))
+
+  problems <- attr(output, "problems")
+  expect_s3_class(problems, "data.frame")
+  expect_equal(problems$index, 1:4)
+  expect_equal(problems$value, input[1:4])
+  expect_true(all(nzchar(problems$reason)))
+})
+
+test_that("strict mode rejects the complete invalid batch", {
+  expect_error(
+    parse_cn_number(c("1万", "约3万", "3万-5万"), strict = TRUE),
+    "Failed to parse 2 values"
+  )
+})
+
+test_that("unsupported input types and invalid arguments fail clearly", {
+  expect_error(parse_cn_number(list("1万")), "character, factor, or numeric")
+  expect_error(parse_cn_number("1万", strict = NA), "single TRUE or FALSE")
+  expect_error(parse_cn_number("1万", na = 1), "character vector")
+})
