@@ -14,8 +14,49 @@
 
 ```r
 install.packages("pak")
-pak::pak("Jorungandr/cncleanr@v0.2.0")
+pak::pak("Jorungandr/cncleanr@v0.2.2")
 ```
+
+## 企业营收清洗示例
+
+下面的流程保留原始文本，解析营收列，并把无法解析的记录定位回原始企业：
+
+```r
+library(cncleanr)
+
+enterprises <- data.frame(
+  company = paste0(c("甲", "乙", "丙", "丁", "戊"), "公司"),
+  revenue_raw = c("3.2亿元", "约5万", "10万+", "暂无", "3万abc")
+)
+
+parsed <- suppressWarnings(parse_cn_quantity(enterprises$revenue_raw))
+cleaned <- cbind(enterprises, parsed)
+cleaned
+#>   company revenue_raw   value qualifier
+#> 1 甲公司     3.2亿元 3.2e+08      exact
+#> 2 乙公司       约5万 5.0e+04     approx
+#> 3 丙公司       10万+ 1.0e+05   at_least
+#> 4 丁公司        暂无      NA       <NA>
+#> 5 戊公司      3万abc      NA       <NA>
+
+problems <- cn_problems(parsed)
+problem_rows <- cbind(
+  company = enterprises$company[problems$index],
+  problems
+)
+problem_rows
+#>   company index  value                                      reason
+#> 1 戊公司      5 3万abc value does not match the supported number syntax
+
+write.csv(
+  cleaned,
+  "enterprise_revenue_cleaned.csv",
+  row.names = FALSE,
+  fileEncoding = "UTF-8"
+)
+```
+
+这里使用 `suppressWarnings()`，是因为下一步会通过 `cn_problems()` 检查完整的结构化问题；如果不准备检查问题，不建议隐藏警告。
 
 ## 精确数字
 
@@ -52,7 +93,16 @@ parse_cn_quantity(c("3万", "约3万", "超过2亿", "不少于5万", "10%以下
 #> 5   1e-01      at_most
 ```
 
-可能的 `qualifier` 为 `exact`、`approx`、`greater_than`、`at_least`、`less_than` 和 `at_most`。
+六种 `qualifier` 的含义和边界如下：
+
+| `qualifier` | 含义 | 边界语义 |
+| --- | --- | --- |
+| `exact` | 精确值 | 等于 `value` |
+| `approx` | 约数 | 以 `value` 为近似值，不定义开闭边界 |
+| `greater_than` | 大于 | `> value`，不包含边界 |
+| `at_least` | 不小于 | `>= value`，包含边界 |
+| `less_than` | 小于 | `< value`，不包含边界 |
+| `at_most` | 不大于 | `<= value`，包含边界 |
 
 常见不等式表达具有明确的边界含义：
 
@@ -78,6 +128,17 @@ parse_cn_range(c("3万-5万", "3-5万", "10万元以上", "低于2亿"))
 `3-5万` 这类共享单位会自动应用到数据区间的两个端点。上下界颠倒或端点无法解析时会报告问题。
 科学计数法中的符号不会被误认为区间分隔符，因此 `1e-3` 和 `1e-3-2e-3` 都可以正确解析。
 
+## 返回值速查
+
+所有解析函数都保持输入顺序，每条输入对应一条结果；问题信息可以从结果对象中单独取出。
+
+| 函数 | 返回值 |
+| --- | --- |
+| `parse_cn_number()` | 数值向量，每条输入对应一个值 |
+| `parse_cn_quantity()` | 含 `value` 和 `qualifier` 两列的数据框 |
+| `parse_cn_range()` | 含 `lower`、`upper`、`lower_inclusive` 和 `upper_inclusive` 四列的数据框 |
+| `cn_problems()` | 含 `index`、`value` 和 `reason` 三列的数据框；没有问题时返回零行 |
+
 ## 查看解析问题
 
 ```r
@@ -88,11 +149,28 @@ cn_problems(result)
 #> 2     3   abc value does not match the supported number syntax
 ```
 
-设置参数 `strict = TRUE` 可以让任意解析失败立即变成错误：
+普通模式会把失败位置返回为 `NA`，保留其他可用结果，同时发出警告。清洗流程如果要求“任意一行失败就停止”，可以设置 `strict = TRUE`：
 
 ```r
 parse_cn_number(c("2万", "abc"), strict = TRUE)
 ```
+
+无论使用哪种模式，自定义缺失值（例如默认支持的 `"暂无"`）都不算解析失败。
+
+## 常见失败原因
+
+`cn_problems()` 的 `reason` 可以直接用于定位以下问题：
+
+| 情况 | 示例 | `reason` |
+| --- | --- | --- |
+| 不支持的语法 | `3万abc` | `value does not match the supported number syntax` |
+| 数字空格分组无效 | `1 2` | `digits use invalid whitespace grouping` |
+| 限定词重复或冲突 | `约3万左右` | `multiple or conflicting qualifiers` |
+| 区间上下界颠倒 | `5万-3万` | `range lower bound is greater than its upper bound` |
+| 区间端点无效 | `3万-abc` | `one or both range endpoints are invalid` |
+| 数值超出有限双精度范围 | `1e308万` | `value is outside the finite double range` |
+
+遇到失败时，先在普通模式下调用解析函数并查看 `cn_problems()`；只有在清洗流程要求“任意一行失败就停止”时，才使用 `strict = TRUE`。
 
 ## 开发与测试
 
