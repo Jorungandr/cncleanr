@@ -6,22 +6,45 @@ This will be the first CRAN submission of `cncleanr`.
 
 ## Test environments
 
-- Local: Windows 11, R 4.6.1
-- GitHub Actions (verification of this candidate is pending):
+- Local: Windows 11 x64 (build 26200), R 4.6.1 (ucrt)
+- The most recent pushed development baseline passed the following GitHub
+  Actions matrix before the changes in this unpushed submission candidate:
   - Ubuntu, R-devel
   - Ubuntu, R-release
   - Ubuntu, R-oldrel-1
   - Windows, R-release
   - macOS, R-release
 
-The GitHub Actions results above will be updated after the final checks for
-this submission candidate have completed. No result is claimed here yet.
+Verification of the current candidate on that matrix is pending. No GitHub
+Actions result is claimed for the unpushed changes.
 
 ## R CMD check results
 
-Checks for the current development version are pending final verification.
-The check counts and any unavoidable NOTE will be recorded here from the
-actual results before submission.
+The current development version, `0.2.3.9000`, was built from source and
+checked locally on the environment above.
+
+- `R CMD check --no-manual`: 1 ERROR, 0 WARNINGs, 0 NOTEs.
+- `R CMD check --as-cran --no-manual`: 1 ERROR, 0 WARNINGs, 1 NOTE.
+
+Both checks ran `tests/parser.R` and `tests/testthat.R`. The dependency-free
+test completed successfully, and testthat reported 108 passes, 0 failures,
+0 warnings, and 0 skips. The ERROR is a local R/toolchain exit failure after
+the successful testthat summary (Windows status `-1073741819`), rather than a
+test failure. The same exit failure occurs after successful standalone runs
+of testthat and other tools that load the local `cli`/`rlang` installation.
+The standard test runner has not been changed to conceal this failure.
+
+The CRAN incoming-feasibility NOTE reports both "New submission" and that the
+development version contains a large component (`0.2.3.9000`). A release
+version must replace the development version before submission.
+
+Auxiliary checks found no invalid URLs and no spelling errors. `lintr` reported
+29 line-length findings and no other lint types; these are existing regular
+expressions, Unicode literals, documentation examples, and test vectors.
+File-level coverage of the same testthat files was 92.370572%. The normal
+`covr::package_coverage()` route was also affected by the local post-test exit
+failure, so the measured result used `covr::file_coverage()` without changing
+the package test runner.
 
 ## Downstream dependencies
 
