@@ -1,6 +1,6 @@
 # cncleanr
 
-[English](README_EN.md) | **中文**
+[English](https://github.com/Jorungandr/cncleanr/blob/main/README_EN.md) | **中文**
 
 [![R-CMD-check](https://github.com/Jorungandr/cncleanr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Jorungandr/cncleanr/actions/workflows/R-CMD-check.yaml)
 

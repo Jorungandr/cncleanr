@@ -7,3 +7,4 @@
 ^outputs$
 ^\$build$
 ^README_EN\.md$
+^cran-comments\.md$
