@@ -39,12 +39,6 @@ jobs:
           extra-packages: any::rcmdcheck
           needs: check
 
-      - name: Run extended testthat suite
-        shell: Rscript {0}
-        run: |
-          pkgload::load_all()
-          testthat::test_dir("tests/testthat")
-
       - uses: r-lib/actions/check-r-package@v2
         with:
           args: 'c("--no-manual", "--as-cran")'
