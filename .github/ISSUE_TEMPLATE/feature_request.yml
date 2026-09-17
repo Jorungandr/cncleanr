@@ -1,0 +1,55 @@
+name: Feature request
+description: Propose support for a real data format or a focused parser improvement
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        New syntax should be grounded in real data and have unambiguous numeric semantics. Use anonymized examples when the source is private.
+  - type: textarea
+    id: source
+    attributes:
+      label: Real data source or format
+      description: Where does this format occur (for example, a spreadsheet, PDF, website, or statistical report)? You may link a public source or describe a private one without sharing confidential data.
+    validations:
+      required: true
+  - type: textarea
+    id: semantics
+    attributes:
+      label: Expected semantics
+      description: Explain the exact numeric value, qualifier, inclusivity, unit, or missing-value meaning the parser should preserve.
+    validations:
+      required: true
+  - type: textarea
+    id: examples
+    attributes:
+      label: Representative examples
+      description: Provide valid examples and, when relevant, nearby malformed examples that should remain rejected.
+      placeholder: |
+        Input: "example"
+        Expected: value = 10000, qualifier = "exact"
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Describe any preprocessing or existing cncleanr workflow you tried and why it is insufficient.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope justification
+      description: Explain why this belongs in cncleanr rather than application-specific preprocessing, especially if it is uncommon or ambiguous.
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy confirmation
+      options:
+        - label: I have removed secrets, personal information, and private or confidential data from all examples.
+          required: true

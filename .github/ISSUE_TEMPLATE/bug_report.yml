@@ -1,0 +1,85 @@
+name: Bug report
+description: Report incorrect parsing, unexpected output, or another reproducible defect
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a problem. Please replace private or sensitive values with safe representative examples.
+  - type: textarea
+    id: input
+    attributes:
+      label: Original input
+      description: Paste the exact input text or vector that triggers the problem, preserving punctuation and whitespace where possible.
+      placeholder: 'c("3万元", "约5万")'
+      render: R
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+      description: What value, qualifier, range, or problem reason did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual result
+      description: What did cncleanr return instead? Include warnings or errors.
+    validations:
+      required: true
+  - type: textarea
+    id: problems
+    attributes:
+      label: cn_problems() output
+      description: Run cn_problems() on the parser result and paste the complete output. Enter "none" if no problem was recorded.
+      render: R
+    validations:
+      required: true
+  - type: textarea
+    id: reprex
+    attributes:
+      label: Minimal reproducible example
+      description: Provide the smallest self-contained R example that reproduces the issue.
+      placeholder: |
+        library(cncleanr)
+        result <- parse_cn_number("example")
+        result
+        cn_problems(result)
+      render: R
+    validations:
+      required: true
+  - type: input
+    id: package_version
+    attributes:
+      label: cncleanr version
+      description: Run packageVersion("cncleanr").
+      placeholder: 0.2.3
+    validations:
+      required: true
+  - type: input
+    id: r_version
+    attributes:
+      label: R version
+      description: Run R.version.string.
+      placeholder: R version 4.6.1
+    validations:
+      required: true
+  - type: input
+    id: operating_system
+    attributes:
+      label: Operating system
+      description: Include the operating system name and version.
+      placeholder: Windows 11, macOS 15, or Ubuntu 24.04
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy confirmation
+      options:
+        - label: I have removed secrets, personal information, and private or confidential data from this report.
+          required: true
