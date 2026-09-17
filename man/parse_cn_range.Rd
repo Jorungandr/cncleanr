@@ -11,7 +11,9 @@ parse_cn_range(
 )
 }
 \arguments{
-\item{x}{A character, factor, or numeric vector.}
+\item{x}{A character, factor, or numeric vector. Numeric input is converted
+to double and otherwise passed through unchanged, including \code{Inf}, \code{-Inf},
+and \code{NaN}.}
 
 \item{na}{A character vector containing values that should be interpreted as
 missing. Matching happens after whitespace and full-width normalization.}
@@ -22,7 +24,10 @@ missing. Matching happens after whitespace and full-width normalization.}
 }
 \value{
 A data frame with columns \code{lower}, \code{upper}, \code{lower_inclusive}, and
-\code{upper_inclusive}. Infinite bounds are represented by \code{-Inf} or \code{Inf}.
+\code{upper_inclusive}. Numeric input becomes an inclusive point range,
+including numeric \code{Inf} and \code{-Inf}; \code{NA} and \code{NaN} have missing
+inclusivity. Infinite bounds created from textual inequalities represent
+open-ended bounds and are distinct from numeric point inputs.
 }
 \description{
 Converts closed ranges such as \code{"3\\u4e07-5\\u4e07"} and open bounds such as

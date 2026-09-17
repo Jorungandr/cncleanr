@@ -11,7 +11,9 @@ parse_cn_quantity(
 )
 }
 \arguments{
-\item{x}{A character, factor, or numeric vector.}
+\item{x}{A character, factor, or numeric vector. Numeric input is converted
+to double and otherwise passed through unchanged, including \code{Inf}, \code{-Inf},
+and \code{NaN}.}
 
 \item{na}{A character vector containing values that should be interpreted as
 missing. Matching happens after whitespace and full-width normalization.}
@@ -23,7 +25,9 @@ missing. Matching happens after whitespace and full-width normalization.}
 \value{
 A data frame with double column \code{value} and character column
 \code{qualifier}. Qualifiers are \code{exact}, \code{approx}, \code{greater_than}, \code{at_least},
-\code{less_than}, and \code{at_most}. Missing values have a missing qualifier.
+\code{less_than}, and \code{at_most}. Numeric finite and infinite values have the
+qualifier \code{exact}; \code{NA} and \code{NaN} have a missing qualifier. Numeric values,
+including \code{Inf}, \code{-Inf}, and \code{NaN}, are preserved in \code{value}.
 }
 \description{
 Parses exact values and values qualified by language or symbols, such as

@@ -127,3 +127,18 @@ test_that("cn_problems returns a stable problem schema", {
   expect_equal(cn_problems(failed)$index, 1L)
   expect_equal(nrow(cn_problems(parse_cn_number("2万"))), 0L)
 })
+
+test_that("numeric input preserves finite and non-finite double values", {
+  numeric_input <- c(
+    finite = 3,
+    positive = Inf,
+    negative = -Inf,
+    missing = NA,
+    nan = NaN
+  )
+
+  expected <- as.double(numeric_input)
+  names(expected) <- names(numeric_input)
+
+  expect_identical(parse_cn_number(numeric_input), expected)
+})

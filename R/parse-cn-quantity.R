@@ -9,7 +9,9 @@
 #'
 #' @return A data frame with double column `value` and character column
 #'   `qualifier`. Qualifiers are `exact`, `approx`, `greater_than`, `at_least`,
-#'   `less_than`, and `at_most`. Missing values have a missing qualifier.
+#'   `less_than`, and `at_most`. Numeric finite and infinite values have the
+#'   qualifier `exact`; `NA` and `NaN` have a missing qualifier. Numeric values,
+#'   including `Inf`, `-Inf`, and `NaN`, are preserved in `value`.
 #'
 #' @examples
 #' parse_cn_quantity(c(

@@ -62,3 +62,20 @@ test_that("quantity parser handles missing, numeric, and invalid input", {
   expect_equal(cn_problems(result)$index, 1L)
   expect_error(parse_cn_quantity("约3万以上", strict = TRUE), "Failed to parse")
 })
+
+test_that("numeric quantities preserve special values and qualifiers", {
+  numeric_input <- c(
+    finite = 3,
+    positive = Inf,
+    negative = -Inf,
+    missing = NA,
+    nan = NaN
+  )
+  result <- parse_cn_quantity(numeric_input)
+
+  expect_identical(result$value, c(3, Inf, -Inf, NA_real_, NaN))
+  expect_identical(
+    result$qualifier,
+    c("exact", "exact", "exact", NA_character_, NA_character_)
+  )
+})

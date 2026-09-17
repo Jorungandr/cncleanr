@@ -139,6 +139,13 @@ Every parser preserves input order and returns one result for each input. Proble
 | `parse_cn_range()` | A data frame with `lower`, `upper`, `lower_inclusive`, and `upper_inclusive` columns |
 | `cn_problems()` | A data frame with `index`, `value`, and `reason` columns; zero rows when there are no problems |
 
+Numeric input is converted directly to doubles and preserved, including `Inf`,
+`-Inf`, and `NaN`. `parse_cn_quantity()` marks finite values, `Inf`, and `-Inf`
+as `exact`, while `NA` and `NaN` have a missing qualifier. `parse_cn_range()`
+represents each non-missing numeric value as an inclusive point range. Infinite
+bounds generated from textual inequalities are open-ended bounds and are
+distinct from numeric `Inf` or `-Inf` point inputs.
+
 ## Inspecting problems
 
 ```r

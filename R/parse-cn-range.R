@@ -8,7 +8,10 @@
 #' @inheritParams parse_cn_number
 #'
 #' @return A data frame with columns `lower`, `upper`, `lower_inclusive`, and
-#'   `upper_inclusive`. Infinite bounds are represented by `-Inf` or `Inf`.
+#'   `upper_inclusive`. Numeric input becomes an inclusive point range,
+#'   including numeric `Inf` and `-Inf`; `NA` and `NaN` have missing
+#'   inclusivity. Infinite bounds created from textual inequalities represent
+#'   open-ended bounds and are distinct from numeric point inputs.
 #'
 #' @examples
 #' parse_cn_range(c("3\u4e07-5\u4e07", "3-5\u4e07", "10\u4e07\u5143\u4ee5\u4e0a"))

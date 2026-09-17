@@ -139,6 +139,12 @@ parse_cn_range(c("3万-5万", "3-5万", "10万元以上", "低于2亿"))
 | `parse_cn_range()` | 含 `lower`、`upper`、`lower_inclusive` 和 `upper_inclusive` 四列的数据框 |
 | `cn_problems()` | 含 `index`、`value` 和 `reason` 三列的数据框；没有问题时返回零行 |
 
+数值型输入会直接转换为双精度数值并保留，包括 `Inf`、`-Inf` 和 `NaN`。
+`parse_cn_quantity()` 将有限数值及 `Inf`、`-Inf` 标记为 `exact`，而
+`NA`、`NaN` 的限定词为缺失。`parse_cn_range()` 将非缺失数值表示为包含
+该值的点区间；由文本不等式生成的无穷边界表示开放区间，与数值型
+`Inf`、`-Inf` 点输入不同。
+
 ## 查看解析问题
 
 ```r

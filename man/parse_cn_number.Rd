@@ -11,7 +11,9 @@ parse_cn_number(
 )
 }
 \arguments{
-\item{x}{A character, factor, or numeric vector.}
+\item{x}{A character, factor, or numeric vector. Numeric input is converted
+to double and otherwise passed through unchanged, including \code{Inf}, \code{-Inf},
+and \code{NaN}.}
 
 \item{na}{A character vector containing values that should be interpreted as
 missing. Matching happens after whitespace and full-width normalization.}
@@ -31,6 +33,10 @@ Converts character values such as \code{"1.25\\u4e07"}, \code{"\\uffe53\\u4ebf"}
 to doubles. Parsing is deliberately conservative: every non-missing value
 must match the supported syntax in full. Spaces between digits are accepted
 only when they form valid three-digit grouping.
+}
+\details{
+Finite-range validation applies to parsed character and factor
+input. Existing numeric \code{Inf}, \code{-Inf}, and \code{NaN} values are preserved.
 }
 \examples{
 parse_cn_number(c("1.25\u4e07", "3\u4ebf\u5143", "12.5\%", "\u6682\u65e0"))

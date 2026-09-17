@@ -63,3 +63,19 @@ test_that("invalid and reversed ranges report problems", {
     "range lower bound is greater than its upper bound"
   )
 })
+
+test_that("numeric inputs become inclusive point ranges", {
+  numeric_input <- c(
+    finite = 3,
+    positive = Inf,
+    negative = -Inf,
+    missing = NA,
+    nan = NaN
+  )
+  result <- parse_cn_range(numeric_input)
+
+  expect_identical(result$lower, c(3, Inf, -Inf, NA_real_, NaN))
+  expect_identical(result$upper, c(3, Inf, -Inf, NA_real_, NaN))
+  expect_identical(result$lower_inclusive, c(TRUE, TRUE, TRUE, NA, NA))
+  expect_identical(result$upper_inclusive, c(TRUE, TRUE, TRUE, NA, NA))
+})

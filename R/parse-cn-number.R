@@ -6,7 +6,9 @@
 #' must match the supported syntax in full. Spaces between digits are accepted
 #' only when they form valid three-digit grouping.
 #'
-#' @param x A character, factor, or numeric vector.
+#' @param x A character, factor, or numeric vector. Numeric input is converted
+#'   to double and otherwise passed through unchanged, including `Inf`, `-Inf`,
+#'   and `NaN`.
 #' @param na A character vector containing values that should be interpreted as
 #'   missing. Matching happens after whitespace and full-width normalization.
 #' @param strict A single logical value. If `FALSE`, invalid values become
@@ -16,6 +18,9 @@
 #' @return A double vector with the same length and names as `x`. When invalid
 #'   values occur in non-strict mode, the result has a `problems` attribute with
 #'   columns `index`, `value`, and `reason`.
+#'
+#' @details Finite-range validation applies to parsed character and factor
+#'   input. Existing numeric `Inf`, `-Inf`, and `NaN` values are preserved.
 #'
 #' @examples
 #' parse_cn_number(c("1.25\u4e07", "3\u4ebf\u5143", "12.5%", "\u6682\u65e0"))
