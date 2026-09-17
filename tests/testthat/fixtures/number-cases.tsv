@@ -1,0 +1,12 @@
+input	expected	status	reason
+1.25万	12500	ok
+￥3亿元	300000000	ok
+１２．５％	0.125	ok
+−3万	-30000	ok
+１．２Ｅ５	120000	ok
+1 234	1234	ok
+暂无		missing
+1 2		invalid	digits use invalid whitespace grouping
+约3万		invalid	value does not match the supported number syntax
+3万-5万		invalid	value does not match the supported number syntax
+1e308万		invalid	value is outside the finite double range

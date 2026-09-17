@@ -12,7 +12,9 @@
 #'   `less_than`, and `at_most`. Missing values have a missing qualifier.
 #'
 #' @examples
-#' parse_cn_quantity(c("\u7ea63\u4e07", "\u5927\u4e8e2\u4ebf", "10\u4e07+", "50\u4f59", "50\u4f59\u4e07\u5143"))
+#' parse_cn_quantity(c(
+#'   "\u7ea63\u4e07", "\u5927\u4e8e2\u4ebf", "10\u4e07+", "50\u4f59", "50\u4f59\u4e07\u5143"
+#' ))
 #'
 #' @export
 parse_cn_quantity <- function(
@@ -118,6 +120,9 @@ parse_cn_quantity <- function(
 
   value <- as.numeric(parsed)
   value[conflict] <- NA_real_
+  if (nrow(problems) > 0L) {
+    qualifier[unique(problems$index)] <- NA_character_
+  }
   output <- data.frame(value = value, qualifier = qualifier)
   apply_cn_problems(output, problems, strict)
 }

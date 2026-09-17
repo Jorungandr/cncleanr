@@ -1,0 +1,10 @@
+input	expected	qualifier	status	reason
+约3万	30000	approx	ok
+不小于3万	30000	at_least	ok
+10万+	100000	at_least	ok
+50余万	500000	greater_than	ok
+50余万元	500000	greater_than	ok
+≤3万	30000	at_most	ok
+暂无			missing
+约3万左右			invalid	multiple or conflicting qualifiers
+abc			invalid	value does not match the supported number syntax

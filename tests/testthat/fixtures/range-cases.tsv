@@ -1,0 +1,10 @@
+input	lower	upper	lower_inclusive	upper_inclusive	status	reason
+3-5万	30000	50000	TRUE	TRUE	ok
+1e-3-2e-3	0.001	0.002	TRUE	TRUE	ok
+-5--3	-5	-3	TRUE	TRUE	ok
+不大于3万	-Inf	30000	FALSE	TRUE	ok
+10万+	100000	Inf	TRUE	FALSE	ok
+50余万元	500000	Inf	FALSE	FALSE	ok
+暂无					missing
+5万-3万					invalid	range lower bound is greater than its upper bound
+3万-abc					invalid	one or both range endpoints are invalid

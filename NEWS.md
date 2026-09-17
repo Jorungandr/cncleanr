@@ -1,3 +1,13 @@
+# cncleanr (development version)
+
+* Expands continuous integration to R devel, release, and oldrel-1 across a
+  five-job operating-system and R-version matrix.
+* Adds auditable UTF-8 fixtures based on representative PDF, spreadsheet, and
+  web inputs.
+* Adds cross-parser invariants for output shape, failure visibility, strict
+  mode consistency, and finite successful values.
+* Marks qualifiers as missing when a qualified quantity cannot be parsed.
+
 # cncleanr 0.2.2
 
 * Normalizes common PDF minus characters and full-width exponent letters.

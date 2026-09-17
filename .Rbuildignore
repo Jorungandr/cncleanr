@@ -3,3 +3,7 @@
 ^\.git$
 ^\.github$
 ^docs$
+^\.vscode$
+^outputs$
+^\$build$
+^README_EN\.md$

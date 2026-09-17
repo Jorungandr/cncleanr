@@ -32,6 +32,8 @@ Parses exact values and values qualified by language or symbols, such as
 The qualifier is retained instead of silently discarded.
 }
 \examples{
-parse_cn_quantity(c("\u7ea63\u4e07", "\u5927\u4e8e2\u4ebf", "10\u4e07+", "50\u4f59", "50\u4f59\u4e07\u5143"))
+parse_cn_quantity(c(
+  "\u7ea63\u4e07", "\u5927\u4e8e2\u4ebf", "10\u4e07+", "50\u4f59", "50\u4f59\u4e07\u5143"
+))
 
 }
