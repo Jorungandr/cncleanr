@@ -14,7 +14,7 @@ Install the released package from GitHub:
 
 ```r
 install.packages("pak")
-pak::pak("Jorungandr/cncleanr@v0.2.2")
+pak::pak("Jorungandr/cncleanr@v0.2.3")
 ```
 
 ## Enterprise revenue cleaning example

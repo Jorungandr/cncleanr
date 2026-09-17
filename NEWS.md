@@ -1,4 +1,4 @@
-# cncleanr (development version)
+# cncleanr 0.2.3
 
 * Expands continuous integration to R devel, release, and oldrel-1 across a
   five-job operating-system and R-version matrix.
@@ -7,6 +7,8 @@
 * Adds cross-parser invariants for output shape, failure visibility, strict
   mode consistency, and finite successful values.
 * Marks qualifiers as missing when a qualified quantity cannot be parsed.
+* Adds matching Chinese and English end-to-end cleaning examples, return-value
+  references, qualifier semantics, and troubleshooting guidance.
 
 # cncleanr 0.2.2
 
