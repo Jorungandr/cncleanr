@@ -1,8 +1,11 @@
 auditable
 CMD
+deduplicates
 ideographic
 inclusivity
 invariants
 oldrel
+parsers
 README
+testthat
 一

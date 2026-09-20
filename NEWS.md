@@ -1,3 +1,14 @@
+# cncleanr 0.2.5
+
+* Rejects malformed whitespace grouping consistently in quantity and range
+  parsing instead of silently joining separated digits.
+* Reports missing range endpoints such as `3-NA` and `NA-3` as structured
+  parsing problems instead of raising a base R error.
+* Batches and deduplicates range parsing work, substantially improving
+  performance for repeated and distinct inputs without adding native code.
+* Improves CRAN metadata, license discovery, installation documentation, and
+  continuous integration coverage for PDF manual generation.
+
 # cncleanr 0.2.4
 
 * Documents numeric pass-through behavior for finite values, infinities,

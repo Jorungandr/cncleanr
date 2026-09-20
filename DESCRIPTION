@@ -1,8 +1,9 @@
 Package: cncleanr
 Title: Parse Compact Numbers in Chinese Data
-Version: 0.2.4
+Version: 0.2.5
 Authors@R: 
-    person("皓天", "刘", , "wyvern06@163.com", role = c("aut", "cre"))
+    person("Haotian", "Liu", , "wyvern06@163.com",
+           role = c("aut", "cre", "cph"))
 Description: Parses compact numeric values, qualified quantities, and ranges
     commonly found in Chinese tables and spreadsheets. It handles Chinese
     magnitude suffixes, currencies, percentages, full-width characters,

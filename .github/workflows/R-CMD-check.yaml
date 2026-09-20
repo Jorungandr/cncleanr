@@ -16,11 +16,32 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - {os: ubuntu-latest, r: release, extra-packages: "any::rcmdcheck"}
-          - {os: ubuntu-latest, r: devel, http-user-agent: release, extra-packages: "any::rcmdcheck"}
-          - {os: ubuntu-latest, r: oldrel-1, extra-packages: "any::rcmdcheck"}
-          - {os: windows-latest, r: release, extra-packages: "any::rcmdcheck"}
-          - {os: macos-latest, r: release, extra-packages: "any::rcmdcheck knitr=?source xfun=?source"}
+          - os: ubuntu-latest
+            r: release
+            manual: true
+            check-args: 'c("--as-cran")'
+            extra-packages: "any::rcmdcheck"
+          - os: ubuntu-latest
+            r: devel
+            manual: false
+            check-args: 'c("--no-manual", "--as-cran")'
+            http-user-agent: release
+            extra-packages: "any::rcmdcheck"
+          - os: ubuntu-latest
+            r: oldrel-1
+            manual: false
+            check-args: 'c("--no-manual", "--as-cran")'
+            extra-packages: "any::rcmdcheck"
+          - os: windows-latest
+            r: release
+            manual: false
+            check-args: 'c("--no-manual", "--as-cran")'
+            extra-packages: "any::rcmdcheck"
+          - os: macos-latest
+            r: release
+            manual: false
+            check-args: 'c("--no-manual", "--as-cran")'
+            extra-packages: "any::rcmdcheck knitr=?source xfun=?source"
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -34,6 +55,9 @@ jobs:
           r-version: ${{ matrix.config.r }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
 
+      - uses: r-lib/actions/setup-tinytex@v2
+        if: matrix.config.manual
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: ${{ matrix.config.extra-packages }}
@@ -41,4 +65,4 @@ jobs:
 
       - uses: r-lib/actions/check-r-package@v2
         with:
-          args: 'c("--no-manual", "--as-cran")'
+          args: ${{ matrix.config.check-args }}

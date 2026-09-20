@@ -10,7 +10,13 @@ It does not merely extract the first number it encounters. A non-missing value t
 
 ## Installation
 
-Install the released package from GitHub:
+Once available on CRAN, install with:
+
+```r
+install.packages("cncleanr")
+```
+
+Before the package reaches CRAN, or to install the current GitHub release:
 
 ```r
 install.packages("pak")

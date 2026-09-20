@@ -19,11 +19,11 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: 皓天 刘 \email{wyvern06@163.com}
+\strong{Maintainer}: Haotian Liu \email{wyvern06@163.com} [copyright holder]
 
 Authors:
 \itemize{
-  \item 皓天 刘 \email{wyvern06@163.com}
+  \item Haotian Liu \email{wyvern06@163.com} [copyright holder]
 }
 
 }

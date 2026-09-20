@@ -13,6 +13,16 @@
 #'   qualifier `exact`; `NA` and `NaN` have a missing qualifier. Numeric values,
 #'   including `Inf`, `-Inf`, and `NaN`, are preserved in `value`.
 #'
+#' @usage
+#' parse_cn_quantity(
+#'   x,
+#'   na = c(
+#'     "", "NA", "N/A", "\u6682\u65e0", "\u672a\u516c\u5e03",
+#'     "\u2014", "\u2013", "-", "...", "\u2026"
+#'   ),
+#'   strict = FALSE
+#' )
+#'
 #' @examples
 #' parse_cn_quantity(c(
 #'   "\u7ea63\u4e07", "\u5927\u4e8e2\u4ebf", "10\u4e07+", "50\u4f59", "50\u4f59\u4e07\u5143"
@@ -43,6 +53,7 @@ parse_cn_quantity <- function(
   }
 
   original <- x
+  invalid_spacing <- has_invalid_cn_digit_spacing(x)
   cleaned <- normalize_cn_number_text(x)
   normalized_na <- normalize_cn_number_text(na)
   is_missing <- is.na(cleaned) | cleaned %in% normalized_na
@@ -104,7 +115,8 @@ parse_cn_quantity <- function(
     }
   }
 
-  cleaned[conflict] <- NA_character_
+  invalid_spacing <- invalid_spacing & !is_missing & !conflict
+  cleaned[conflict | invalid_spacing] <- NA_character_
   parsed <- suppressWarnings(parse_cn_number(cleaned, na = normalized_na))
   problems <- cn_problems(parsed)
   if (nrow(problems) > 0L) {
@@ -119,9 +131,18 @@ parse_cn_quantity <- function(
     )
     problems <- rbind(problems, conflict_problems)
   }
+  if (any(invalid_spacing)) {
+    spacing_problems <- data.frame(
+      index = which(invalid_spacing),
+      value = original[invalid_spacing],
+      reason = "digits use invalid whitespace grouping",
+      stringsAsFactors = FALSE
+    )
+    problems <- rbind(problems, spacing_problems)
+  }
 
   value <- as.numeric(parsed)
-  value[conflict] <- NA_real_
+  value[conflict | invalid_spacing] <- NA_real_
   if (nrow(problems) > 0L) {
     qualifier[unique(problems$index)] <- NA_character_
   }

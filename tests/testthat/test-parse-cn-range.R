@@ -79,3 +79,49 @@ test_that("numeric inputs become inclusive point ranges", {
   expect_identical(result$lower_inclusive, c(TRUE, TRUE, TRUE, NA, NA))
   expect_identical(result$upper_inclusive, c(TRUE, TRUE, TRUE, NA, NA))
 })
+
+test_that("missing and malformed range endpoints are structured problems", {
+  result <- NULL
+
+  expect_warning(
+    result <- parse_cn_range(c("3-NA", "NA-3", "1 2", "1 234")),
+    "Failed to parse 3 values"
+  )
+  expect_equal(cn_problems(result)$index, 1:3)
+  expect_equal(
+    cn_problems(result)$reason,
+    c(
+      "one or both range endpoints are invalid",
+      "one or both range endpoints are invalid",
+      "digits use invalid whitespace grouping"
+    )
+  )
+  expect_true(all(is.na(result[1:3, ])))
+  expect_equal(result$lower[[4L]], 1234)
+  expect_equal(result$upper[[4L]], 1234)
+})
+
+test_that("range parser expands duplicate, factor, empty, and custom missing input", {
+  duplicated <- parse_cn_range(rep(c("3万-5万", "不少于2万"), each = 3L))
+  factor_result <- parse_cn_range(factor(c("1万", "2万-3万")))
+
+  expect_equal(duplicated$lower, c(rep(3e4, 3L), rep(2e4, 3L)))
+  expect_equal(duplicated$upper, c(rep(5e4, 3L), rep(Inf, 3L)))
+  expect_equal(factor_result$lower, c(1e4, 2e4))
+  expect_equal(factor_result$upper, c(1e4, 3e4))
+  expect_equal(nrow(parse_cn_range(character())), 0L)
+  expect_true(all(is.na(parse_cn_range("保密", na = "保密"))))
+})
+
+test_that("range parser expands duplicated problems to original positions", {
+  result <- NULL
+
+  expect_warning(
+    result <- parse_cn_range(c("未知", "3万-5万", "未知")),
+    "Failed to parse 2 values"
+  )
+  expect_equal(cn_problems(result)$index, c(1L, 3L))
+  expect_true(all(
+    cn_problems(result)$reason == "value is not a supported range or bound"
+  ))
+})

@@ -22,6 +22,16 @@
 #' @details Finite-range validation applies to parsed character and factor
 #'   input. Existing numeric `Inf`, `-Inf`, and `NaN` values are preserved.
 #'
+#' @usage
+#' parse_cn_number(
+#'   x,
+#'   na = c(
+#'     "", "NA", "N/A", "\u6682\u65e0", "\u672a\u516c\u5e03",
+#'     "\u2014", "\u2013", "-", "...", "\u2026"
+#'   ),
+#'   strict = FALSE
+#' )
+#'
 #' @examples
 #' parse_cn_number(c("1.25\u4e07", "3\u4ebf\u5143", "12.5%", "\u6682\u65e0"))
 #' parse_cn_number(c("\uff11\uff12\uff0e\uff15\uff05", "(2.5\u4e07)"))

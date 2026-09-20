@@ -79,3 +79,30 @@ test_that("numeric quantities preserve special values and qualifiers", {
     c("exact", "exact", "exact", NA_character_, NA_character_)
   )
 })
+
+test_that("quantity parsing preserves digit-grouping validation", {
+  result <- NULL
+
+  expect_warning(
+    result <- parse_cn_quantity(c("1 2", "1 234", "约1 2")),
+    "digits use invalid whitespace grouping"
+  )
+  expect_equal(result$value, c(NA_real_, 1234, NA_real_))
+  expect_equal(result$qualifier, c(NA_character_, "exact", NA_character_))
+  expect_equal(cn_problems(result)$index, c(1L, 3L))
+  expect_true(all(
+    cn_problems(result)$reason == "digits use invalid whitespace grouping"
+  ))
+})
+
+test_that("quantity parser handles factors, empty input, and custom missing values", {
+  factor_result <- parse_cn_quantity(factor(c("1万", "约2万")))
+
+  expect_equal(factor_result$value, c(1e4, 2e4))
+  expect_equal(factor_result$qualifier, c("exact", "approx"))
+  expect_equal(parse_cn_quantity(character()), data.frame(
+    value = numeric(),
+    qualifier = character()
+  ))
+  expect_true(is.na(parse_cn_quantity("保密", na = "保密")$value))
+})

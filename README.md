@@ -10,7 +10,13 @@
 
 ## 安装
 
-从 GitHub 安装正式版本：
+CRAN 收录后可直接安装：
+
+```r
+install.packages("cncleanr")
+```
+
+在 CRAN 收录前，或需要从 GitHub 安装当前正式版本时：
 
 ```r
 install.packages("pak")
