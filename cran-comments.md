@@ -7,9 +7,7 @@ This will be the first CRAN submission of `cncleanr`.
 ## Test environments
 
 - Local: Windows 11 x64 (build 26200), R 4.6.1 (ucrt)
-- The immediately preceding development candidate passed the following
-  GitHub Actions matrix; verification of the `0.2.4` release candidate on the
-  same matrix is pending:
+- The `0.2.4` release candidate passed the following GitHub Actions matrix:
   - Ubuntu, R-devel
   - Ubuntu, R-release
   - Ubuntu, R-oldrel-1
@@ -19,8 +17,10 @@ This will be the first CRAN submission of `cncleanr`.
 ## R CMD check results
 
 The `0.2.4` release candidate was built from source and checked locally on the
-environment above. Its GitHub Actions results will be refreshed before
-release.
+environment above.
+
+All five jobs in the GitHub Actions matrix completed
+`R CMD check --as-cran --no-manual` successfully for this release candidate.
 
 The local `R CMD check --as-cran --no-manual` result was 1 ERROR, 0 WARNINGs,
 and 1 NOTE.
