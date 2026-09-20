@@ -7,21 +7,21 @@ This will be the first CRAN submission of `cncleanr`.
 ## Test environments
 
 - Local: Windows 11 x64 (build 26200), R 4.6.1 (ucrt)
-- The most recent pushed development baseline passed the following GitHub
-  Actions matrix before the changes in this unpushed submission candidate:
+- The current development candidate passed the following GitHub Actions
+  matrix:
   - Ubuntu, R-devel
   - Ubuntu, R-release
   - Ubuntu, R-oldrel-1
   - Windows, R-release
   - macOS, R-release
 
-Verification of the current candidate on that matrix is pending. No GitHub
-Actions result is claimed for the unpushed changes.
-
 ## R CMD check results
 
 The current development version, `0.2.3.9000`, was built from source and
 checked locally on the environment above.
+
+All five jobs in the GitHub Actions matrix completed
+`R CMD check --as-cran --no-manual` successfully for the current candidate.
 
 - `R CMD check --no-manual`: 1 ERROR, 0 WARNINGs, 0 NOTEs.
 - `R CMD check --as-cran --no-manual`: 1 ERROR, 0 WARNINGs, 1 NOTE.
