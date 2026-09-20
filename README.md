@@ -14,7 +14,7 @@
 
 ```r
 install.packages("pak")
-pak::pak("Jorungandr/cncleanr@v0.2.3")
+pak::pak("Jorungandr/cncleanr@v0.2.4")
 ```
 
 ## 企业营收清洗示例

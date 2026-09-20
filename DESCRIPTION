@@ -1,6 +1,6 @@
 Package: cncleanr
 Title: Parse Compact Numbers in Chinese Data
-Version: 0.2.3.9000
+Version: 0.2.4
 Authors@R: 
     person("皓天", "刘", , "wyvern06@163.com", role = c("aut", "cre"))
 Description: Parses compact numeric values, qualified quantities, and ranges

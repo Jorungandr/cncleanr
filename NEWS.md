@@ -1,4 +1,13 @@
-# cncleanr (development version)
+# cncleanr 0.2.4
+
+* Documents numeric pass-through behavior for finite values, infinities,
+  `NA`, and `NaN` across all three parsers.
+* Runs the complete testthat suite through the standard `R CMD check` entry
+  point, with 108 tests covering parser behavior and failure reporting.
+* Adds package spelling checks, CRAN submission records, contributor guidance,
+  and structured bug-report and feature-request forms.
+* Checks release candidates on R-devel, R-release, and R-oldrel-1 across Linux,
+  macOS, and Windows.
 
 # cncleanr 0.2.3
 
