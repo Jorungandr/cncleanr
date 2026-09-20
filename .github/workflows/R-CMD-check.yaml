@@ -16,11 +16,11 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - {os: ubuntu-latest, r: release, use-public-rspm: true}
-          - {os: ubuntu-latest, r: devel, http-user-agent: release, use-public-rspm: true}
-          - {os: ubuntu-latest, r: oldrel-1, use-public-rspm: true}
-          - {os: windows-latest, r: release, use-public-rspm: true}
-          - {os: macos-latest, r: release, use-public-rspm: false}
+          - {os: ubuntu-latest, r: release, extra-packages: "any::rcmdcheck"}
+          - {os: ubuntu-latest, r: devel, http-user-agent: release, extra-packages: "any::rcmdcheck"}
+          - {os: ubuntu-latest, r: oldrel-1, extra-packages: "any::rcmdcheck"}
+          - {os: windows-latest, r: release, extra-packages: "any::rcmdcheck"}
+          - {os: macos-latest, r: release, extra-packages: "any::rcmdcheck knitr=?source"}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -33,11 +33,10 @@ jobs:
         with:
           r-version: ${{ matrix.config.r }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
-          use-public-rspm: ${{ matrix.config.use-public-rspm }}
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::rcmdcheck
+          extra-packages: ${{ matrix.config.extra-packages }}
           needs: check
 
       - uses: r-lib/actions/check-r-package@v2
