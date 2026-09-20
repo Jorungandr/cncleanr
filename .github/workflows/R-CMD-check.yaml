@@ -20,7 +20,7 @@ jobs:
           - {os: ubuntu-latest, r: devel, http-user-agent: release, extra-packages: "any::rcmdcheck"}
           - {os: ubuntu-latest, r: oldrel-1, extra-packages: "any::rcmdcheck"}
           - {os: windows-latest, r: release, extra-packages: "any::rcmdcheck"}
-          - {os: macos-latest, r: release, extra-packages: "any::rcmdcheck knitr=?source"}
+          - {os: macos-latest, r: release, extra-packages: "any::rcmdcheck knitr=?source xfun=?source"}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
