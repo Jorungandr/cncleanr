@@ -9,6 +9,8 @@ This is the first CRAN submission of `cncleanr`.
 - GitHub Actions: Ubuntu (R-devel, R-release, R-oldrel-1), Windows
   (R-release), and macOS (R-release)
 - Ubuntu R-release additionally builds and checks the PDF reference manual.
+- R-hub: C23, no long double, and no suggested packages; all three checks
+  completed with `Status: OK`.
 
 ## R CMD check results
 
