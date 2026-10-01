@@ -193,7 +193,7 @@ find_cn_range_endpoints_batch <- function(text, na) {
 
 propagate_cn_range_suffix <- function(endpoints) {
   suffix_pattern <- paste0(
-    "((?:\u4e07\u4ebf|\u4e07|\u4ebf)(?:\u4eba\u6c11\u5e01|\u5757\u94b1|\u5143|\u5757)?|",
+    "((?:\u4e07\u4ebf|\u4e07|\u4ebf)(?:\u4eba\u6c11\u5e01|\u5757\u94b1|\u5143|\u5757)?|\u5343\u5143|",
     "(?:\u4eba\u6c11\u5e01|\u5757\u94b1|\u5143|\u5757)|%)$"
   )
   suffixes <- vapply(endpoints, function(value) {

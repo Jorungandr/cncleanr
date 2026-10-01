@@ -75,7 +75,7 @@ parse_cn_number(c("1.25万", "￥3亿元", "12.5%", "１．２e５", "暂无"))
 
 Common supported forms include:
 
-- `万`, `亿`, and `万亿` magnitude suffixes;
+- `万`, `亿`, and `万亿` magnitude suffixes, plus thousand-yuan amounts (`千元`, so `1.5千元` becomes `1500`);
 - `元`, `人民币`, `￥`, `¥`, `RMB`, `CNY`, `块`, and `块钱` currencies;
 - percentages and scientific notation;
 - full-width digits, punctuation, exponent letters, and common PDF minus signs;
@@ -113,6 +113,7 @@ The six `qualifier` values and their boundary semantics are:
 Common inequality forms have explicit boundary semantics:
 
 - `大于3万` and `小于3万` exclude the boundary;
+- `超3万` means greater than 30,000 and excludes the boundary;
 - `不大于3万` and `不小于3万` include the boundary;
 - `<`, `>`, `<=`, `>=`, `≤`, `≥`, and their full-width forms are supported;
 - `10万+` means at least 100,000;
@@ -131,7 +132,7 @@ parse_cn_range(c("3万-5万", "3-5万", "10万元以上", "低于2亿"))
 #> 4  -Inf 2e+08           FALSE           FALSE
 ```
 
-A shared suffix in a form such as `3-5万` is applied to both endpoints of the numeric range. Reversed ranges and invalid endpoints are reported as problems.
+A shared suffix in a form such as `3-5万` is applied to both endpoints of the numeric range; `3-5千元` means 3,000 to 5,000. Reversed ranges and invalid endpoints are reported as problems.
 Signs in scientific notation are not treated as range separators, so both `1e-3` and `1e-3-2e-3` are parsed correctly.
 
 ## Return-value reference

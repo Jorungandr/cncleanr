@@ -90,7 +90,7 @@ parse_cn_number <- function(
     "(\u00a5|\u4eba\u6c11\u5e01|(?i:RMB|CNY))?",
     "([+-]?)",
     "((?:(?:[0-9]{1,3}(?:,[0-9]{3})+|[0-9]+)(?:\\.[0-9]+)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)?)",
-    "(\u4e07\u4ebf|\u4e07|\u4ebf)?",
+    "(\u4e07\u4ebf|\u4e07|\u4ebf|\u5343(?=\u5143))?",
     "(\u4eba\u6c11\u5e01|\u5757\u94b1|\u5143|\u5757)?",
     "(%)?$"
   )
@@ -143,6 +143,7 @@ parse_cn_number <- function(
       "\u4e07" = 1e4,
       "\u4ebf" = 1e8,
       "\u4e07\u4ebf" = 1e12,
+      "\u5343" = 1e3,
       1
     )
     value <- value * multiplier

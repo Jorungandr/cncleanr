@@ -1,6 +1,6 @@
 Package: cncleanr
 Title: Parse Compact Numbers in Chinese Data
-Version: 0.2.5
+Version: 0.2.6
 Authors@R: 
     person("Haotian", "Liu", , "wyvern06@163.com",
            role = c("aut", "cre", "cph"))

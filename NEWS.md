@@ -1,3 +1,11 @@
+# cncleanr 0.2.6
+
+* Supports thousand-yuan amounts (`千元`), including shared range suffixes.
+* Recognizes the shorthand qualifier `超` as greater than the stated value.
+* Reports qualifiers without a valid quantity instead of treating them as
+  missing values after stripping the qualifier.
+* Adds reproducible real-data validation using the MIT-licensed CFQA dataset.
+
 # cncleanr 0.2.5
 
 * Rejects malformed whitespace grouping consistently in quantity and range

@@ -64,7 +64,7 @@ parse_cn_quantity <- function(
   prefix_rules <- c(
     at_most = "^(?:\u4e0d\u8d85\u8fc7|\u4e0d\u9ad8\u4e8e|\u4e0d\u5927\u4e8e|\u4e0d\u591a\u4e8e|\u81f3\u591a|<=|\u2264|\u2266)",
     at_least = "^(?:\u4e0d\u5c11\u4e8e|\u4e0d\u4f4e\u4e8e|\u4e0d\u5c0f\u4e8e|\u81f3\u5c11|>=|\u2265|\u2267)",
-    greater_than = "^(?:\u8d85\u8fc7|\u8d85\u51fa|\u5927\u4e8e|\u9ad8\u4e8e|\u591a\u4e8e|>(?!=))",
+    greater_than = "^(?:\u8d85\u8fc7|\u8d85\u51fa|\u8d85|\u5927\u4e8e|\u9ad8\u4e8e|\u591a\u4e8e|>(?!=))",
     less_than = "^(?:\u4f4e\u4e8e|\u5c0f\u4e8e|\u4e0d\u8db3|\u5c11\u4e8e|<(?!=))",
     approx = "^(?:\u5927\u7ea6|\u7ea6\u4e3a|\u5927\u6982|\u7ea6|\u8fd1)"
   )
@@ -88,7 +88,7 @@ parse_cn_quantity <- function(
     )]
     infix_pattern <- paste0(
       "^(.+)\u4f59(",
-      "(?:\u4e07\u4ebf|\u4e07|\u4ebf)(?:\u4eba\u6c11\u5e01|\u5757\u94b1|\u5143|\u5757)?|",
+      "(?:\u4e07\u4ebf|\u4e07|\u4ebf)(?:\u4eba\u6c11\u5e01|\u5757\u94b1|\u5143|\u5757)?|\u5343\u5143|",
       "(?:\u4eba\u6c11\u5e01|\u5757\u94b1|\u5143|\u5757)",
       ")$"
     )
@@ -116,8 +116,8 @@ parse_cn_quantity <- function(
   }
 
   invalid_spacing <- invalid_spacing & !is_missing & !conflict
-  cleaned[conflict | invalid_spacing] <- NA_character_
-  parsed <- suppressWarnings(parse_cn_number(cleaned, na = normalized_na))
+  cleaned[is_missing | conflict | invalid_spacing] <- NA_character_
+  parsed <- suppressWarnings(parse_cn_number(cleaned, na = character()))
   problems <- cn_problems(parsed)
   if (nrow(problems) > 0L) {
     problems$value <- original[problems$index]
