@@ -10,13 +10,14 @@ parse_cn_number(
     "", "NA", "N/A", "\u6682\u65e0", "\u672a\u516c\u5e03",
     "\u2014", "\u2013", "-", "...", "\u2026"
   ),
-  strict = FALSE
+  strict = FALSE,
+  unit = NULL
 )
 }
 \arguments{
-\item{x}{A character, factor, or numeric vector. Numeric input is converted
-to double and otherwise passed through unchanged, including \code{Inf}, \code{-Inf},
-and \code{NaN}.}
+\item{x}{A character, factor, or numeric vector. When \code{unit = NULL}, numeric
+input is converted to double and otherwise passed through unchanged,
+including \code{Inf}, \code{-Inf}, and \code{NaN}.}
 
 \item{na}{A character vector containing values that should be interpreted as
 missing. Matching happens after whitespace and full-width normalization.}
@@ -24,6 +25,17 @@ missing. Matching happens after whitespace and full-width normalization.}
 \item{strict}{A single logical value. If \code{FALSE}, invalid values become
 \code{NA_real_}, a warning is emitted, and a data frame is stored in the
 \code{problems} attribute. If \code{TRUE}, invalid values cause an error.}
+
+\item{unit}{A single optional table-header unit: yuan, thousand yuan,
+ten thousand, hundred million, or trillion, optionally in yuan. Use the
+spellings \code{"\\u5143"}, \code{"\\u5343\\u5143"}, \code{"\\u4e07"},
+\code{"\\u4e07\\u5143"}, \code{"\\u4ebf"}, \code{"\\u4ebf\\u5143"},
+\code{"\\u4e07\\u4ebf"}, or \code{"\\u4e07\\u4ebf\\u5143"}.
+Bare values inherit this unit;
+explicit units must have the same multiplier and are not scaled twice.
+Percentages conflict with a header unit. With a header unit, numeric input
+follows character parsing: missing values remain missing, while infinities
+and overflow are reported as problems. Defaults to \code{NULL} (no header unit).}
 }
 \value{
 A double vector with the same length and names as \code{x}. When invalid
@@ -39,10 +51,12 @@ only when they form valid three-digit grouping.
 }
 \details{
 Finite-range validation applies to parsed character and factor
-input. Existing numeric \code{Inf}, \code{-Inf}, and \code{NaN} values are preserved.
+input. With \code{unit = NULL}, existing numeric \code{Inf}, \code{-Inf}, and \code{NaN}
+values are preserved.
 }
 \examples{
 parse_cn_number(c("1.25\u4e07", "3\u4ebf\u5143", "12.5\%", "\u6682\u65e0"))
 parse_cn_number(c("\uff11\uff12\uff0e\uff15\uff05", "(2.5\u4e07)"))
+parse_cn_number(c("123.5", "1.5\u5343\u5143"), unit = "\u5343\u5143")
 
 }

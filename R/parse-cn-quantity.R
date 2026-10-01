@@ -6,6 +6,9 @@
 #' The qualifier is retained instead of silently discarded.
 #'
 #' @inheritParams parse_cn_number
+#' @param x A character, factor, or numeric vector. Numeric input is converted
+#'   to double and otherwise passed through unchanged, including `Inf`, `-Inf`,
+#'   and `NaN`.
 #'
 #' @return A data frame with double column `value` and character column
 #'   `qualifier`. Qualifiers are `exact`, `approx`, `greater_than`, `at_least`,

@@ -6,21 +6,32 @@
 #' must match the supported syntax in full. Spaces between digits are accepted
 #' only when they form valid three-digit grouping.
 #'
-#' @param x A character, factor, or numeric vector. Numeric input is converted
-#'   to double and otherwise passed through unchanged, including `Inf`, `-Inf`,
-#'   and `NaN`.
+#' @param x A character, factor, or numeric vector. When `unit = NULL`, numeric
+#'   input is converted to double and otherwise passed through unchanged,
+#'   including `Inf`, `-Inf`, and `NaN`.
 #' @param na A character vector containing values that should be interpreted as
 #'   missing. Matching happens after whitespace and full-width normalization.
 #' @param strict A single logical value. If `FALSE`, invalid values become
 #'   `NA_real_`, a warning is emitted, and a data frame is stored in the
 #'   `problems` attribute. If `TRUE`, invalid values cause an error.
+#' @param unit A single optional table-header unit: yuan, thousand yuan,
+#'   ten thousand, hundred million, or trillion, optionally in yuan. Use the
+#'   spellings `"\u5143"`, `"\u5343\u5143"`, `"\u4e07"`,
+#'   `"\u4e07\u5143"`, `"\u4ebf"`, `"\u4ebf\u5143"`,
+#'   `"\u4e07\u4ebf"`, or `"\u4e07\u4ebf\u5143"`.
+#'   Bare values inherit this unit;
+#'   explicit units must have the same multiplier and are not scaled twice.
+#'   Percentages conflict with a header unit. With a header unit, numeric input
+#'   follows character parsing: missing values remain missing, while infinities
+#'   and overflow are reported as problems. Defaults to `NULL` (no header unit).
 #'
 #' @return A double vector with the same length and names as `x`. When invalid
 #'   values occur in non-strict mode, the result has a `problems` attribute with
 #'   columns `index`, `value`, and `reason`.
 #'
 #' @details Finite-range validation applies to parsed character and factor
-#'   input. Existing numeric `Inf`, `-Inf`, and `NaN` values are preserved.
+#'   input. With `unit = NULL`, existing numeric `Inf`, `-Inf`, and `NaN`
+#'   values are preserved.
 #'
 #' @usage
 #' parse_cn_number(
@@ -29,12 +40,14 @@
 #'     "", "NA", "N/A", "\u6682\u65e0", "\u672a\u516c\u5e03",
 #'     "\u2014", "\u2013", "-", "...", "\u2026"
 #'   ),
-#'   strict = FALSE
+#'   strict = FALSE,
+#'   unit = NULL
 #' )
 #'
 #' @examples
 #' parse_cn_number(c("1.25\u4e07", "3\u4ebf\u5143", "12.5%", "\u6682\u65e0"))
 #' parse_cn_number(c("\uff11\uff12\uff0e\uff15\uff05", "(2.5\u4e07)"))
+#' parse_cn_number(c("123.5", "1.5\u5343\u5143"), unit = "\u5343\u5143")
 #'
 #' @export
 parse_cn_number <- function(
@@ -43,7 +56,8 @@ parse_cn_number <- function(
     "", "NA", "N/A", "\u6682\u65e0", "\u672a\u516c\u5e03",
     "\u2014", "\u2013", "-", "...", "\u2026"
   ),
-  strict = FALSE
+  strict = FALSE,
+  unit = NULL
 ) {
   if (!is.logical(strict) || length(strict) != 1L || is.na(strict)) {
     stop("`strict` must be a single TRUE or FALSE value.", call. = FALSE)
@@ -51,10 +65,29 @@ parse_cn_number <- function(
   if (!is.character(na)) {
     stop("`na` must be a character vector.", call. = FALSE)
   }
+  header_multipliers <- c(
+    "\u5143" = 1, "\u5343\u5143" = 1e3,
+    "\u4e07" = 1e4, "\u4e07\u5143" = 1e4,
+    "\u4ebf" = 1e8, "\u4ebf\u5143" = 1e8,
+    "\u4e07\u4ebf" = 1e12, "\u4e07\u4ebf\u5143" = 1e12
+  )
+  if (!is.null(unit) &&
+      (!is.character(unit) || length(unit) != 1L || is.na(unit) ||
+       !unit %in% names(header_multipliers))) {
+    stop("`unit` must be NULL or a single supported Chinese header unit.", call. = FALSE)
+  }
+  header_multiplier <- if (is.null(unit)) NULL else unname(header_multipliers[[unit]])
   if (is.numeric(x)) {
-    output <- as.double(x)
-    names(output) <- names(x)
-    return(output)
+    if (is.null(unit)) {
+      output <- as.double(x)
+      names(output) <- names(x)
+      return(output)
+    }
+    input_names <- names(x)
+    missing <- is.na(x)
+    x <- sprintf("%.17g", x)
+    x[missing] <- NA_character_
+    names(x) <- input_names
   }
   if (is.factor(x)) {
     x <- as.character(x)
@@ -107,7 +140,7 @@ parse_cn_number <- function(
     currency_prefix <- fields[[3L]]
     sign_after <- fields[[4L]]
     number_text <- fields[[5L]]
-    unit <- fields[[6L]]
+    magnitude <- fields[[6L]]
     currency_suffix <- fields[[7L]]
     percent <- fields[[8L]]
     has_sign <- nzchar(sign_before) || nzchar(sign_after)
@@ -124,7 +157,7 @@ parse_cn_number <- function(
     }
     if (
       nzchar(percent) &&
-        (nzchar(unit) || nzchar(currency_prefix) || nzchar(currency_suffix))
+        (nzchar(magnitude) || nzchar(currency_prefix) || nzchar(currency_suffix))
     ) {
       matched[[i]] <- FALSE
       reasons[[i]] <- "percentages cannot also use currency or a magnitude suffix"
@@ -139,13 +172,23 @@ parse_cn_number <- function(
     }
 
     multiplier <- switch(
-      unit,
+      magnitude,
       "\u4e07" = 1e4,
       "\u4ebf" = 1e8,
       "\u4e07\u4ebf" = 1e12,
       "\u5343" = 1e3,
       1
     )
+    if (!is.null(header_multiplier)) {
+      explicit_unit <- nzchar(magnitude) || nzchar(currency_prefix) ||
+        nzchar(currency_suffix)
+      if (nzchar(percent) || (explicit_unit && multiplier != header_multiplier)) {
+        matched[[i]] <- FALSE
+        reasons[[i]] <- "explicit unit conflicts with the table-header unit"
+        next
+      }
+      if (!explicit_unit) multiplier <- header_multiplier
+    }
     value <- value * multiplier
     if (!is.finite(value)) {
       matched[[i]] <- FALSE

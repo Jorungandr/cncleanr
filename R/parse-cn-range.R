@@ -6,6 +6,9 @@
 #' scientific notation are distinguished from range separators.
 #'
 #' @inheritParams parse_cn_number
+#' @param x A character, factor, or numeric vector. Numeric input is converted
+#'   to double and otherwise passed through unchanged, including `Inf`, `-Inf`,
+#'   and `NaN`.
 #'
 #' @return A data frame with columns `lower`, `upper`, `lower_inclusive`, and
 #'   `upper_inclusive`. Numeric input becomes an inclusive point range,

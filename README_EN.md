@@ -85,6 +85,24 @@ Common supported forms include:
 
 Whitespace between digits is accepted only when it forms valid three-digit grouping: `1 234` becomes `1234`, while `1 2` and `12 34` are reported instead of being silently concatenated.
 
+## Table-header units
+
+When the header says "thousand yuan" but cells contain bare numbers, supply `unit` explicitly:
+
+```r
+parse_cn_number(c("123.5", "1.5千元", "暂无"), unit = "千元")
+#> [1] 123500   1500     NA
+```
+
+Supported units are `元`, `千元`, `万`, `万元`, `亿`, `亿元`, `万亿`, and `万亿元`.
+Bare values inherit the header unit. Explicit units with the same multiplier
+are converted only once (`万` and `万元` have the same multiplier). Different
+explicit multipliers and percentages are reported as problems, not overridden.
+Omitting `unit` preserves existing behavior. With `unit`, numeric input is also
+scaled, `NA`/`NaN` remain missing, and `Inf`, `-Inf`, or conversion overflow are
+reported as problems. This argument is only available in `parse_cn_number()`;
+it does not read or infer table headers.
+
 ## Qualified quantities
 
 `parse_cn_quantity()` retains the meaning of approximate values and fuzzy qualifiers in the original text.

@@ -1,5 +1,8 @@
 # cncleanr 0.2.6
 
+* Adds an explicit `unit` argument to `parse_cn_number()` for table-header
+  units. Bare values inherit the unit; matching explicit units are not scaled
+  twice, and conflicting units or percentages are reported as problems.
 * Supports thousand-yuan amounts (`千元`), including shared range suffixes.
 * Recognizes the shorthand qualifier `超` as greater than the stated value.
 * Reports qualifiers without a valid quantity instead of treating them as
