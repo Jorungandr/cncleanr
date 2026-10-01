@@ -10,17 +10,17 @@
 
 ## 安装
 
-CRAN 收录后可直接安装：
+从 [CRAN](https://CRAN.R-project.org/package=cncleanr) 安装：
 
 ```r
 install.packages("cncleanr")
 ```
 
-在 CRAN 收录前，或需要从 GitHub 安装当前正式版本时：
+也可以从 GitHub 安装当前正式版本：
 
 ```r
 install.packages("pak")
-pak::pak("Jorungandr/cncleanr@v0.2.4")
+pak::pak("Jorungandr/cncleanr@v0.2.5")
 ```
 
 ## 企业营收清洗示例

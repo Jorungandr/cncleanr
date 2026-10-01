@@ -10,17 +10,17 @@ It does not merely extract the first number it encounters. A non-missing value t
 
 ## Installation
 
-Once available on CRAN, install with:
+Install from [CRAN](https://CRAN.R-project.org/package=cncleanr):
 
 ```r
 install.packages("cncleanr")
 ```
 
-Before the package reaches CRAN, or to install the current GitHub release:
+Alternatively, install the current GitHub release:
 
 ```r
 install.packages("pak")
-pak::pak("Jorungandr/cncleanr@v0.2.4")
+pak::pak("Jorungandr/cncleanr@v0.2.5")
 ```
 
 ## Enterprise revenue cleaning example
