@@ -10,7 +10,7 @@ It does not merely extract the first number it encounters. A non-missing value t
 
 ## Installation
 
-Install from [CRAN](https://CRAN.R-project.org/package=cncleanr):
+Install from [CRAN](https://CRAN.R-project.org/package=cncleanr) (currently 0.2.5; the table-header unit feature below requires GitHub 0.2.6):
 
 ```r
 install.packages("cncleanr")
@@ -20,7 +20,7 @@ Alternatively, install the current GitHub release:
 
 ```r
 install.packages("pak")
-pak::pak("Jorungandr/cncleanr@v0.2.5")
+pak::pak("Jorungandr/cncleanr@v0.2.6")
 ```
 
 ## Enterprise revenue cleaning example
@@ -102,6 +102,9 @@ Omitting `unit` preserves existing behavior. With `unit`, numeric input is also
 scaled, `NA`/`NaN` remain missing, and `Inf`, `-Inf`, or conversion overflow are
 reported as problems. This argument is only available in `parse_cn_number()`;
 it does not read or infer table headers.
+Apply header units only to relevant monetary rows or columns. EPS (yuan/share),
+headcounts, or ratios in the same table may have their own units and must not
+receive a blanket monetary multiplier.
 
 ## Qualified quantities
 

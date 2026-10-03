@@ -10,7 +10,7 @@
 
 ## 安装
 
-从 [CRAN](https://CRAN.R-project.org/package=cncleanr) 安装：
+从 [CRAN](https://CRAN.R-project.org/package=cncleanr) 安装（当前为 0.2.5；下文表头单位功能需要 GitHub 0.2.6）：
 
 ```r
 install.packages("cncleanr")
@@ -20,7 +20,7 @@ install.packages("cncleanr")
 
 ```r
 install.packages("pak")
-pak::pak("Jorungandr/cncleanr@v0.2.5")
+pak::pak("Jorungandr/cncleanr@v0.2.6")
 ```
 
 ## 企业营收清洗示例
@@ -100,6 +100,8 @@ parse_cn_number(c("123.5", "1.5千元", "暂无"), unit = "千元")
 不传 `unit` 时行为不变。传入 `unit` 时，数值型输入也进行换算，
 `NA`/`NaN` 作为缺失值，`Inf`、`-Inf` 和换算溢出报告问题。
 本参数仅用于 `parse_cn_number()`，不自动读取或识别表头。
+仅对适用的金额行或列传入表头单位；同表中的每股收益（元/股）、
+人数或比率可能有自己的单位，不能整表统一乘以金额倍率。
 
 ## 模糊数量与不等式
 
