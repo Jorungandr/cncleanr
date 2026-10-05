@@ -5,6 +5,7 @@
 需要 GitHub 版 cncleanr 0.2.6。安装：
 
 ```r
+if (!requireNamespace("pak", quietly = TRUE)) install.packages("pak")
 pak::pak("Jorungandr/cncleanr@v0.2.6")
 ```
 
