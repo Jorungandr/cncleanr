@@ -37,6 +37,9 @@ Parses exact values and values qualified by language or symbols, such as
 \code{"\\u7ea63\\u4e07"}, \code{"\\u5927\\u4e8e2\\u4ebf"}, \code{"\\u4e0d\\u5c0f\\u4e8e5\\u4e07"}, \code{"10\\u4e07+"}, \code{"50\\u4f59"}, or
 \code{"50\\u4f59\\u4e07\\u5143"}.
 The qualifier is retained instead of silently discarded.
+One approximation prefix combined with an approximation suffix is accepted,
+for example \code{"\\u7ea615\%\\u5de6\\u53f3"}. Repeated prefixes or suffixes and
+mixed inequality qualifiers are rejected.
 }
 \examples{
 parse_cn_quantity(c(

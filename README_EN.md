@@ -110,6 +110,12 @@ receive a blanket monetary multiplier.
 
 ## Qualified quantities
 
+The 0.2.7 development version accepts one approximation prefix paired with
+`左右`: `约15%左右` returns `value = 0.15` and `qualifier = "approx"`.
+Mixed inequalities and repeated prefixes or suffixes remain invalid.
+Approximations do not define a deterministic range. This change is not in
+the GitHub 0.2.6 release yet.
+
 `parse_cn_quantity()` retains the meaning of approximate values and fuzzy qualifiers in the original text.
 
 ```r
@@ -202,7 +208,7 @@ The `reason` returned by `cn_problems()` can be used directly to locate these pr
 | --- | --- | --- |
 | Unsupported syntax | `3万abc` | `value does not match the supported number syntax` |
 | Invalid whitespace grouping between digits | `1 2` | `digits use invalid whitespace grouping` |
-| Repeated or conflicting qualifiers | `约3万左右` | `multiple or conflicting qualifiers` |
+| Repeated or conflicting qualifiers | `超过3万左右` | `multiple or conflicting qualifiers` |
 | Reversed range bounds | `5万-3万` | `range lower bound is greater than its upper bound` |
 | Invalid range endpoint | `3万-abc` | `one or both range endpoints are invalid` |
 | Value outside the finite double range | `1e308万` | `value is outside the finite double range` |

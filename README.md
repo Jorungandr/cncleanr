@@ -107,6 +107,10 @@ parse_cn_number(c("123.5", "1.5千元", "暂无"), unit = "千元")
 
 ## 模糊数量与不等式
 
+0.2.7 开发版允许一个约数前缀搭配“左右”：`约15%左右` 返回
+`value = 0.15`、`qualifier = "approx"`。混合不等式、重复前缀或后缀
+仍报告问题；约数不自动转换为确定区间。此改动尚不在 GitHub 0.2.6 中。
+
 `parse_cn_quantity()` 保留原文中的约数与模糊限定含义。
 
 ```r
@@ -198,7 +202,7 @@ parse_cn_number(c("2万", "abc"), strict = TRUE)
 | --- | --- | --- |
 | 不支持的语法 | `3万abc` | `value does not match the supported number syntax` |
 | 数字空格分组无效 | `1 2` | `digits use invalid whitespace grouping` |
-| 限定词重复或冲突 | `约3万左右` | `multiple or conflicting qualifiers` |
+| 限定词重复或冲突 | `超过3万左右` | `multiple or conflicting qualifiers` |
 | 区间上下界颠倒 | `5万-3万` | `range lower bound is greater than its upper bound` |
 | 区间端点无效 | `3万-abc` | `one or both range endpoints are invalid` |
 | 数值超出有限双精度范围 | `1e308万` | `value is outside the finite double range` |

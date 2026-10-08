@@ -1,3 +1,9 @@
+# cncleanr 0.2.7
+
+* Accepts one approximation prefix combined with the suffix meaning
+  "approximately", retaining `approx`. Mixed inequalities and repeated
+  prefixes or suffixes remain invalid.
+
 # cncleanr 0.2.6
 
 * Adds an explicit `unit` argument to `parse_cn_number()` for table-header

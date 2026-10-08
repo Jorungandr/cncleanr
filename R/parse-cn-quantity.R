@@ -4,6 +4,9 @@
 #' `"\u7ea63\u4e07"`, `"\u5927\u4e8e2\u4ebf"`, `"\u4e0d\u5c0f\u4e8e5\u4e07"`, `"10\u4e07+"`, `"50\u4f59"`, or
 #' `"50\u4f59\u4e07\u5143"`.
 #' The qualifier is retained instead of silently discarded.
+#' One approximation prefix combined with an approximation suffix is accepted,
+#' for example `"\u7ea615%\u5de6\u53f3"`. Repeated prefixes or suffixes and
+#' mixed inequality qualifiers are rejected.
 #'
 #' @inheritParams parse_cn_number
 #' @param x A character, factor, or numeric vector. Numeric input is converted
@@ -101,7 +104,10 @@ parse_cn_quantity <- function(
     )[[1L]]
     has_infix_yu <- length(infix_fields) > 0L
 
-    if (length(prefix_hits) + length(suffix_hits) + has_infix_yu > 1L) {
+    redundant_approx <- identical(prefix_hits, "approx") &&
+      identical(suffix_hits, "approx") && !has_infix_yu
+    if (length(prefix_hits) + length(suffix_hits) + has_infix_yu > 1L &&
+        !redundant_approx) {
       conflict[[i]] <- TRUE
       qualifier[[i]] <- NA_character_
       next
@@ -109,6 +115,9 @@ parse_cn_quantity <- function(
     if (length(prefix_hits) == 1L) {
       qualifier[[i]] <- prefix_hits
       cleaned[[i]] <- sub(prefix_rules[[prefix_hits]], "", cleaned[[i]], perl = TRUE)
+      if (redundant_approx) {
+        cleaned[[i]] <- sub(suffix_rules[["approx"]], "", cleaned[[i]], perl = TRUE)
+      }
     } else if (length(suffix_hits) == 1L) {
       qualifier[[i]] <- suffix_hits
       cleaned[[i]] <- sub(suffix_rules[[suffix_hits]], "", cleaned[[i]], perl = TRUE)

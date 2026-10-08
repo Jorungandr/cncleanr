@@ -6,5 +6,5 @@ input	expected	qualifier	status	reason
 50余万元	500000	greater_than	ok
 ≤3万	30000	at_most	ok
 暂无			missing
-约3万左右			invalid	multiple or conflicting qualifiers
+约3万左右	30000	approx	ok
 abc			invalid	value does not match the supported number syntax
