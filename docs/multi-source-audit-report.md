@@ -87,3 +87,21 @@ Rscript --vanilla docs/multi-source-audit.R
 
 验收脚本只依赖 Python 标准库、R 基础函数和 cncleanr；不新增包依赖。
 如果不使用独立库，请调整脚本开头的 `.libPaths()`。
+
+## 0.2.7 安装版复测（2026-10-08）
+
+使用同一批数据，CSL 普通表达从 376 个增加到 377 个（去重后 334 个），
+新增通过的是已人工核对的 `约15％左右`，保留 `approx`。
+37 个百分比区间不变；其余九次特殊表达保持拒绝。
+CFQA 的 1,412 个合法片段、六个错误格式，以及企鹅的 2,029 个数值、
+35 个缺失值均保持原结果。三个函数的安装后示例运行通过。
+
+脚本默认仍验证 0.2.6；验证独立库中的 0.2.7 时运行：
+
+```text
+Rscript --vanilla docs/multi-source-audit.R outputs/release-0.2.7/library
+Rscript --vanilla docs/release-0.2.7-check.R
+```
+
+当前脚本按版本保存 `results-0.2.6.tsv` 或 `results-0.2.7.tsv`，
+不覆盖历史测试文件。原始数据、抽取规则和限制与上文相同。

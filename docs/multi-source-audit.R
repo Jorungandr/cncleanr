@@ -1,12 +1,20 @@
-# Run after the Python extraction; use the installed GitHub 0.2.6 release.
-.libPaths(c('outputs/release-0.2.6/library', .libPaths()))
+# Optional first argument: library containing installed 0.2.6 or 0.2.7.
+args <- commandArgs(trailingOnly = TRUE)
+.libPaths(c(if (length(args)) args[[1L]] else 'outputs/release-0.2.6/library', .libPaths()))
 library(cncleanr)
-stopifnot(as.character(packageVersion('cncleanr')) == '0.2.6')
+version <- as.character(packageVersion('cncleanr'))
+stopifnot(version %in% c('0.2.6', '0.2.7'))
 root <- 'outputs/multi-source-audit'
 cases <- read.delim(file.path(root, 'cases.tsv'), quote = '"',
                    fileEncoding = 'UTF-8', stringsAsFactors = FALSE,
                    na.strings = character(), colClasses = 'character')
 expected <- suppressWarnings(as.double(cases$expected))
+if (version == '0.2.7') {
+  revised <- cases$source == 'CSL' & cases$input == '约15％左右'
+  stopifnot(sum(revised) == 1L)
+  cases$status[revised] <- 'valid'
+  cases$qualifier[revised] <- 'approx'
+}
 parsed <- suppressWarnings(parse_cn_quantity(cases$input))
 failed <- cn_problems(parsed)$index
 cases$actual <- parsed$value
@@ -33,7 +41,7 @@ print(table(cases$source[!duplicated(cases[c('source', 'input')])],
             cases$outcome[!duplicated(cases[c('source', 'input')])]))
 print(cases[cases$outcome %in% c('wrong', 'rejected', 'manual_review'),
             c('source', 'row', 'input', 'expected', 'actual', 'reason')])
-write.table(cases, file.path(root, 'results.tsv'), sep='\t',
+write.table(cases, file.path(root, paste0('results-', version, '.tsv')), sep='\t',
             row.names=FALSE, fileEncoding='UTF-8')
 stopifnot(!anyNA(cases$outcome),
           !any(cases$outcome %in% c('wrong', 'rejected', 'range_rejected', 'range_wrong')))
@@ -58,8 +66,13 @@ stopifnot(identical(parse_cn_number(manual[1]), .6418))
 intervals <- parse_cn_range(manual[3:4])
 stopifnot(isTRUE(all.equal(intervals$lower, c(.2, .1765))),
           isTRUE(all.equal(intervals$upper, c(.3, .5882))))
-stopifnot(nrow(cn_problems(suppressWarnings(parse_cn_quantity(manual[2])))) == 1L,
-          nrow(cn_problems(suppressWarnings(parse_cn_range(manual[5])))) == 1L)
+if (version == '0.2.6') {
+  stopifnot(nrow(cn_problems(suppressWarnings(parse_cn_quantity(manual[2])))) == 1L)
+} else {
+  approx <- parse_cn_quantity(manual[2], strict=TRUE)
+  stopifnot(approx$value == .15, approx$qualifier == 'approx')
+}
+stopifnot(nrow(cn_problems(suppressWarnings(parse_cn_range(manual[5])))) == 1L)
 cat('PASS: five hand-reviewed examples, including safe rejections\n')
 # Recheck the previous financial sample against the installed release too.
 finance <- read.delim('outputs/real-data-audit/spans.tsv', quote='"',

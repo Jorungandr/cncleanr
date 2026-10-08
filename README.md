@@ -20,7 +20,7 @@ install.packages("cncleanr")
 
 ```r
 install.packages("pak")
-pak::pak("Jorungandr/cncleanr@v0.2.6")
+pak::pak("Jorungandr/cncleanr@v0.2.7")
 ```
 
 ## 企业营收清洗示例
@@ -107,9 +107,9 @@ parse_cn_number(c("123.5", "1.5千元", "暂无"), unit = "千元")
 
 ## 模糊数量与不等式
 
-0.2.7 开发版允许一个约数前缀搭配“左右”：`约15%左右` 返回
+GitHub 0.2.7 允许一个约数前缀搭配“左右”：`约15%左右` 返回
 `value = 0.15`、`qualifier = "approx"`。混合不等式、重复前缀或后缀
-仍报告问题；约数不自动转换为确定区间。此改动尚不在 GitHub 0.2.6 中。
+仍报告问题；约数不自动转换为确定区间。此改动不在 0.2.6 中。
 
 `parse_cn_quantity()` 保留原文中的约数与模糊限定含义。
 

@@ -20,7 +20,7 @@ Alternatively, install the current GitHub release:
 
 ```r
 install.packages("pak")
-pak::pak("Jorungandr/cncleanr@v0.2.6")
+pak::pak("Jorungandr/cncleanr@v0.2.7")
 ```
 
 ## Enterprise revenue cleaning example
@@ -110,11 +110,11 @@ receive a blanket monetary multiplier.
 
 ## Qualified quantities
 
-The 0.2.7 development version accepts one approximation prefix paired with
+GitHub 0.2.7 accepts one approximation prefix paired with
 `左右`: `约15%左右` returns `value = 0.15` and `qualifier = "approx"`.
 Mixed inequalities and repeated prefixes or suffixes remain invalid.
 Approximations do not define a deterministic range. This change is not in
-the GitHub 0.2.6 release yet.
+the GitHub 0.2.6 release.
 
 `parse_cn_quantity()` retains the meaning of approximate values and fuzzy qualifiers in the original text.
 
