@@ -27,6 +27,8 @@ pak::pak("Jorungandr/cncleanr@v0.2.7")
 
 完整案例：[真实财报清洗：表头单位、混合指标与异常定位](docs/financial-table-example.md)。
 
+公开数据案例：[将缺失值、错误标记与长文本分开处理](docs/open-data-cleaning.md)。
+
 下面的流程保留原始文本，解析营收列，并把无法解析的记录定位回原始企业：
 
 ```r

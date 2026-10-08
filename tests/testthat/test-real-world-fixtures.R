@@ -1,3 +1,18 @@
+test_that("open-data notes do not silently become numbers or missing values", {
+  text <- c("10,536", "-", "#VALUE!", "未統計",
+            "27,091(外國跑者3,249人)", "活動仍辦理中")
+  default <- suppressWarnings(parse_cn_number(text))
+  expect_equal(as.numeric(default), c(10536, rep(NA_real_, 5)))
+  expect_equal(cn_problems(default)$index, 3:6)
+  custom <- suppressWarnings(parse_cn_number(text, na=c("", "-", "未統計")))
+  expect_equal(as.numeric(custom), as.numeric(default))
+  expect_equal(cn_problems(custom)$index, c(3L, 5L, 6L))
+  for (parser in list(parse_cn_quantity, parse_cn_range)) {
+    result <- suppressWarnings(parser(text))
+    expect_equal(cn_problems(result)$index, 3:6)
+  }
+})
+
 test_that("number fixtures match expected values and problems", {
   cases <- read_cn_fixture("number-cases.tsv")
   result <- suppressWarnings(parse_cn_number(cases$input))

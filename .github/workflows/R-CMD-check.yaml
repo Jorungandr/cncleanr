@@ -63,6 +63,12 @@ jobs:
           extra-packages: ${{ matrix.config.extra-packages }}
           needs: check
 
+      - name: Check executable cleaning example
+        shell: Rscript {0}
+        run: |
+          pkgload::load_all(".", quiet = TRUE)
+          source("docs/open-data-cleaning.R", encoding = "UTF-8")
+
       - uses: r-lib/actions/check-r-package@v2
         with:
           args: ${{ matrix.config.check-args }}

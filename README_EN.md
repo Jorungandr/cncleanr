@@ -27,6 +27,8 @@ pak::pak("Jorungandr/cncleanr@v0.2.7")
 
 Complete walkthrough: [real financial tables, mixed units, and failure tracing](docs/financial-table-example_EN.md).
 
+Open-data example: [separate missing values, error markers, and mixed text](docs/open-data-cleaning_EN.md).
+
 The workflow below preserves the original text, parses the revenue column, and maps unparseable records back to their source companies:
 
 ```r
