@@ -50,7 +50,30 @@ Rscript --vanilla docs/batch-stability.R outputs/validation-2026-10-08/library
 
 本地断言通过，进程退出码为 0。这是合成稳定性检查，不计入真实数据覆盖量，
 也不是内存泄漏测量、速度基准或完整 CRAN 检查。
-CI 清洗示例步骤也配置运行同一脚本；新增步骤的远程结果尚待推送验证。
+CI 清洗示例步骤也运行同一脚本。
+提交 `06df855` 的[五平台检查](https://github.com/Jorungandr/cncleanr/actions/runs/37887435018)
+已全部成功，每个平台的清洗示例及批量检查步骤均成功。
 
-后续可用全新、隔离的 R 安装进行对照，但本轮没有安装或替换用户的 R。
-系统级修复应以进一步对照证据为依据，不能把问题通过修改解析器“修掉”。
+## 全新 R 安装对照
+
+2026-10-09 经用户确认，在 `outputs/environment-diagnosis/fresh-R-4.6.1/`
+安装官方 R 4.6.1，安装程序退出码 0。安装包 MD5
+`7907f3a20ec8ec88cd0da279024b8e27` 与 CRAN 公布值一致。
+禁用默认版本登记、文件关联和快捷方式；不覆盖 `D:/R/R-4.6.1`。
+安装程序会创建该独立副本的卸载记录，诊断目录暂时保留，不自动删除。
+官方校验入口：[安装包指纹](https://cran.r-project.org/bin/windows/base/md5sum.R-4.6.1.txt)。
+
+使用新 R 和独立下载的 R 4.6 rlang 二进制，只保留诊断库与新 R 基础库，
+仍出现 `-1073741819`。切换 C locale 或将进程 PATH 限为 Windows 系统目录也仍复现。
+原安装与新安装 `bin/x64/R.dll` 的 SHA-256 一致：
+`01a74425b34c3db9bfe0eda380c9ebcbe6dc664ccbf16d4f95a63218f30dff94`。
+这进一步排除了“只需重新安装同版本 R 即可解决”的解释，尚未证明是具体哪个系统组件。
+
+新 R 运行 `batch-stability.R` 全部通过，退出码 0。
+整包检查使用独立 rlang/cli 库，但 testthat 及其他测试依赖仍来自原用户库，
+不能将其称为全依赖隔离环境。日志保存在
+`outputs/environment-diagnosis/fresh-check/cncleanr.Rcheck/`。
+新 R 的整包检查仍是 `Status: 1 ERROR`：209 项断言通过后测试进程异常退出。
+本轮关闭远程 incoming 检查、跳过 PDF 手册；依赖索引查询也出现网络访问诊断。
+不能把本轮本地检查说成完整通过，远程五平台成功与本地退出问题应分别记录。
+未修改系统 DLL、未更改原依赖库、未跳过或改写包测试来规避错误。
