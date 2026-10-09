@@ -1,5 +1,8 @@
 # Development changes (unreleased)
 
+* Extracts numeric captures and validates/converts them in batches, avoiding
+  per-value match lists and conversions while preserving first-error precedence.
+
 * Deduplicates original quantity text and batches qualifier matching, restoring
   every source row and its structured parsing problems after processing.
 

@@ -142,3 +142,16 @@ test_that("numeric input preserves finite and non-finite double values", {
 
   expect_identical(parse_cn_number(numeric_input), expected)
 })
+
+test_that("batched validation preserves the first applicable error", {
+  x <- c('-RMB+1e309%', '(-1e309)', 'RMB1e309%', '1e309', '1e308万', '12')
+  result <- suppressWarnings(parse_cn_number(x, unit = '万'))
+  expect_equal(as.numeric(result), c(rep(NA_real_, 5), 120000))
+  expect_identical(cn_problems(result)$reason, c(
+    'a value cannot contain more than one explicit sign',
+    'accounting parentheses cannot contain an explicit sign',
+    'percentages cannot also use currency or a magnitude suffix',
+    'value is outside the finite double range',
+    'value is outside the finite double range'
+  ))
+})

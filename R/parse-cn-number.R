@@ -127,83 +127,49 @@ parse_cn_number <- function(
     "(\u4eba\u6c11\u5e01|\u5757\u94b1|\u5143|\u5757)?",
     "(%)?$"
   )
-  matches <- regmatches(work, regexec(pattern, work, perl = TRUE))
-  matched <- lengths(matches) > 0L
+  matches <- regexpr(pattern, work, perl = TRUE)
+  matched <- matches > 0L
   reasons <- rep("value does not match the supported number syntax", length(work))
   invalid_work_spacing <- invalid_spacing[active]
   matched[invalid_work_spacing] <- FALSE
   reasons[invalid_work_spacing] <- "digits use invalid whitespace grouping"
 
-  for (i in which(matched)) {
-    fields <- matches[[i]]
-    sign_before <- fields[[2L]]
-    currency_prefix <- fields[[3L]]
-    sign_after <- fields[[4L]]
-    number_text <- fields[[5L]]
-    magnitude <- fields[[6L]]
-    currency_suffix <- fields[[7L]]
-    percent <- fields[[8L]]
-    has_sign <- nzchar(sign_before) || nzchar(sign_after)
-
-    if (nzchar(sign_before) && nzchar(sign_after)) {
-      matched[[i]] <- FALSE
-      reasons[[i]] <- "a value cannot contain more than one explicit sign"
-      next
-    }
-    if (accounting[[i]] && has_sign) {
-      matched[[i]] <- FALSE
-      reasons[[i]] <- "accounting parentheses cannot contain an explicit sign"
-      next
-    }
-    if (
-      nzchar(percent) &&
-        (nzchar(magnitude) || nzchar(currency_prefix) || nzchar(currency_suffix))
-    ) {
-      matched[[i]] <- FALSE
-      reasons[[i]] <- "percentages cannot also use currency or a magnitude suffix"
-      next
-    }
-
-    value <- suppressWarnings(as.double(gsub(",", "", number_text, fixed = TRUE)))
-    if (!is.finite(value)) {
-      matched[[i]] <- FALSE
-      reasons[[i]] <- "value is outside the finite double range"
-      next
-    }
-
-    multiplier <- switch(
-      magnitude,
-      "\u4e07" = 1e4,
-      "\u4ebf" = 1e8,
-      "\u4e07\u4ebf" = 1e12,
-      "\u5343" = 1e3,
-      1
-    )
-    if (!is.null(header_multiplier)) {
-      explicit_unit <- nzchar(magnitude) || nzchar(currency_prefix) ||
-        nzchar(currency_suffix)
-      if (nzchar(percent) || (explicit_unit && multiplier != header_multiplier)) {
-        matched[[i]] <- FALSE
-        reasons[[i]] <- "explicit unit conflicts with the table-header unit"
-        next
-      }
-      if (!explicit_unit) multiplier <- header_multiplier
-    }
-    value <- value * multiplier
-    if (!is.finite(value)) {
-      matched[[i]] <- FALSE
-      reasons[[i]] <- "value is outside the finite double range"
-      next
-    }
-    sign <- if (nzchar(sign_before)) sign_before else sign_after
-    if (identical(sign, "-") || accounting[[i]]) {
-      value <- -value
-    }
-    if (nzchar(percent)) {
-      value <- value / 100
-    }
-    output[[active[[i]]]] <- value
+  starts <- attr(matches, "capture.start")
+  ends <- starts + attr(matches, "capture.length") - 1L
+  fields <- lapply(seq_len(7L), function(j) substring(work, starts[, j], ends[, j]))
+  sign_before <- fields[[1L]]
+  sign_after <- fields[[3L]]
+  magnitude <- fields[[5L]]
+  percent <- nzchar(fields[[7L]])
+  explicit_unit <- nzchar(magnitude) | nzchar(fields[[2L]]) | nzchar(fields[[6L]])
+  # Apply validations in their original order so the first error stays stable.
+  reject <- function(condition, reason) {
+    bad <- which(matched & condition)
+    matched[bad] <<- FALSE
+    reasons[bad] <<- reason
   }
+  reject(nzchar(sign_before) & nzchar(sign_after),
+         "a value cannot contain more than one explicit sign")
+  reject(accounting & (nzchar(sign_before) | nzchar(sign_after)),
+         "accounting parentheses cannot contain an explicit sign")
+  reject(percent & explicit_unit,
+         "percentages cannot also use currency or a magnitude suffix")
+  value <- suppressWarnings(as.double(gsub(",", "", fields[[4L]], fixed = TRUE)))
+  reject(!is.finite(value), "value is outside the finite double range")
+  multiplier <- c(1, 1e4, 1e8, 1e12, 1e3)[
+    match(magnitude, c("", "\u4e07", "\u4ebf", "\u4e07\u4ebf", "\u5343"), nomatch = 1L)
+  ]
+  if (!is.null(header_multiplier)) {
+    reject(percent | (explicit_unit & multiplier != header_multiplier),
+           "explicit unit conflicts with the table-header unit")
+    multiplier[!explicit_unit] <- header_multiplier
+  }
+  value <- value * multiplier
+  reject(!is.finite(value), "value is outside the finite double range")
+  negative <- sign_before == "-" | sign_after == "-" | accounting
+  value[negative] <- -value[negative]
+  value[percent] <- value[percent] / 100
+  output[active[matched]] <- value[matched]
 
   failed_local <- which(!matched)
   if (length(failed_local) > 0L) {
