@@ -1,3 +1,8 @@
+# Development changes (unreleased)
+
+* Fills range output columns in batches rather than repeatedly updating
+  data-frame rows. Parsing rules and structured problems are unchanged.
+
 # cncleanr 0.2.7
 
 * Accepts one approximation prefix combined with the suffix meaning

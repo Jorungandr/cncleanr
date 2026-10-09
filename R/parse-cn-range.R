@@ -84,29 +84,26 @@ parse_cn_range <- function(
     quantity_failed <- cn_problems(quantity)$index
     quantity_ok <- setdiff(seq_along(unique_text), quantity_failed)
 
-    for (i in quantity_ok) {
-      value <- quantity$value[[i]]
-      qualifier <- quantity$qualifier[[i]]
-      if (identical(qualifier, "approx")) {
-        unique_reason[[i]] <- "an approximate value does not define explicit bounds"
-      } else if (identical(qualifier, "exact")) {
-        unique_output[i, ] <- list(value, value, TRUE, TRUE)
-      } else if (identical(qualifier, "at_least")) {
-        unique_output[i, ] <- list(value, Inf, TRUE, FALSE)
-      } else if (identical(qualifier, "greater_than")) {
-        unique_output[i, ] <- list(value, Inf, FALSE, FALSE)
-      } else if (identical(qualifier, "at_most")) {
-        unique_output[i, ] <- list(-Inf, value, FALSE, TRUE)
-      } else if (identical(qualifier, "less_than")) {
-        unique_output[i, ] <- list(-Inf, value, FALSE, FALSE)
-      }
-    }
+    qualifier <- quantity$qualifier[quantity_ok]
+    approximate <- quantity_ok[qualifier %in% "approx"]
+    unique_reason[approximate] <- "an approximate value does not define explicit bounds"
+    bounded <- quantity_ok[qualifier %in%
+      c("exact", "at_least", "greater_than", "at_most", "less_than")]
+    qualifier <- quantity$qualifier[bounded]
+    value <- quantity$value[bounded]
+    unique_output$lower[bounded] <- ifelse(
+      qualifier %in% c("at_most", "less_than"), -Inf, value)
+    unique_output$upper[bounded] <- ifelse(
+      qualifier %in% c("at_least", "greater_than"), Inf, value)
+    unique_output$lower_inclusive[bounded] <- qualifier %in% c("exact", "at_least")
+    unique_output$upper_inclusive[bounded] <- qualifier %in% c("exact", "at_most")
 
     if (length(quantity_failed) > 0L) {
       ranges <- find_cn_range_endpoints_batch(
         unique_text[quantity_failed],
         normalized_na
       )
+      valid_range <- rep(FALSE, length(quantity_failed))
       for (j in seq_along(quantity_failed)) {
         i <- quantity_failed[[j]]
         values <- ranges$values[[j]]
@@ -116,9 +113,15 @@ parse_cn_range <- function(
           unique_reason[[i]] <-
             "range lower bound is greater than its upper bound"
         } else {
-          unique_output[i, ] <- list(values[[1L]], values[[2L]], TRUE, TRUE)
+          valid_range[[j]] <- TRUE
         }
       }
+      rows <- quantity_failed[valid_range]
+      endpoints <- ranges$values[valid_range]
+      unique_output$lower[rows] <- vapply(endpoints, `[[`, numeric(1), 1L)
+      unique_output$upper[rows] <- vapply(endpoints, `[[`, numeric(1), 2L)
+      unique_output$lower_inclusive[rows] <- TRUE
+      unique_output$upper_inclusive[rows] <- TRUE
     }
 
     output[active, ] <- unique_output[active_map, , drop = FALSE]

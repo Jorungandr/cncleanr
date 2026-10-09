@@ -125,3 +125,18 @@ test_that("range parser expands duplicated problems to original positions", {
     cn_problems(result)$reason == "value is not a supported range or bound"
   ))
 })
+test_that("batched range columns preserve mixed boundary semantics", {
+  input <- rep(c("3万", ">=3万", ">3万", "<=3万", "<3万",
+                 "3-5万", "约3万", "bad", "暂无"), 100L)
+  result <- suppressWarnings(parse_cn_range(input))
+  expect_equal(result$lower, rep(c(30000, 30000, 30000, -Inf, -Inf,
+                                  30000, NA, NA, NA), 100L))
+  expect_equal(result$upper, rep(c(30000, Inf, Inf, 30000, 30000,
+                                  50000, NA, NA, NA), 100L))
+  expect_equal(result$lower_inclusive,
+               rep(c(TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, NA, NA, NA), 100L))
+  expect_equal(result$upper_inclusive,
+               rep(c(TRUE, FALSE, FALSE, TRUE, FALSE, TRUE, NA, NA, NA), 100L))
+  expect_equal(cn_problems(result)$index, which(seq_along(input) %% 9L %in% c(7L, 8L)))
+  expect_error(parse_cn_range(input, strict=TRUE), "Failed to parse")
+})
