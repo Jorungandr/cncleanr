@@ -1,5 +1,8 @@
 # Development changes (unreleased)
 
+* Deduplicates original quantity text and batches qualifier matching, restoring
+  every source row and its structured parsing problems after processing.
+
 * Fills range output columns in batches rather than repeatedly updating
   data-frame rows. Parsing rules and structured problems are unchanged.
 * Preallocates range separator candidates and groups valid candidates by

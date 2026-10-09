@@ -106,3 +106,18 @@ test_that("quantity parser handles factors, empty input, and custom missing valu
   ))
   expect_true(is.na(parse_cn_quantity("保密", na = "保密")$value))
 })
+test_that("quantity deduplication restores every original row and error", {
+  input <- rep(c("约3万", "约1 2", "约12", "约3万以上", "50余万元",
+                 "保密", "bad"), 100L)
+  result <- suppressWarnings(parse_cn_quantity(input, na="保密"))
+  expect_equal(result$value, rep(c(30000, NA, 12, NA, 500000, NA, NA), 100L))
+  expect_equal(result$qualifier,
+               rep(c("approx", NA, "approx", NA, "greater_than", NA, NA), 100L))
+  failed <- which(seq_along(input) %% 7L %in% c(2L, 4L, 0L))
+  expect_equal(cn_problems(result)$index, failed)
+  expect_equal(cn_problems(result)$value, input[failed])
+  expect_equal(cn_problems(result)$reason,
+    rep(c("digits use invalid whitespace grouping", "multiple or conflicting qualifiers",
+          "value does not match the supported number syntax"), 100L))
+  expect_error(parse_cn_quantity(input, na="保密", strict=TRUE), "Failed to parse")
+})

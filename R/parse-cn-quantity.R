@@ -58,6 +58,9 @@ parse_cn_quantity <- function(
     return(data.frame(value = numeric(), qualifier = character()))
   }
 
+  full_original <- x
+  x <- unique(x)
+  input_map <- match(full_original, x)
   original <- x
   invalid_spacing <- has_invalid_cn_digit_spacing(x)
   cleaned <- normalize_cn_number_text(x)
@@ -65,7 +68,6 @@ parse_cn_quantity <- function(
   is_missing <- is.na(cleaned) | cleaned %in% normalized_na
   qualifier <- rep("exact", length(cleaned))
   qualifier[is_missing] <- NA_character_
-  conflict <- rep(FALSE, length(cleaned))
 
   prefix_rules <- c(
     at_most = "^(?:\u4e0d\u8d85\u8fc7|\u4e0d\u9ad8\u4e8e|\u4e0d\u5927\u4e8e|\u4e0d\u591a\u4e8e|\u81f3\u591a|<=|\u2264|\u2266)",
@@ -81,51 +83,46 @@ parse_cn_quantity <- function(
     approx = "\u5de6\u53f3$"
   )
 
-  for (i in which(!is_missing)) {
-    prefix_hits <- names(prefix_rules)[vapply(
-      prefix_rules,
-      function(pattern) grepl(pattern, cleaned[[i]], perl = TRUE),
-      logical(1)
-    )]
-    suffix_hits <- names(suffix_rules)[vapply(
-      suffix_rules,
-      function(pattern) grepl(pattern, cleaned[[i]], perl = TRUE),
-      logical(1)
-    )]
-    infix_pattern <- paste0(
-      "^(.+)\u4f59(",
-      "(?:\u4e07\u4ebf|\u4e07|\u4ebf)(?:\u4eba\u6c11\u5e01|\u5757\u94b1|\u5143|\u5757)?|\u5343\u5143|",
-      "(?:\u4eba\u6c11\u5e01|\u5757\u94b1|\u5143|\u5757)",
-      ")$"
-    )
-    infix_fields <- regmatches(
-      cleaned[[i]],
-      regexec(infix_pattern, cleaned[[i]], perl = TRUE)
-    )[[1L]]
-    has_infix_yu <- length(infix_fields) > 0L
-
-    redundant_approx <- identical(prefix_hits, "approx") &&
-      identical(suffix_hits, "approx") && !has_infix_yu
-    if (length(prefix_hits) + length(suffix_hits) + has_infix_yu > 1L &&
-        !redundant_approx) {
-      conflict[[i]] <- TRUE
-      qualifier[[i]] <- NA_character_
-      next
-    }
-    if (length(prefix_hits) == 1L) {
-      qualifier[[i]] <- prefix_hits
-      cleaned[[i]] <- sub(prefix_rules[[prefix_hits]], "", cleaned[[i]], perl = TRUE)
-      if (redundant_approx) {
-        cleaned[[i]] <- sub(suffix_rules[["approx"]], "", cleaned[[i]], perl = TRUE)
-      }
-    } else if (length(suffix_hits) == 1L) {
-      qualifier[[i]] <- suffix_hits
-      cleaned[[i]] <- sub(suffix_rules[[suffix_hits]], "", cleaned[[i]], perl = TRUE)
-    } else if (has_infix_yu) {
-      qualifier[[i]] <- "greater_than"
-      cleaned[[i]] <- paste0(infix_fields[[2L]], infix_fields[[3L]])
-    }
+  active <- which(!is_missing)
+  prefix_kind <- suffix_kind <- rep("", length(cleaned))
+  prefix_count <- suffix_count <- integer(length(cleaned))
+  for (kind in names(prefix_rules)) {
+    hits <- active[grepl(prefix_rules[[kind]], cleaned[active], perl = TRUE)]
+    prefix_kind[hits] <- kind
+    prefix_count[hits] <- prefix_count[hits] + 1L
   }
+  for (kind in names(suffix_rules)) {
+    hits <- active[grepl(suffix_rules[[kind]], cleaned[active], perl = TRUE)]
+    suffix_kind[hits] <- kind
+    suffix_count[hits] <- suffix_count[hits] + 1L
+  }
+  infix_pattern <- paste0(
+    "^(.+)\u4f59(",
+    "(?:\u4e07\u4ebf|\u4e07|\u4ebf)(?:\u4eba\u6c11\u5e01|\u5757\u94b1|\u5143|\u5757)?|\u5343\u5143|",
+    "(?:\u4eba\u6c11\u5e01|\u5757\u94b1|\u5143|\u5757)",
+    ")$"
+  )
+  has_infix_yu <- rep(FALSE, length(cleaned))
+  has_infix_yu[active] <- grepl(infix_pattern, cleaned[active], perl = TRUE)
+  redundant_approx <- prefix_count == 1L & suffix_count == 1L &
+    prefix_kind == "approx" & suffix_kind == "approx" & !has_infix_yu
+  conflict <- prefix_count + suffix_count + has_infix_yu > 1L & !redundant_approx
+  qualifier[conflict] <- NA_character_
+  for (kind in names(prefix_rules)) {
+    rows <- which(!conflict & prefix_count == 1L & prefix_kind == kind)
+    qualifier[rows] <- kind
+    cleaned[rows] <- sub(prefix_rules[[kind]], "", cleaned[rows], perl = TRUE)
+  }
+  cleaned[redundant_approx] <- sub(suffix_rules[["approx"]], "",
+                                  cleaned[redundant_approx], perl = TRUE)
+  for (kind in names(suffix_rules)) {
+    rows <- which(!conflict & prefix_count == 0L & suffix_count == 1L & suffix_kind == kind)
+    qualifier[rows] <- kind
+    cleaned[rows] <- sub(suffix_rules[[kind]], "", cleaned[rows], perl = TRUE)
+  }
+  rows <- which(!conflict & prefix_count == 0L & suffix_count == 0L & has_infix_yu)
+  qualifier[rows] <- "greater_than"
+  cleaned[rows] <- sub(infix_pattern, "\\1\\2", cleaned[rows], perl = TRUE)
 
   invalid_spacing <- invalid_spacing & !is_missing & !conflict
   cleaned[is_missing | conflict | invalid_spacing] <- NA_character_
@@ -158,7 +155,12 @@ parse_cn_quantity <- function(
   if (nrow(problems) > 0L) {
     qualifier[unique(problems$index)] <- NA_character_
   }
-  output <- data.frame(value = value, qualifier = qualifier)
+  reason <- rep(NA_character_, length(x))
+  reason[problems$index] <- problems$reason
+  failed <- which(!is.na(reason[input_map]))
+  problems <- data.frame(index = failed, value = full_original[failed],
+                         reason = reason[input_map[failed]], stringsAsFactors = FALSE)
+  output <- data.frame(value = value[input_map], qualifier = qualifier[input_map])
   apply_cn_problems(output, problems, strict)
 }
 
