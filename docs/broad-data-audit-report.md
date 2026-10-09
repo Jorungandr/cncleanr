@@ -102,4 +102,16 @@ Rscript docs/multi-source-audit.R outputs/release-0.2.7/library
 再次通过公开数据清洗示例和本轮 16961 项检查。
 检查归档的 37 个条目，确认不含 `outputs/`、`docs/`、`.vscode/` 或 `.github/`，
 而新增回归测试包含在源码包中。源码包仅用于本地验证，未替换既有 GitHub 发布附件。
-这不是新的完整 `R CMD check` 或远程矩阵运行；新增 CI 步骤尚待推送后验证。
+以上是本地构建及审计结果，远程检查另见下节。
+
+## 远程验证结果
+
+2026-10-09 核实提交 `49fff9bbc87aa79c8030acbbd1c7c78e00921857` 的
+[GitHub Actions 检查](https://github.com/Jorungandr/cncleanr/actions/runs/37796592146)
+已完成，整体结果为 `success`。
+Linux R-release、R-devel、R-oldrel-1，Windows R-release、macOS R-release
+五项任务全部通过，每项的新增可执行清洗示例步骤也全部通过。
+Linux R-release 按现有配置包含 PDF 手册检查。
+远程任务运行包检查和小型清洗示例，没有下载并复跑本轮完整公开数据快照；
+16961 项数据审计的证据仍是前述本地结果。
+本轮不改变版本号，没有创建发布或提交 CRAN。
