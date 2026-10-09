@@ -142,16 +142,16 @@ find_cn_range_endpoints_batch <- function(text, na) {
   size <- length(text)
   values <- vector("list", size)
   reason <- rep("one or both range endpoints are invalid", size)
-  candidate_source <- integer()
-  candidate_left <- character()
-  candidate_right <- character()
+  positions_by_text <- gregexpr(
+    "[\u81f3\u5230~\uff5e\u2014\u2013-]", text, perl = TRUE)
+  capacity <- sum(lengths(positions_by_text))
+  candidate_source <- integer(capacity)
+  candidate_left <- character(capacity)
+  candidate_right <- character(capacity)
+  candidate_count <- 0L
 
   for (i in seq_along(text)) {
-    positions <- gregexpr(
-      "[\u81f3\u5230~\uff5e\u2014\u2013-]",
-      text[[i]],
-      perl = TRUE
-    )[[1L]]
+    positions <- positions_by_text[[i]]
     if (identical(positions[[1L]], -1L)) {
       reason[[i]] <- "value is not a supported range or bound"
       next
@@ -164,15 +164,20 @@ find_cn_range_endpoints_batch <- function(text, na) {
         next
       }
       endpoints <- propagate_cn_range_suffix(c(left, right))
-      candidate_source <- c(candidate_source, i)
-      candidate_left <- c(candidate_left, endpoints[[1L]])
-      candidate_right <- c(candidate_right, endpoints[[2L]])
+      candidate_count <- candidate_count + 1L
+      candidate_source[[candidate_count]] <- i
+      candidate_left[[candidate_count]] <- endpoints[[1L]]
+      candidate_right[[candidate_count]] <- endpoints[[2L]]
     }
   }
 
-  if (length(candidate_source) == 0L) {
+  if (candidate_count == 0L) {
     return(list(values = values, reason = reason))
   }
+  used <- seq_len(candidate_count)
+  candidate_source <- candidate_source[used]
+  candidate_left <- candidate_left[used]
+  candidate_right <- candidate_right[used]
 
   endpoint_text <- as.vector(rbind(candidate_left, candidate_right))
   parsed <- suppressWarnings(parse_cn_number(endpoint_text, na = na))
@@ -184,8 +189,11 @@ find_cn_range_endpoints_batch <- function(text, na) {
     !invalid_endpoint[seq.int(2L, length(parsed), by = 2L)]
   parsed <- matrix(as.numeric(parsed), ncol = 2L, byrow = TRUE)
 
-  for (i in seq_along(text)) {
-    matches <- which(candidate_source == i & candidate_valid)
+  matches_by_source <- split(which(candidate_valid), candidate_source[candidate_valid])
+  source_ids <- as.integer(names(matches_by_source))
+  for (group in seq_along(matches_by_source)) {
+    i <- source_ids[[group]]
+    matches <- matches_by_source[[group]]
     if (length(matches) == 1L) {
       values[[i]] <- parsed[matches, ]
       reason[[i]] <- NA_character_

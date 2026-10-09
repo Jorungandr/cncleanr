@@ -2,6 +2,8 @@
 
 * Fills range output columns in batches rather than repeatedly updating
   data-frame rows. Parsing rules and structured problems are unchanged.
+* Preallocates range separator candidates and groups valid candidates by
+  source input instead of repeatedly scanning the complete candidate vector.
 
 # cncleanr 0.2.7
 

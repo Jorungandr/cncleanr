@@ -140,3 +140,12 @@ test_that("batched range columns preserve mixed boundary semantics", {
   expect_equal(cn_problems(result)$index, which(seq_along(input) %% 9L %in% c(7L, 8L)))
   expect_error(parse_cn_range(input, strict=TRUE), "Failed to parse")
 })
+
+test_that("grouped endpoint candidates retain signs and original positions", {
+  input <- c("bad", "3-5万", "-5--3", "1e-3-2e-3", "3-NA", "5-3", "3-4-5")
+  result <- suppressWarnings(parse_cn_range(input))
+  expect_equal(result$lower, c(NA, 30000, -5, .001, NA, NA, NA))
+  expect_equal(result$upper, c(NA, 50000, -3, .002, NA, NA, NA))
+  expect_equal(cn_problems(result)$index, c(1L, 5L, 6L, 7L))
+  expect_equal(cn_problems(result)$value, input[c(1L, 5L, 6L, 7L)])
+})

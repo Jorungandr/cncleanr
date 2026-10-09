@@ -4,8 +4,9 @@ args <- commandArgs(trailingOnly=TRUE)
 .libPaths(c(if (length(args)) args[[1]] else 'outputs/validation-2026-10-08/library', .libPaths()))
 library(cncleanr)
 baseline <- parse_cn_range
-source('R/parse-cn-range.R', encoding='UTF-8')
-environment(parse_cn_range) <- asNamespace('cncleanr')
+candidate <- new.env(parent=asNamespace('cncleanr'))
+source('R/parse-cn-range.R', local=candidate, encoding='UTF-8')
+parse_cn_range <- candidate$parse_cn_range
 cases <- list(
   empty=character(), missing=c('暂无', NA_character_, '-'),
   mixed=c('3万', '>=3万', '>3万', '<=3万', '<3万', '约3万',
@@ -33,3 +34,12 @@ for (n in c(10000L, 100000L)) {
   }
 }
 cat('PASS: baseline equivalence and independent point-range expectations\n')
+for (n in c(10000L, 20000L)) {
+  x <- paste0(seq_len(n), '-', seq_len(n)+1L, '万')
+  stopifnot(identical(parse_cn_range(x), baseline(x)))
+  for (label in c('baseline', 'candidate')) {
+    parser <- if (label == 'baseline') baseline else parse_cn_range
+    cat(n, 'distinct closed intervals', label, 'median seconds:',
+        median(replicate(3, system.time(parser(x))[['elapsed']])), '\n')
+  }
+}
