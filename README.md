@@ -29,6 +29,8 @@ pak::pak("Jorungandr/cncleanr@v0.2.7")
 
 公开数据案例：[将缺失值、错误标记与长文本分开处理](docs/open-data-cleaning.md)。
 
+CSV 工作流：[保留原文与编号、按列处理单位、导出异常清单](docs/csv-cleaning.md)。
+
 下面的流程保留原始文本，解析营收列，并把无法解析的记录定位回原始企业：
 
 ```r
