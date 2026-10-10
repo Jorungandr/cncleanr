@@ -6,6 +6,9 @@ CRAN 0.2.5. There is still one package and one public R interface.
 
 `src/simple-number.c` recognizes complete simple decimal/scientific numbers,
 optional signs, common Chinese magnitudes, yuan suffixes and percentages.
+The later [formatted-number update](formatted-optimization.md) also accelerates
+existing currency prefixes and accounting parentheses, with a second native
+pass after the existing normalization and spacing validation.
 It uses R's numeric conversion API, rejects non-finite results and contradictory
 units, and does not modify input vectors. Native routines are registered and
 dynamic symbol lookup is disabled. Garbage-collection stress testing passed.
@@ -13,9 +16,8 @@ dynamic symbol lookup is disabled. Garbage-collection stress testing passed.
 Entirely supported batches (including recognized missing markers) return
 early. In mixed batches, accepted native values are retained and only unresolved
 rows use the R path, with problem indices mapped back to the original input.
-Currency prefixes, accounting parentheses, grouped digits, full-width
-characters, malformed values and other unsupported forms retain the complete
-R parser. Syntax validation and error reasons still use the existing R code.
+Formats unsupported by the native parser retain the complete R parser.
+Syntax validation and error reasons still use the existing R code.
 Syntax, custom missing markers, names, units and error reporting remain unchanged.
 
 常见数值整批通过 C 校验时直接返回；混合批次保留已解析结果，

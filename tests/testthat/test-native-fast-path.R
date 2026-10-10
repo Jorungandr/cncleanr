@@ -1,4 +1,7 @@
 test_that('native accepted cells agree with the complete R fallback', {
+  r_parser <- parse_cn_number
+  environment(r_parser) <- list2env(list(.Call = function(symbol, x, unit) rep(NA_real_, length(x))),
+    parent = environment(parse_cn_number))
   grid <- expand.grid(
     prefix = c('', '-', '+', '(', 'RMB', '-RMB+'),
     body = c('0', '.25', '.', '1.', '1e-999', '1e309', '1e308',
@@ -6,11 +9,11 @@ test_that('native accepted cells agree with the complete R fallback', {
     suffix = c('', '万', '亿元', '千元', '万亿', '%', '万%', ')', '元元'),
     stringsAsFactors = FALSE)
   x <- c(do.call(paste0, grid), NA_character_)
-  # Leading whitespace forces these cells through the complete R path.
+  # Disable native calls in the reference so acceleration cannot hide a false match.
   for (header in c(NA_real_, 1, 1e3, 1e4, 1e8, 1e12)) {
     unit <- if (is.na(header)) NULL else
       c('元', '千元', '万', '亿', '万亿')[match(header, c(1, 1e3, 1e4, 1e8, 1e12))]
-    reference <- suppressWarnings(parse_cn_number(ifelse(is.na(x), NA_character_, paste0(' ', x)), unit = unit))
+    reference <- suppressWarnings(r_parser(x, unit = unit))
     native <- .Call(cncleanr:::C_simple_numbers, x, header)
     handled <- which(!is.na(native))
     expect_identical(native[handled], as.numeric(reference)[handled])
@@ -29,6 +32,9 @@ test_that('native batches preserve names, missing markers and negative zero', {
 })
 
 test_that('native floating-point boundaries agree with the R fallback', {
+  r_parser <- parse_cn_number
+  environment(r_parser) <- list2env(list(.Call = function(symbol, x, unit) rep(NA_real_, length(x))),
+    parent = environment(parse_cn_number))
   grid <- expand.grid(
     sign = c('', '-', '+'),
     mantissa = c('0', '1', '1.7976931348623157',
@@ -38,8 +44,7 @@ test_that('native floating-point boundaries agree with the R fallback', {
     stringsAsFactors = FALSE)
   x <- do.call(paste0, grid)
   for (unit in list(NULL, '\u5143', '\u5343\u5143', '\u4e07', '\u4ebf', '\u4e07\u4ebf')) {
-    # Leading whitespace bypasses the native path without changing numeric values.
-    reference <- suppressWarnings(parse_cn_number(c(paste0(' ', x), 'invalid'), unit = unit))
+    reference <- suppressWarnings(r_parser(c(x, 'invalid'), unit = unit))
     header <- if (is.null(unit)) NA_real_ else
       c(1, 1e3, 1e4, 1e8, 1e12)[match(unit, c('\u5143', '\u5343\u5143', '\u4e07', '\u4ebf', '\u4e07\u4ebf'))]
     native <- .Call(cncleanr:::C_simple_numbers, x, header)
@@ -67,4 +72,28 @@ test_that('mixed native and fallback rows preserve original problem indices', {
   expect_error(parse_cn_number(x, strict = TRUE), 'positions 2, 6')
   expect_identical(parse_cn_number(c('3\u4e07', ' NA'), na = c('\uff13\u4e07', 'NA')),
     c(NA_real_, NA_real_))
+})
+
+test_that('currency and accounting acceleration preserves sign restrictions', {
+  valid <- c('RMB3\u4e07', 'rMb-3\u5143', '-CNY2\u4ebf', '\u00a53',
+             '\u4eba\u6c11\u5e013\u5343\u5143', '(RMB2\u4e07)', '(3%)', '(0)')
+  expected <- c(30000, -3, -2e8, 3, 3000, -20000, -.03, -0)
+  expect_identical(.Call(cncleanr:::C_simple_numbers, valid, NA_real_), expected)
+  expect_identical(parse_cn_number(valid), expected)
+  expect_identical(1 / parse_cn_number('(0)'), -Inf)
+  invalid <- c('(-3)', '(+3)', '-RMB+3', '(RMB-3)', 'RMB3%',
+               'RMB', 'R', 'RM', 'C', 'CN', '(', 'RMB3\u5143)')
+  expect_true(all(is.na(.Call(cncleanr:::C_simple_numbers, invalid, NA_real_))))
+  result <- suppressWarnings(parse_cn_number(invalid))
+  expect_identical(cn_problems(result)$index, seq_along(invalid))
+})
+
+test_that('normalized acceleration still validates spacing and missing markers', {
+  x <- c(' RMB 3 \u4e07 ', ' ( \uffe5\uff12\u4e07 ) ', '\uff11\uff12\uff0e\uff15\uff05',
+         '1 234\u5143', '1 23\u5143', '\uff13\u4e07')
+  expect_warning(result <- parse_cn_number(x, na = '3\u4e07'), 'positions 5')
+  expect_identical(as.numeric(result), c(30000, -20000, .125, 1234, NA, NA))
+  expect_identical(cn_problems(result)$index, 5L)
+  expect_identical(cn_problems(result)$reason, 'digits use invalid whitespace grouping')
+  expect_identical(parse_cn_number(' RMB 3 \u4e07 ', unit = '\u4e07'), 30000)
 })

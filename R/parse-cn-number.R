@@ -120,7 +120,11 @@ parse_cn_number <- function(
 
   output <- fast
   names(output) <- input_names
-  active_local <- which(!is_missing)
+  normalized_fast <- .Call(C_simple_numbers, normalized,
+    if (is.null(header_multiplier)) NA_real_ else header_multiplier)
+  normalized_fast[is_missing | invalid_spacing] <- NA_real_
+  output[pending] <- normalized_fast
+  active_local <- which(!is_missing & is.na(normalized_fast))
   active <- pending[active_local]
 
   if (length(active) == 0L) {

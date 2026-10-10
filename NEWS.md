@@ -1,5 +1,9 @@
 # Development changes (unreleased)
 
+* Accelerates existing currency prefixes and accounting parentheses in the
+  conservative C path. Normalized unresolved cells retry native parsing after
+  missing-marker and digit-spacing checks; original R errors remain unchanged.
+
 * Retains native results in mixed numeric batches and runs the complete R parser
   only on unresolved rows, preserving original problem indices, missing-value
   precedence, names and strict errors.

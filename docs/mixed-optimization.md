@@ -50,7 +50,7 @@ From the repository root, with the unchanged baseline already installed:
 The script compares values, names, complete problem attributes, fixtures,
 factors, numeric inputs, custom missing markers, header units and strict messages
 for all three parsers before timing. The baseline is a local snapshot, not
-redistributed. Formal native tests force the R reference path with whitespace,
+redistributed. Formal native tests disable native calls in a local reference function,
 so mixed-batch native reuse cannot conceal a false native acceptance.
 
 新回归测试明确核对交错的 C/R 行、原始异常索引、负零和标准化缺失标记。
