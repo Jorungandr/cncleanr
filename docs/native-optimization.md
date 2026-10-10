@@ -48,14 +48,28 @@ attributes with the unchanged R baseline. Direct accepted-cell checks prevent
 whole-batch fallback from hiding invalid native acceptance. The same direct
 checks are included in `tests/testthat/test-native-fast-path.R` for CI.
 
-Local installation, batch stability, broad-data audit, multi-source audit and
+At the native-stage commit, local installation, batch stability, broad-data audit, multi-source audit and
 CSV round-trip checks passed. All local testthat assertions passed, but its
 process still exited with the pre-existing `0xc0000005` issue; this is not
 recorded as a successful full local check. The independent native benchmark
 and garbage-collection stress process exit status are checked separately.
 
 本地安装、压力测试、公开数据审计和 CSV 验证通过；完整测试断言通过，
-但测试依赖相关的本机退出异常仍未解决，不算完整检查通过。
+当时测试依赖相关的本机退出异常尚未解决，不算完整检查通过。
+
+Follow-up: the missing Windows architecture variable was identified and supplied
+by `docs/run-r.ps1`. The full local check now exits cleanly (no PDF manual or
+remote incoming checks). All five jobs of the
+[fix CI run](https://github.com/Jorungandr/cncleanr/actions/runs/38032567982)
+passed. See [environment diagnosis](environment-diagnosis.md).
+退出异常已通过本地启动入口的环境修复解决，五平台检查通过；未修改解析算法。
+
+The native regression suite additionally compares 810 scientific-number/unit
+cases across six header-unit configurations, including overflow, underflow,
+subnormal values and signed zero. Accepted native values, their reciprocals
+and complete fast-path batches must agree exactly with the full R fallback.
+新增浮点边界回归覆盖 810 种科学计数法/单位组合及六种表头配置，
+核对上溢、下溢、极小值和负零；不会把混合批次自动回退误当成 C 解析正确。
 
 Source installation now requires a C compiler. Windows local verification used
 the already installed UCRT GCC through a task-local Makevars file; it did not

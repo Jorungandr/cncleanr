@@ -1,5 +1,9 @@
 # Development changes (unreleased)
 
+* Expands native-parser regression checks at floating-point overflow, underflow,
+  subnormal and signed-zero boundaries, comparing accepted values with the full
+  R fallback across supported header units.
+
 * Adds a local Windows R launcher that supplies a missing architecture environment
   variable to avoid the cli 3.6.6 shutdown crash, preserves native exit codes,
   and restores the calling environment. Parsing behavior is unchanged.

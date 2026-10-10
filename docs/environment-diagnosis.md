@@ -34,12 +34,18 @@ $env:PROCESSOR_ARCHITECTURE = 'AMD64'
 `-RawEnvironment` 保留原始环境用于复现（可能再次触发崩溃提示）。
 检测脚本的补齐和恢复行为已经验证，四个探针均退出 0。
 
-对当前开发源码重新构建后，`R CMD check --as-cran --no-manual` 为 `Status: OK`，
-检查进程退出码 0，testthat 为 `FAIL 0 | WARN 0 | SKIP 0 | PASS 249`。
+首次修复验证为 249 项断言通过。补充浮点边界回归后重新构建当前开发源码，
+`R CMD check --as-cran --no-manual` 为 `Status: OK`，
+检查进程退出码 0，testthat 为 `FAIL 0 | WARN 0 | SKIP 0 | PASS 279`。
 日志保存在 `outputs/environment-diagnosis/fixed-check/cncleanr.Rcheck/`。
 此轮关闭远程 incoming 检查、未检查 PDF 手册；依赖查询仍出现 Bioconductor
 索引不可访问的提示，因此不宣称完成全部远程预检。
 rlang/cli 使用独立诊断库，其余测试依赖来自原用户库。
+
+修复提交 `7d88183` 的[线上检查](https://github.com/Jorungandr/cncleanr/actions/runs/38032567982)
+已完成：Linux release/devel/oldrel-1、Windows release、macOS release 五项均成功。
+在当前开发解析器上复跑原有公开数据审计、批量稳定性及 CSV 往返检查，
+各独立进程退出码均为 0；这是同一批数据的回归验证，不算新增来源或覆盖量。
 
 2026-10-09，Windows 11、R 4.6.1。检查日志位于
 `outputs/validation-2026-10-08/cncleanr.Rcheck/`。

@@ -55,4 +55,12 @@ regression also passed against explicit expected values. Existing full testthat
 assertions passed, but the process exited with the pre-existing access violation;
 this is not recorded as a successful full local check.
 差异检查、公开数据审计、压力测试及 CSV 验证通过；本机完整测试退出异常
-仍未解决，不算完整检查通过。新的 Unicode 回归检查也纳入远程测试。
+当时尚未解决，不算完整检查通过。新的 Unicode 回归检查也纳入远程测试。
+
+Follow-up: the shutdown environment issue is resolved via `docs/run-r.ps1`;
+see [diagnosis](environment-diagnosis.md). The
+[qualifier-stage CI](https://github.com/Jorungandr/cncleanr/actions/runs/38031781519)
+passed all five platforms. Existing open-data audits, batch stress and CSV
+round-trip checks were rerun on the current installed parser with exit code 0.
+本机退出问题已解决；限定词优化的五平台检查均通过。
+已复跑公开数据、压力及 CSV 验证；没有新增数据来源，也不重复计算覆盖量。

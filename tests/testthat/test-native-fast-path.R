@@ -27,3 +27,27 @@ test_that('native batches preserve names, missing markers and negative zero', {
   expect_error(.Call(cncleanr:::C_simple_numbers, 1, NA_real_), 'Invalid native')
   expect_error(.Call(cncleanr:::C_simple_numbers, '1', numeric()), 'Invalid native')
 })
+
+test_that('native floating-point boundaries agree with the R fallback', {
+  grid <- expand.grid(
+    sign = c('', '-', '+'),
+    mantissa = c('0', '1', '1.7976931348623157',
+                 '2.2250738585072014', '4.9406564584124654'),
+    exponent = paste0('e', c(-325, -324, -308, -1, 0, 1, 296, 308, 309)),
+    suffix = c('', '%', '\u5143', '\u4e07', '\u4ebf', '\u4e07\u4ebf'),
+    stringsAsFactors = FALSE)
+  x <- do.call(paste0, grid)
+  for (unit in list(NULL, '\u5143', '\u5343\u5143', '\u4e07', '\u4ebf', '\u4e07\u4ebf')) {
+    # A malformed sentinel forces the full R path without changing valid cells.
+    reference <- suppressWarnings(parse_cn_number(c(x, 'invalid'), unit = unit))
+    header <- if (is.null(unit)) NA_real_ else
+      c(1, 1e3, 1e4, 1e8, 1e12)[match(unit, c('\u5143', '\u5343\u5143', '\u4e07', '\u4ebf', '\u4e07\u4ebf'))]
+    native <- .Call(cncleanr:::C_simple_numbers, x, header)
+    handled <- which(!is.na(native))
+    expect_gt(length(handled), 0L)
+    expect_identical(native[handled], as.numeric(reference)[handled])
+    expect_identical(1 / native[handled], 1 / as.numeric(reference)[handled])
+    expect_false(any(handled %in% cn_problems(reference)$index))
+    expect_identical(parse_cn_number(x[handled], unit = unit), native[handled])
+  }
+})
