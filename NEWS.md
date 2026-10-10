@@ -1,5 +1,9 @@
 # Development changes (unreleased)
 
+* Matches qualifier groups once and reuses captured lengths for stripping.
+  Character normalization is shared with digit-spacing validation, and grouping
+  checks only inspect inputs that actually contain spaces between digits.
+
 * Adds a registered C fast path for completely supported simple-number batches.
   Unsupported formats retain the complete R parser and its structured errors.
   Source installations now require a C compiler; the public R API is unchanged.

@@ -25,6 +25,8 @@ pak::pak("Jorungandr/cncleanr@v0.2.7")
 
 The unreleased development branch adds C acceleration for common numeric formats without changing the R API. Other formats retain the complete R parser. Installing that branch from source requires a C compiler; on Windows, use [Rtools](https://cran.r-project.org/bin/windows/Rtools/) matching your R version. This change is not part of the v0.2.7 release above.
 
+Development benchmarks: [native numeric acceleration](docs/native-optimization.md) and [qualifier/character-normalization optimization](docs/qualifier-optimization.md). Timing depends on input format and repetition; no universal latency is guaranteed.
+
 ## Enterprise revenue cleaning example
 
 Complete walkthrough: [real financial tables, mixed units, and failure tracing](docs/financial-table-example_EN.md).

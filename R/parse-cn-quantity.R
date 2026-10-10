@@ -62,8 +62,9 @@ parse_cn_quantity <- function(
   x <- unique(x)
   input_map <- match(full_original, x)
   original <- x
-  invalid_spacing <- has_invalid_cn_digit_spacing(x)
-  cleaned <- normalize_cn_number_text(x)
+  characters <- normalize_cn_number_characters(x)
+  invalid_spacing <- has_invalid_cn_digit_spacing(characters, characters_normalized = TRUE)
+  cleaned <- normalize_cn_number_text(characters, characters_normalized = TRUE)
   normalized_na <- normalize_cn_number_text(na)
   is_missing <- is.na(cleaned) | cleaned %in% normalized_na
   qualifier <- rep("exact", length(cleaned))
@@ -86,16 +87,23 @@ parse_cn_quantity <- function(
   active <- which(!is_missing)
   prefix_kind <- suffix_kind <- rep("", length(cleaned))
   prefix_count <- suffix_count <- integer(length(cleaned))
-  for (kind in names(prefix_rules)) {
-    hits <- active[grepl(prefix_rules[[kind]], cleaned[active], perl = TRUE)]
-    prefix_kind[hits] <- kind
-    prefix_count[hits] <- prefix_count[hits] + 1L
-  }
-  for (kind in names(suffix_rules)) {
-    hits <- active[grepl(suffix_rules[[kind]], cleaned[active], perl = TRUE)]
-    suffix_kind[hits] <- kind
-    suffix_count[hits] <- suffix_count[hits] + 1L
-  }
+  prefix_length <- suffix_length <- integer(length(cleaned))
+  # Each rule group is disjoint (e.g. > excludes >=). Capture its kind once,
+  # then reuse match lengths for stripping instead of running each rule again.
+  prefix_match <- regexpr(paste0("(", prefix_rules, ")", collapse = "|"),
+                         cleaned[active], perl = TRUE)
+  hits <- which(prefix_match > 0L)
+  prefix_kind[active[hits]] <- names(prefix_rules)[max.col(
+    attr(prefix_match, "capture.start")[hits, , drop = FALSE], ties.method = "first")]
+  prefix_count[active[hits]] <- 1L
+  prefix_length[active[hits]] <- attr(prefix_match, "match.length")[hits]
+  suffix_match <- regexpr(paste0("(", suffix_rules, ")", collapse = "|"),
+                         cleaned[active], perl = TRUE)
+  hits <- which(suffix_match > 0L)
+  suffix_kind[active[hits]] <- names(suffix_rules)[max.col(
+    attr(suffix_match, "capture.start")[hits, , drop = FALSE], ties.method = "first")]
+  suffix_count[active[hits]] <- 1L
+  suffix_length[active[hits]] <- attr(suffix_match, "match.length")[hits]
   infix_pattern <- paste0(
     "^(.+)\u4f59(",
     "(?:\u4e07\u4ebf|\u4e07|\u4ebf)(?:\u4eba\u6c11\u5e01|\u5757\u94b1|\u5143|\u5757)?|\u5343\u5143|",
@@ -108,18 +116,13 @@ parse_cn_quantity <- function(
     prefix_kind == "approx" & suffix_kind == "approx" & !has_infix_yu
   conflict <- prefix_count + suffix_count + has_infix_yu > 1L & !redundant_approx
   qualifier[conflict] <- NA_character_
-  for (kind in names(prefix_rules)) {
-    rows <- which(!conflict & prefix_count == 1L & prefix_kind == kind)
-    qualifier[rows] <- kind
-    cleaned[rows] <- sub(prefix_rules[[kind]], "", cleaned[rows], perl = TRUE)
-  }
-  cleaned[redundant_approx] <- sub(suffix_rules[["approx"]], "",
-                                  cleaned[redundant_approx], perl = TRUE)
-  for (kind in names(suffix_rules)) {
-    rows <- which(!conflict & prefix_count == 0L & suffix_count == 1L & suffix_kind == kind)
-    qualifier[rows] <- kind
-    cleaned[rows] <- sub(suffix_rules[[kind]], "", cleaned[rows], perl = TRUE)
-  }
+  rows <- which(!conflict & prefix_count == 1L)
+  qualifier[rows] <- prefix_kind[rows]
+  cleaned[rows] <- substring(cleaned[rows], prefix_length[rows] + 1L)
+  rows <- which(!conflict & prefix_count == 0L & suffix_count == 1L)
+  qualifier[rows] <- suffix_kind[rows]
+  rows <- c(rows, which(redundant_approx))
+  cleaned[rows] <- substr(cleaned[rows], 1L, nchar(cleaned[rows]) - suffix_length[rows])
   rows <- which(!conflict & prefix_count == 0L & suffix_count == 0L & has_infix_yu)
   qualifier[rows] <- "greater_than"
   cleaned[rows] <- sub(infix_pattern, "\\1\\2", cleaned[rows], perl = TRUE)

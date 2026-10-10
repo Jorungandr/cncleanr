@@ -112,8 +112,9 @@ parse_cn_number <- function(
     return(fast)
   }
   original <- x
-  invalid_spacing <- has_invalid_cn_digit_spacing(x)
-  normalized <- normalize_cn_number_text(x)
+  characters <- normalize_cn_number_characters(x)
+  invalid_spacing <- has_invalid_cn_digit_spacing(characters, characters_normalized = TRUE)
+  normalized <- normalize_cn_number_text(characters, characters_normalized = TRUE)
   normalized_na <- normalize_cn_number_text(na)
   is_missing <- is.na(normalized) | normalized %in% normalized_na
 
@@ -203,8 +204,8 @@ parse_cn_number <- function(
   output
 }
 
-normalize_cn_number_text <- function(x) {
-  x <- normalize_cn_number_characters(x)
+normalize_cn_number_text <- function(x, characters_normalized = FALSE) {
+  if (!characters_normalized) x <- normalize_cn_number_characters(x)
   gsub("[[:space:]\u3000\u00a0\u202f]+", "", x, perl = TRUE)
 }
 
@@ -218,25 +219,26 @@ normalize_cn_number_characters <- function(x) {
   gsub("[\u2212\ufe63\u2013]", "-", x, perl = TRUE)
 }
 
-has_invalid_cn_digit_spacing <- function(x) {
-  x <- normalize_cn_number_characters(x)
+has_invalid_cn_digit_spacing <- function(x, characters_normalized = FALSE) {
+  if (!characters_normalized) x <- normalize_cn_number_characters(x)
   spacing <- "[[:space:]\u3000\u00a0\u202f]"
   has_digit_spacing <- grepl(
     paste0("[0-9]", spacing, "+[0-9]"),
     x,
     perl = TRUE
   )
-  valid_grouping <- grepl(
+  rows <- which(has_digit_spacing)
+  has_digit_spacing[rows] <- !grepl(
     paste0(
       "^[^0-9]*",
       "[0-9]{1,3}(?:", spacing, "+[0-9]{3})+",
       "(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?",
       "[^0-9]*$"
     ),
-    x,
+    x[rows],
     perl = TRUE
   )
-  has_digit_spacing & !valid_grouping
+  has_digit_spacing
 }
 
 format_cn_parse_failure <- function(problems) {

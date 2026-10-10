@@ -25,6 +25,8 @@ pak::pak("Jorungandr/cncleanr@v0.2.7")
 
 开发分支（尚未发布）加入了常见数值格式的 C 加速，R 接口不变；其他格式继续使用完整的 R 解析器。从源码安装开发分支需要 C 编译工具，Windows 建议使用与 R 版本匹配的 [Rtools](https://cran.r-project.org/bin/windows/Rtools/)。此变化不属于上面的 v0.2.7 正式版本。
 
+开发版性能记录：[C 数值加速](docs/native-optimization.md)、[限定词与字符标准化优化](docs/qualifier-optimization.md)。计时随格式和重复率变化，不保证所有输入达到相同耗时。
+
 ## 企业营收清洗示例
 
 完整案例：[真实财报清洗：表头单位、混合指标与异常定位](docs/financial-table-example.md)。

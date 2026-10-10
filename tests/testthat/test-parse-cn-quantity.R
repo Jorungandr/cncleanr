@@ -121,3 +121,14 @@ test_that("quantity deduplication restores every original row and error", {
           "value does not match the supported number syntax"), 100L))
   expect_error(parse_cn_quantity(input, na="保密", strict=TRUE), "Failed to parse")
 })
+
+test_that('captured qualifier lengths preserve Unicode and digit grouping', {
+  input <- c('不超过３万', '约为１２％左右', '≥4万元', '50余万元',
+             '近1\u202f234万元左右', '约1 2万左右')
+  result <- suppressWarnings(parse_cn_quantity(input))
+  expect_identical(result$value, c(30000, .12, 40000, 500000, 12340000, NA_real_))
+  expect_identical(result$qualifier,
+    c('at_most', 'approx', 'at_least', 'greater_than', 'approx', NA_character_))
+  expect_identical(cn_problems(result)$index, 6L)
+  expect_identical(cn_problems(result)$reason, 'digits use invalid whitespace grouping')
+})

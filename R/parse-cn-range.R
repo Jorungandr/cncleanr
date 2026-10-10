@@ -66,8 +66,9 @@ parse_cn_range <- function(
   }
 
   original <- x
-  invalid_spacing <- has_invalid_cn_digit_spacing(x)
-  normalized <- normalize_cn_number_text(x)
+  characters <- normalize_cn_number_characters(x)
+  invalid_spacing <- has_invalid_cn_digit_spacing(characters, characters_normalized = TRUE)
+  normalized <- normalize_cn_number_text(characters, characters_normalized = TRUE)
   normalized_na <- normalize_cn_number_text(na)
   is_missing <- is.na(normalized) | normalized %in% normalized_na
   invalid_spacing <- invalid_spacing & !is_missing
