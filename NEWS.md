@@ -1,5 +1,9 @@
 # Development changes (unreleased)
 
+* Adds a local Windows R launcher that supplies a missing architecture environment
+  variable to avoid the cli 3.6.6 shutdown crash, preserves native exit codes,
+  and restores the calling environment. Parsing behavior is unchanged.
+
 * Matches qualifier groups once and reuses captured lengths for stripping.
   Character normalization is shared with digit-spacing validation, and grouping
   checks only inspect inputs that actually contain spaces between digits.

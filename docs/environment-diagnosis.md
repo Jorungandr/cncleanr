@@ -1,5 +1,46 @@
 # 本地 R 退出异常与批量稳定性检查
 
+## 2026-10-10：已定位并验证环境修复
+
+本机已有的 `Rscript.exe.12424.dmp` 显示退出清理调用链：
+`R_CleanUp → R_RunWeakRefFinalizer → clic_unload → clic_stop_thread → cli__kill_thread → strcmp`。
+`strcmp` 的第一个参数为 NULL，触发访问异常。该转储不含 cncleanr DLL。
+[cli 3.6.6 源码](https://github.com/r-lib/cli/blob/v3.6.6/src/thread.c)
+在 Windows 清理线程时直接执行 `strcmp(getenv("PROCESSOR_ARCHITECTURE"), "ARM64")`，
+没有检查环境变量缺失的情况。本任务启动的进程环境确实缺少该变量。
+
+仅在启动 R 的 PowerShell 进程中补齐真实架构后，基础 R、rlang、cli、testthat
+四个独立探针及 cncleanr 全部测试均正常退出，退出码为 0。
+未修改解析算法、用户依赖库、注册表或系统 DLL；这是一项已验证的本地环境绕行修复，
+不是已修复上游 cli 源码的声明。此前记录的失败仍保留在下文。
+
+本机是 Windows x64，在当前 PowerShell 会话启动 R 前执行：
+
+```powershell
+$env:PROCESSOR_ARCHITECTURE = 'AMD64'
+```
+
+该设置只影响当前会话及其子进程，不写入全局环境。不要在 ARM64 Windows 上照抄 AMD64。
+后续本地测试或检查推荐使用启动脚本，它只在变量缺失时自动补齐真实架构：
+
+```powershell
+./docs/run-r.ps1 -RArguments @('--vanilla', 'docs/batch-stability.R', 'outputs/qualifier-optimization/library')
+./docs/run-r.ps1 -Executable 'D:/R/R-4.6.1/bin/R.exe' -RArguments @('CMD', 'check', '--no-manual', 'cncleanr_0.2.7.tar.gz')
+./docs/test-r-launcher.ps1
+```
+
+启动脚本透传参数与 R 的退出码，执行后恢复原环境；不会跳过测试或隐藏错误。
+诊断脚本默认仅在变量缺失时按实际操作系统架构补齐，结束后恢复原环境；
+`-RawEnvironment` 保留原始环境用于复现（可能再次触发崩溃提示）。
+检测脚本的补齐和恢复行为已经验证，四个探针均退出 0。
+
+对当前开发源码重新构建后，`R CMD check --as-cran --no-manual` 为 `Status: OK`，
+检查进程退出码 0，testthat 为 `FAIL 0 | WARN 0 | SKIP 0 | PASS 249`。
+日志保存在 `outputs/environment-diagnosis/fixed-check/cncleanr.Rcheck/`。
+此轮关闭远程 incoming 检查、未检查 PDF 手册；依赖查询仍出现 Bioconductor
+索引不可访问的提示，因此不宣称完成全部远程预检。
+rlang/cli 使用独立诊断库，其余测试依赖来自原用户库。
+
 2026-10-09，Windows 11、R 4.6.1。检查日志位于
 `outputs/validation-2026-10-08/cncleanr.Rcheck/`。
 

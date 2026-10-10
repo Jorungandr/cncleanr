@@ -31,6 +31,13 @@ CRAN 包页面当前没有反向依赖部分；正式提交前仍需重新核对
 
 ## 本地检查限制
 
+2026-10-10 更新：已定位到 cli 3.6.6 退出清理时未处理缺失的
+`PROCESSOR_ARCHITECTURE` 环境变量。通过项目本地启动脚本补齐真实架构后，
+当前开发源码检查为 `Status: OK`，249 项 testthat 断言通过且进程退出码 0。
+详见[环境诊断及修复](environment-diagnosis.md)。仍未检查 PDF 手册，
+关闭了远程 incoming 检查；正式提交前仍需最终源码包的新远程预检。
+以下为此前失败的历史记录，不代表修复后的状态。
+
 2026-10-09 对本地构建包运行 `--as-cran --no-manual`。
 初次在线 incoming 查询未完成，停止后以 `_R_CHECK_CRAN_INCOMING_REMOTE_=false` 重跑。
 源码、安装、帮助和示例检查通过，但 testthat 子进程异常结束导致 `Status: 1 ERROR`；

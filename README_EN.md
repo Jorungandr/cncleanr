@@ -232,6 +232,11 @@ The project includes two test suites:
 
 Every push is checked on Linux, macOS, and Windows with GitHub Actions.
 
+For a local Windows R shutdown crash caused by `cli`, use
+[`docs/run-r.ps1`](docs/run-r.ps1) to launch R. It supplies the architecture
+environment variable only when missing, leaves the global environment unchanged,
+and preserves the actual exit code. See the [environment diagnosis](docs/environment-diagnosis.md).
+
 ## Scope
 
 `cncleanr` focuses on Arabic digits combined with Chinese data conventions, such as `3.2亿元`, `约5万`, and `3万-5万`. Fully written Chinese numerals such as “一万三千” are currently outside the package's core scope.

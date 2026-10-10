@@ -226,6 +226,10 @@ parse_cn_number(c("2万", "abc"), strict = TRUE)
 
 每次推送都会在 Linux、macOS 和 Windows 上运行 GitHub Actions 检查。
 
+Windows 本地开发若在 R 退出时遇到 `cli` 引发的崩溃，可使用
+[`docs/run-r.ps1`](docs/run-r.ps1) 启动 R：它仅在缺失时补齐架构环境变量，
+不修改全局环境，并保留真实退出码。详情见[环境诊断](docs/environment-diagnosis.md)。
+
 ## 设计边界
 
 `cncleanr` 专注于实际数据源中的阿拉伯数字加中文单位，例如 `3.2亿元`、`约5万` 和 `3万-5万`。中文文字数字（例如“一万三千”）暂不属于本包的核心范围。
