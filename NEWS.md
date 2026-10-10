@@ -1,5 +1,9 @@
 # Development changes (unreleased)
 
+* Adds a registered C fast path for completely supported simple-number batches.
+  Unsupported formats retain the complete R parser and its structured errors.
+  Source installations now require a C compiler; the public R API is unchanged.
+
 * Extracts numeric captures and validates/converts them in batches, avoiding
   per-value match lists and conversions while preserving first-error precedence.
 

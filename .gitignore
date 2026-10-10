@@ -6,3 +6,6 @@
 *.tar.gz
 docs/reference/
 docs/articles/
+/src/*.o
+/src/*.dll
+/src/*.so

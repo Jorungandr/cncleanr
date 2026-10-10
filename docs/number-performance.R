@@ -4,6 +4,11 @@ args <- commandArgs(trailingOnly = TRUE)
   'outputs/quantity-optimization/library', .libPaths()))
 library(cncleanr)
 candidate <- new.env(parent = asNamespace('cncleanr'))
+dll_paths <- list.files('outputs/native-optimization/library/cncleanr/libs',
+  recursive = TRUE, full.names = TRUE)
+dll_path <- dll_paths[basename(dll_paths) == paste0('cncleanr', .Platform$dynlib.ext)]
+stopifnot(length(dll_path) == 1L)
+candidate$C_simple_numbers <- getNativeSymbolInfo('simple_numbers', dyn.load(dll_path))
 for (file in c('number', 'quantity', 'range'))
   source(paste0('R/parse-cn-', file, '.R'), local = candidate, encoding = 'UTF-8')
 for (name in ls(candidate))

@@ -50,6 +50,7 @@
 #' parse_cn_number(c("123.5", "1.5\u5343\u5143"), unit = "\u5343\u5143")
 #'
 #' @export
+#' @useDynLib cncleanr, .registration = TRUE, .fixes = "C_"
 parse_cn_number <- function(
   x,
   na = c(
@@ -100,6 +101,16 @@ parse_cn_number <- function(
   }
 
   input_names <- names(x)
+  fast <- .Call(C_simple_numbers, x,
+                if (is.null(header_multiplier)) NA_real_ else header_multiplier)
+  missing_fast <- is.na(x) | x %in% normalize_cn_number_text(na)
+  fast[missing_fast] <- NA_real_
+  # ponytail: mixed unsupported batches use the complete R parser; split/remap
+  # only if profiling shows these batches need their own fast path.
+  if (all(!is.na(fast) | missing_fast)) {
+    names(fast) <- input_names
+    return(fast)
+  }
   original <- x
   invalid_spacing <- has_invalid_cn_digit_spacing(x)
   normalized <- normalize_cn_number_text(x)
