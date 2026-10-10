@@ -1,5 +1,9 @@
 # Development changes (unreleased)
 
+* Retains native results in mixed numeric batches and runs the complete R parser
+  only on unresolved rows, preserving original problem indices, missing-value
+  precedence, names and strict errors.
+
 * Expands native-parser regression checks at floating-point overflow, underflow,
   subnormal and signed-zero boundaries, comparing accepted values with the full
   R fallback across supported header units.

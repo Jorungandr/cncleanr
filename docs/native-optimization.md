@@ -10,13 +10,16 @@ It uses R's numeric conversion API, rejects non-finite results and contradictory
 units, and does not modify input vectors. Native routines are registered and
 dynamic symbol lookup is disabled. Garbage-collection stress testing passed.
 
-Only entirely supported batches (including recognized missing markers) return
-early. Currency prefixes, accounting parentheses, grouped digits, full-width
+Entirely supported batches (including recognized missing markers) return
+early. In mixed batches, accepted native values are retained and only unresolved
+rows use the R path, with problem indices mapped back to the original input.
+Currency prefixes, accounting parentheses, grouped digits, full-width
 characters, malformed values and other unsupported forms retain the complete
-R parser. This deliberately avoids a second error-remapping implementation.
+R parser. Syntax validation and error reasons still use the existing R code.
 Syntax, custom missing markers, names, units and error reporting remain unchanged.
 
-常见数值整批通过 C 校验时直接返回；其他批次继续使用完整 R 解析器。
+常见数值整批通过 C 校验时直接返回；混合批次保留已解析结果，
+仅未处理行使用完整 R 解析器，并恢复原始行号。
 没有删除复杂格式支持，也没有把不认识的输入当成合法值。
 自定义缺失标记、表头单位、名称及错误信息保持原有语义。
 
@@ -36,7 +39,8 @@ per run to avoid timer-resolution zero. No file I/O is included.
 These are measurements, not latency guarantees. Qualifier matching and range
 construction remain in R; the 0.1-second target is met for this common-number
 sample, not for every parser or input format. Mixed unsupported batches may
-not benefit. System load and allocation/collection affect timing substantially.
+not have the same gain; see the newer [mixed-batch measurements](mixed-optimization.md).
+System load and allocation/collection affect timing substantially.
 0.1 秒只在此常见数值样本上达到，不代表数量、区间及所有格式都达到。
 本轮计时与此前不同轮次的计时不能混用计算提速比例。
 

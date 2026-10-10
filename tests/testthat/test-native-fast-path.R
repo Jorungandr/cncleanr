@@ -6,11 +6,11 @@ test_that('native accepted cells agree with the complete R fallback', {
     suffix = c('', '万', '亿元', '千元', '万亿', '%', '万%', ')', '元元'),
     stringsAsFactors = FALSE)
   x <- c(do.call(paste0, grid), NA_character_)
-  # The invalid cell forces the public parser through the existing full R path.
+  # Leading whitespace forces these cells through the complete R path.
   for (header in c(NA_real_, 1, 1e3, 1e4, 1e8, 1e12)) {
     unit <- if (is.na(header)) NULL else
       c('元', '千元', '万', '亿', '万亿')[match(header, c(1, 1e3, 1e4, 1e8, 1e12))]
-    reference <- suppressWarnings(parse_cn_number(x, unit = unit))
+    reference <- suppressWarnings(parse_cn_number(ifelse(is.na(x), NA_character_, paste0(' ', x)), unit = unit))
     native <- .Call(cncleanr:::C_simple_numbers, x, header)
     handled <- which(!is.na(native))
     expect_identical(native[handled], as.numeric(reference)[handled])
@@ -38,8 +38,8 @@ test_that('native floating-point boundaries agree with the R fallback', {
     stringsAsFactors = FALSE)
   x <- do.call(paste0, grid)
   for (unit in list(NULL, '\u5143', '\u5343\u5143', '\u4e07', '\u4ebf', '\u4e07\u4ebf')) {
-    # A malformed sentinel forces the full R path without changing valid cells.
-    reference <- suppressWarnings(parse_cn_number(c(x, 'invalid'), unit = unit))
+    # Leading whitespace bypasses the native path without changing numeric values.
+    reference <- suppressWarnings(parse_cn_number(c(paste0(' ', x), 'invalid'), unit = unit))
     header <- if (is.null(unit)) NA_real_ else
       c(1, 1e3, 1e4, 1e8, 1e12)[match(unit, c('\u5143', '\u5343\u5143', '\u4e07', '\u4ebf', '\u4e07\u4ebf'))]
     native <- .Call(cncleanr:::C_simple_numbers, x, header)
@@ -50,4 +50,21 @@ test_that('native floating-point boundaries agree with the R fallback', {
     expect_false(any(handled %in% cn_problems(reference)$index))
     expect_identical(parse_cn_number(x[handled], unit = unit), native[handled])
   }
+})
+
+test_that('mixed native and fallback rows preserve original problem indices', {
+  x <- setNames(c('2\u4e07', '1 2', '\uff13\u4e07', '4', '(5\u5143)',
+                  'bad', NA, '\u6682 \u65e0', '-0%', ' \uff16\u4e07'), letters[1:10])
+  expect_warning(result <- parse_cn_number(x), 'positions 2, 6')
+  expected <- setNames(c(20000, NA, 30000, 4, -5, NA, NA, NA, -0, 60000), names(x))
+  expect_identical(as.numeric(result), unname(expected))
+  expect_identical(names(result), names(expected))
+  expect_identical(1 / result[[9L]], -Inf)
+  expect_identical(cn_problems(result)$index, c(2L, 6L))
+  expect_identical(cn_problems(result)$value, unname(x[c(2L, 6L)]))
+  expect_identical(cn_problems(result)$reason,
+    c('digits use invalid whitespace grouping', 'value does not match the supported number syntax'))
+  expect_error(parse_cn_number(x, strict = TRUE), 'positions 2, 6')
+  expect_identical(parse_cn_number(c('3\u4e07', ' NA'), na = c('\uff13\u4e07', 'NA')),
+    c(NA_real_, NA_real_))
 })

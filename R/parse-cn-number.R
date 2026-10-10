@@ -105,28 +105,29 @@ parse_cn_number <- function(
                 if (is.null(header_multiplier)) NA_real_ else header_multiplier)
   missing_fast <- is.na(x) | x %in% normalize_cn_number_text(na)
   fast[missing_fast] <- NA_real_
-  # ponytail: mixed unsupported batches use the complete R parser; split/remap
-  # only if profiling shows these batches need their own fast path.
   if (all(!is.na(fast) | missing_fast)) {
     names(fast) <- input_names
     return(fast)
   }
   original <- x
+  pending <- which(is.na(fast) & !missing_fast)
+  x <- x[pending]
   characters <- normalize_cn_number_characters(x)
   invalid_spacing <- has_invalid_cn_digit_spacing(characters, characters_normalized = TRUE)
   normalized <- normalize_cn_number_text(characters, characters_normalized = TRUE)
   normalized_na <- normalize_cn_number_text(na)
   is_missing <- is.na(normalized) | normalized %in% normalized_na
 
-  output <- rep(NA_real_, length(normalized))
+  output <- fast
   names(output) <- input_names
-  active <- which(!is_missing)
+  active_local <- which(!is_missing)
+  active <- pending[active_local]
 
   if (length(active) == 0L) {
     return(output)
   }
 
-  work <- normalized[active]
+  work <- normalized[active_local]
   accounting <- grepl("^\\(.*\\)$", work, perl = TRUE)
   work[accounting] <- sub("^\\((.*)\\)$", "\\1", work[accounting], perl = TRUE)
 
@@ -142,7 +143,7 @@ parse_cn_number <- function(
   matches <- regexpr(pattern, work, perl = TRUE)
   matched <- matches > 0L
   reasons <- rep("value does not match the supported number syntax", length(work))
-  invalid_work_spacing <- invalid_spacing[active]
+  invalid_work_spacing <- invalid_spacing[active_local]
   matched[invalid_work_spacing] <- FALSE
   reasons[invalid_work_spacing] <- "digits use invalid whitespace grouping"
 
