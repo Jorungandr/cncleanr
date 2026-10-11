@@ -136,7 +136,9 @@ parse_cn_number <- function(
 
   work <- normalized[active_local]
   invalid_work_spacing <- invalid_spacing[active_local]
-  work[invalid_work_spacing] <- ""
+  spacing_failed <- active[invalid_work_spacing]
+  active <- active[!invalid_work_spacing]
+  work <- work[!invalid_work_spacing]
   accounting <- grepl("^\\(.*\\)$", work, perl = TRUE)
   work[accounting] <- sub("^\\((.*)\\)$", "\\1", work[accounting], perl = TRUE)
 
@@ -152,12 +154,12 @@ parse_cn_number <- function(
   matches <- regexpr(pattern, work, perl = TRUE)
   matched <- matches > 0L
   reasons <- rep("value does not match the supported number syntax", length(work))
-  matched[invalid_work_spacing] <- FALSE
-  reasons[invalid_work_spacing] <- "digits use invalid whitespace grouping"
 
   starts <- attr(matches, "capture.start")
   ends <- starts + attr(matches, "capture.length") - 1L
-  fields <- lapply(seq_len(7L), function(j) substring(work, starts[, j], ends[, j]))
+  fields <- if (length(work)) {
+    lapply(seq_len(7L), function(j) substring(work, starts[, j], ends[, j]))
+  } else rep(list(character()), 7L)
   sign_before <- fields[[1L]]
   sign_after <- fields[[3L]]
   magnitude <- fields[[5L]]
@@ -193,12 +195,16 @@ parse_cn_number <- function(
   output[active[matched]] <- value[matched]
 
   failed_local <- which(!matched)
-  if (length(failed_local) > 0L) {
-    failed <- active[failed_local]
+  failed <- c(spacing_failed, active[failed_local])
+  if (length(failed) > 0L) {
+    failure_reasons <- c(rep("digits use invalid whitespace grouping", length(spacing_failed)),
+                        reasons[failed_local])
+    failure_order <- if (length(spacing_failed) && length(failed_local)) order(failed) else seq_along(failed)
+    failed <- failed[failure_order]
     problems <- data.frame(
       index = failed,
       value = original[failed],
-      reason = reasons[failed_local],
+      reason = failure_reasons[failure_order],
       stringsAsFactors = FALSE
     )
     message <- format_cn_parse_failure(problems)

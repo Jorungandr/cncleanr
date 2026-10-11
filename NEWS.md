@@ -1,5 +1,9 @@
 # Development changes (unreleased)
 
+* Excludes known digit-grouping failures from capture extraction and numeric
+  conversion. Grouping and syntax failures merge in original source order;
+  all-grouping-error batches retain their original diagnostics.
+
 * Skips native retries for unchanged text, missing markers and invalid digit
   grouping. Known grouping failures avoid full syntax matching while retaining
   the original text, source indices and error precedence.

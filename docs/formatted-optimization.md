@@ -107,3 +107,45 @@ used as evidence. The archive was verified to contain the new retry logic and
 long-invalid-grouping regression.
 最终独立整包检查及 304 项断言通过；公开数据、批量和 CSV 验证通过。
 本轮未检查 PDF 手册及远程 incoming，没有新增公开数据覆盖量。
+
+### Grouping-error filtering / 分组错误过滤
+
+Further work removes known grouping failures from the regex capture and numeric
+conversion vectors altogether, instead of substituting empty strings. Their
+original indices and reasons merge with syntax failures in source order. Sorting
+is only needed when both kinds of failure occur. The all-grouping-failure case
+is covered explicitly, as are mixed errors and strict first-error precedence.
+已知分组错误行不再进入捕获或数值转换，只在最终报告中与其他错误按原行号合并。
+全部行分组错误、错误交错顺序及严格模式的首条原因均有回归测试。
+
+Reused the same three-by-five-call benchmark, with the unchanged retry-stage
+library as baseline and DLL source. Candidate: current byte-compiled R code.
+No C change or new dependency. Final local 100000-row measurements:
+
+| Input / 输入 | Before / 优化前 | After / 优化后 |
+| --- | ---: | ---: |
+| Plain / 普通数值 | 0.006 s | 0.006 s |
+| Currency / 货币前缀 | 0.008 s | 0.006 s |
+| Spaced currency / 带空白货币前缀 | 0.174 s | 0.218 s |
+| Accounting / 括号负数 | 0.018 s | 0.020 s |
+| Full-width / 全角数字 | 0.148 s | 0.148 s |
+| Mixed grouping / 混合空白分组 | 0.354 s | 0.186 s |
+| Invalid / 全无效 | 0.228 s | 0.222 s |
+
+The grouping sample improved about 47%; invalid text was essentially flat.
+Other samples fluctuated, including slower spaced-currency timing despite not
+reaching the changed grouping-filter path. These are measurements, not guarantees,
+and should not be combined with previous tables to calculate speedups.
+分组样本约改善 47%，但仍未达到 0.1 秒。其他样本存在波动，不能保证统一提速。
+The complete formatted differential grid and all three parsers match the baseline.
+
+Final verification: `Status: OK`, process exit 0,
+`FAIL 0 | WARN 0 | SKIP 0 | PASS 312`. Existing open-data, batch and CSV checks
+also passed against the final check-installed package. Logs:
+`outputs/grouping-filter/final-check/cncleanr.Rcheck/`.
+The first check was interrupted during a slow repository lookup; the completed
+rerun limited network request timeout to 10 seconds and still reported a CRAN
+index download warning. No package tests were skipped. PDF manual and remote
+incoming checks were not run; this is not a completed online CRAN pretest.
+最终整包检查及 312 项断言通过，公开数据、压力和 CSV 验证正常退出。
+网络索引查询有提示，未检查 PDF 手册和远程 incoming。

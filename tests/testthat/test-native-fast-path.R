@@ -110,3 +110,20 @@ test_that('invalid spacing short-circuit preserves original text and precedence'
   missing_override <- suppressWarnings(parse_cn_number(x, na = c('NA', long_invalid)))
   expect_identical(cn_problems(missing_override)$index, 6L)
 })
+
+test_that('filtered grouping failures merge in source order with syntax failures', {
+  x <- c(a = 'bad', b = '1 23', c = '1e309', d = '2 34', e = '2\u4e07')
+  expect_warning(result <- parse_cn_number(x), 'positions 1, 2, 3, 4')
+  expect_identical(cn_problems(result)$index, 1:4)
+  expect_identical(cn_problems(result)$value, unname(x[1:4]))
+  expect_identical(cn_problems(result)$reason, c(
+    'value does not match the supported number syntax',
+    'digits use invalid whitespace grouping',
+    'value is outside the finite double range',
+    'digits use invalid whitespace grouping'))
+  expect_identical(as.numeric(result), c(NA, NA, NA, NA, 20000))
+  expect_error(parse_cn_number(x, strict = TRUE), 'First problem: value does not match')
+  expect_warning(all_spacing <- parse_cn_number(c('1 2', '3 45')), 'positions 1, 2')
+  expect_identical(cn_problems(all_spacing)$reason,
+    rep('digits use invalid whitespace grouping', 2L))
+})
