@@ -120,9 +120,12 @@ parse_cn_number <- function(
 
   output <- fast
   names(output) <- input_names
-  normalized_fast <- .Call(C_simple_numbers, normalized,
-    if (is.null(header_multiplier)) NA_real_ else header_multiplier)
-  normalized_fast[is_missing | invalid_spacing] <- NA_real_
+  normalized_fast <- rep(NA_real_, length(normalized))
+  retry <- which(!is_missing & !invalid_spacing & normalized != x)
+  if (length(retry)) {
+    normalized_fast[retry] <- .Call(C_simple_numbers, normalized[retry],
+      if (is.null(header_multiplier)) NA_real_ else header_multiplier)
+  }
   output[pending] <- normalized_fast
   active_local <- which(!is_missing & is.na(normalized_fast))
   active <- pending[active_local]
@@ -132,6 +135,8 @@ parse_cn_number <- function(
   }
 
   work <- normalized[active_local]
+  invalid_work_spacing <- invalid_spacing[active_local]
+  work[invalid_work_spacing] <- ""
   accounting <- grepl("^\\(.*\\)$", work, perl = TRUE)
   work[accounting] <- sub("^\\((.*)\\)$", "\\1", work[accounting], perl = TRUE)
 
@@ -147,7 +152,6 @@ parse_cn_number <- function(
   matches <- regexpr(pattern, work, perl = TRUE)
   matched <- matches > 0L
   reasons <- rep("value does not match the supported number syntax", length(work))
-  invalid_work_spacing <- invalid_spacing[active_local]
   matched[invalid_work_spacing] <- FALSE
   reasons[invalid_work_spacing] <- "digits use invalid whitespace grouping"
 

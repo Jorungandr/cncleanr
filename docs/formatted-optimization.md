@@ -67,3 +67,43 @@ using the independently installed candidate. A forced-GC stress process also
 passed; its deliberately unsupported cell emitted the expected parsing warning.
 整包检查及 298 项断言通过；既有公开数据、压力、CSV 和强制内存回收验证通过。
 不是新增数据覆盖量，也不宣称已完成 PDF 手册或远程预提交检查。
+
+## 2026-10-11 follow-up / 后续开销削减
+
+Native retry now only visits changed, non-missing text with valid digit grouping.
+Known grouping errors are replaced with an empty temporary work string before
+syntax matching; the original input and grouping error take precedence in the
+problem report. The C routine and public syntax are unchanged.
+仅对标准化后有变化且分组有效的文本重试 C；已知分组错误不再做完整语法匹配。
+原文仍保留用于问题报告，缺失标记优先于分组错误。
+
+Reused `formatted-performance.R` with the unchanged formatted-stage library as
+both baseline and DLL source. The candidate is current byte-compiled R code;
+the DLL is unchanged. Same 100000-row, three-by-five-call method, no I/O:
+
+| Input / 输入 | Before / 优化前 | After / 优化后 |
+| --- | ---: | ---: |
+| Plain / 普通数值 | 0.018 s | 0.018 s |
+| Currency / 货币前缀 | 0.016 s | 0.016 s |
+| Spaced currency / 带空白货币前缀 | 0.156 s | 0.150 s |
+| Accounting / 括号负数 | 0.016 s | 0.018 s |
+| Full-width / 全角数字 | 0.124 s | 0.132 s |
+| Mixed grouping / 混合空白分组 | 0.394 s | 0.338 s |
+| Invalid / 全无效 | 0.178 s | 0.176 s |
+
+The grouping sample improved modestly; other samples were flat or fluctuated,
+and full-width text regressed slightly. Absolute times vary substantially with
+machine load; do not compare this table directly with the previous day's times.
+The full differential grid and all three parsers still match the baseline.
+本轮收益有限，不是整体提速，也未达到分组文本 0.1 秒的目标。
+
+The final independent package check passed with `Status: OK`, exit code 0 and
+`FAIL 0 | WARN 0 | SKIP 0 | PASS 304`. Logs:
+`outputs/retry-optimization/final-check/cncleanr.Rcheck/`.
+PDF manual and remote incoming checks were not run. The existing open-data,
+batch and CSV checks also passed using the independently installed candidate.
+An earlier redundant check was stopped; only this completed final check is
+used as evidence. The archive was verified to contain the new retry logic and
+long-invalid-grouping regression.
+最终独立整包检查及 304 项断言通过；公开数据、批量和 CSV 验证通过。
+本轮未检查 PDF 手册及远程 incoming，没有新增公开数据覆盖量。

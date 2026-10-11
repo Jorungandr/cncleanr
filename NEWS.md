@@ -1,5 +1,9 @@
 # Development changes (unreleased)
 
+* Skips native retries for unchanged text, missing markers and invalid digit
+  grouping. Known grouping failures avoid full syntax matching while retaining
+  the original text, source indices and error precedence.
+
 * Accelerates existing currency prefixes and accounting parentheses in the
   conservative C path. Normalized unresolved cells retry native parsing after
   missing-marker and digit-spacing checks; original R errors remain unchanged.

@@ -97,3 +97,16 @@ test_that('normalized acceleration still validates spacing and missing markers',
   expect_identical(cn_problems(result)$reason, 'digits use invalid whitespace grouping')
   expect_identical(parse_cn_number(' RMB 3 \u4e07 ', unit = '\u4e07'), 30000)
 })
+
+test_that('invalid spacing short-circuit preserves original text and precedence', {
+  long_invalid <- paste(rep('1', 500L), collapse = ' ')
+  x <- c('7\u4e07', long_invalid, '1 234', '\u3000NA', 'RMB 2 \u4e07', 'bad')
+  expect_warning(result <- parse_cn_number(x), 'positions 2, 6')
+  expect_identical(as.numeric(result), c(70000, NA, 1234, NA, 20000, NA))
+  expect_identical(cn_problems(result)$index, c(2L, 6L))
+  expect_identical(cn_problems(result)$value, x[c(2L, 6L)])
+  expect_identical(cn_problems(result)$reason,
+    c('digits use invalid whitespace grouping', 'value does not match the supported number syntax'))
+  missing_override <- suppressWarnings(parse_cn_number(x, na = c('NA', long_invalid)))
+  expect_identical(cn_problems(missing_override)$index, 6L)
+})
