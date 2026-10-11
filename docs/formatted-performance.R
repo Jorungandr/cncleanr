@@ -1,7 +1,10 @@
-# Rscript docs/formatted-performance.R [baseline library] [candidate library]
+# Rscript docs/formatted-performance.R [baseline library] [candidate library] [rows]
 args <- commandArgs(trailingOnly = TRUE)
 baseline <- if (length(args)) args[[1L]] else 'outputs/mixed-optimization/library'
 candidate_library <- if (length(args) > 1L) args[[2L]] else 'outputs/formatted-optimization/library'
+size <- if (length(args) > 2L) suppressWarnings(as.numeric(args[[3L]])) else 100000L
+stopifnot(length(size) == 1L, is.finite(size), size > 0,
+          size == floor(size), size <= .Machine$integer.max)
 .libPaths(c(baseline, .libPaths()))
 library(cncleanr)
 candidate <- new.env(parent = asNamespace('cncleanr'))
@@ -36,7 +39,7 @@ for (unit in c('\u5143', '\u5343\u5143', '\u4e07', '\u4ebf', '\u4e07\u4ebf'))
   stopifnot(identical(suppressWarnings(parse_cn_number(x, unit = unit)),
     suppressWarnings(candidate$parse_cn_number(x, unit = unit))))
 
-id <- seq_len(100000L)
+id <- seq_len(size)
 samples <- list(plain = paste0(id, '\u4e07'), currency = paste0('RMB', id, '\u4e07'),
   spaced_currency = paste0('RMB ', id, ' \u4e07'), accounting = paste0('(RMB', id, '\u5143)'),
   fullwidth = paste0(chartr('0123456789', '\uff10\uff11\uff12\uff13\uff14\uff15\uff16\uff17\uff18\uff19', as.character(id)), '\u4e07'),
@@ -45,8 +48,16 @@ for (name in names(samples)) {
   input <- samples[[name]]
   stopifnot(identical(suppressWarnings(parse_cn_number(input)),
     suppressWarnings(candidate$parse_cn_number(input))))
-  timing <- function(fun) median(replicate(3,
-    system.time(for (i in seq_len(5L)) suppressWarnings(fun(input)))[['elapsed']] / 5))
-  cat(name, 'baseline/candidate seconds:', timing(parse_cn_number), timing(candidate$parse_cn_number), '\n')
+  functions <- list(parse_cn_number, candidate$parse_cn_number)
+  repeats <- if (size < 1000000L) 5L else 1L
+  elapsed <- matrix(NA_real_, nrow = 5L, ncol = 2L)
+  for (round in seq_len(5L)) {
+    for (version in if (round %% 2L) 1:2 else 2:1) {
+      elapsed[round, version] <- system.time(
+        for (i in seq_len(repeats)) suppressWarnings(functions[[version]](input))
+      )[['elapsed']] / repeats
+    }
+  }
+  cat(name, size, 'rows; baseline/candidate median seconds:', apply(elapsed, 2L, median), '\n')
 }
 cat('PASS: formatted grid, all parsers, header units, missing markers and strict messages\n')

@@ -149,3 +149,51 @@ index download warning. No package tests were skipped. PDF manual and remote
 incoming checks were not run; this is not a completed online CRAN pretest.
 最终整包检查及 312 项断言通过，公开数据、压力和 CSV 验证正常退出。
 网络索引查询有提示，未检查 PDF 手册和远程 incoming。
+
+### Paired large-batch verification / 交替计时与百万条验证 (2026-10-11)
+
+The existing benchmark now accepts a third argument for row count. Five paired
+trials alternate baseline/candidate execution order; each trial averages five
+calls below one million rows and one call at one million rows or above. Tables
+report the median per-call elapsed time, excluding data preparation and file I/O.
+Baseline: the formatted-stage installed library (`1c974e2`); candidate: current
+byte-compiled R source (`de7fc09`) with the final check-installed DLL. This round
+changes measurement only, not parser algorithms. Earlier tables retain their
+original methodology and should not be combined with these timings.
+现有脚本支持第三个参数指定行数，五轮交替新旧执行顺序，报告单次耗时中位数。
+本轮只改进测量，没有修改解析算法；数据准备和文件读写不计入耗时。
+
+| Input / 输入 | 100k baseline / 基线 | 100k candidate / 当前 | 1m baseline / 基线 | 1m candidate / 当前 |
+| --- | ---: | ---: | ---: | ---: |
+| Plain / 普通数值 | 0.010 s | 0.008 s | 0.09 s | 0.10 s |
+| Currency / 货币前缀 | 0.010 s | 0.010 s | 0.10 s | 0.10 s |
+| Spaced currency / 带空白货币前缀 | 0.172 s | 0.202 s | 1.00 s | 1.01 s |
+| Accounting / 括号负数 | 0.018 s | 0.018 s | 0.10 s | 0.08 s |
+| Full-width / 全角数字 | 0.078 s | 0.158 s | 0.80 s | 0.80 s |
+| Mixed grouping / 混合空白分组 | 0.200 s | 0.086 s | 5.38 s | 1.98 s |
+| Invalid / 全无效 | 0.082 s | 0.082 s | 1.71 s | 1.77 s |
+
+The million-row grouping sample improved about 63%, but remains far above
+0.1 seconds. The 100k full-width sample regressed in this run, while the
+million-row full-width sample was flat. This discrepancy needs investigation,
+not a blanket speedup claim. These local timings are not latency guarantees.
+百万条分组样本约改善 63%，仍未达到 0.1 秒；十万条全角样本本次明显退步，
+百万条全角样本则持平，后续需继续排查，不能据此承诺所有格式统一提速。
+
+Both sizes passed exact baseline/candidate comparisons, including the formatted
+grid, all three parsers, header units, custom missing markers and strict error
+messages. Zero rows are rejected before library loading. No new full package
+check was run for this benchmark-only change; the preceding 312-assertion check
+remains the package-check evidence.
+两种规模的差异验证均通过，非法行数 0 被拒绝。本轮未重新运行整包检查。
+
+```powershell
+./docs/run-r.ps1 -RArguments @('--vanilla', 'docs/formatted-performance.R',
+  'outputs/formatted-optimization/library',
+  'outputs/grouping-filter/final-check/cncleanr.Rcheck', '1000000')
+```
+
+The paths above refer to local retained build snapshots; use your own installed
+baseline and candidate library paths elsewhere. Candidate R files are sourced
+from the current working tree.
+以上路径是本地保留的构建快照，其他环境需替换为自己的安装库路径；候选 R 代码来自当前工作树。
