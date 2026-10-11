@@ -1,5 +1,8 @@
 # Development changes (unreleased)
 
+* Reuses normalized missing markers across native and fallback number parsing,
+  avoiding duplicate normalization without changing missing-value precedence.
+
 * Excludes known digit-grouping failures from capture extraction and numeric
   conversion. Grouping and syntax failures merge in original source order;
   all-grouping-error batches retain their original diagnostics.

@@ -103,7 +103,8 @@ parse_cn_number <- function(
   input_names <- names(x)
   fast <- .Call(C_simple_numbers, x,
                 if (is.null(header_multiplier)) NA_real_ else header_multiplier)
-  missing_fast <- is.na(x) | x %in% normalize_cn_number_text(na)
+  normalized_na <- normalize_cn_number_text(na)
+  missing_fast <- is.na(x) | x %in% normalized_na
   fast[missing_fast] <- NA_real_
   if (all(!is.na(fast) | missing_fast)) {
     names(fast) <- input_names
@@ -115,7 +116,6 @@ parse_cn_number <- function(
   characters <- normalize_cn_number_characters(x)
   invalid_spacing <- has_invalid_cn_digit_spacing(characters, characters_normalized = TRUE)
   normalized <- normalize_cn_number_text(characters, characters_normalized = TRUE)
-  normalized_na <- normalize_cn_number_text(na)
   is_missing <- is.na(normalized) | normalized %in% normalized_na
 
   output <- fast

@@ -197,3 +197,25 @@ The paths above refer to local retained build snapshots; use your own installed
 baseline and candidate library paths elsewhere. Candidate R files are sourced
 from the current working tree.
 以上路径是本地保留的构建快照，其他环境需替换为自己的安装库路径；候选 R 代码来自当前工作树。
+
+### Normalization profiling / 规范化采样
+
+Five million-row full-width calls were profiled with `Rprof(interval = 0.01)`
+after verifying that every input parsed successfully. In this local sample,
+`chartr`, `grepl`, and `gsub` accounted for about 24%, 18%, and 16% of sampled
+self time. Sampling percentages are diagnostic, not benchmark guarantees.
+百万条全角输入连续调用五次的采样显示，字符转换和正则扫描是主要开销。
+
+The number parser now normalizes custom missing markers only once per call,
+reusing them in the fallback. The paired 100k benchmark showed no meaningful
+overall speedup: full-width 0.072/0.072 s, spaced currency 0.086/0.086 s,
+grouped 0.200/0.206 s, invalid 0.184/0.184 s (baseline/candidate).
+仅移除缺失标记的重复规范化；本轮没有测出显著提速，不宣称解决全角瓶颈。
+
+The differential benchmark passed. The complete `tests/testthat` suite also
+passed with candidate number-parser source loaded into the retained installed
+package namespace (and its existing DLL); this was not a fresh installation
+or a new `R CMD check`. Initial harness attempts failed because of locked
+namespace bindings and a relative library path after the test runner changed
+directory; the corrected absolute-path run exited successfully.
+新旧结果对比和完整测试目录通过；使用已有 DLL 与本轮 R 源码，未重新安装或整包检查。
