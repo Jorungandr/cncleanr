@@ -1,5 +1,22 @@
 # 0.2.8 发布包验收 / Release validation
 
+## 发布完成 / Published
+
+2026-10-12：[GitHub v0.2.8](https://github.com/Jorungandr/cncleanr/releases/tag/v0.2.8)
+已正式发布，固定标签指向 `002fbbfa141edca7900d2645dac24feb72b6b7b7`。
+最终提交的 [CI run 38250845508](https://github.com/Jorungandr/cncleanr/actions/runs/38250845508)
+五项任务均成功，每项 339 个断言通过。Windows、macOS、Linux devel/oldrel-1
+检查为 OK；Linux release 只有缺少 tidy 的 HTML 校验 NOTE，PDF 手册检查通过。
+正式发布附件重新下载后的 SHA-256 与下文完全一致；在独立库安装后确认
+版本 0.2.8，数值、数量、区间三个解析函数的安装后冒烟检查全部通过。
+本次没有提交 CRAN。
+
+Published on 2026-10-12 at the fixed commit above. All five final CI jobs
+passed 339 assertions each; Linux release had only the missing-tidy NOTE and
+passed the PDF manual check. The public source attachment was downloaded,
+hash-verified and installed into an isolated library; version and smoke checks
+for all three parsers passed. No CRAN submission was made.
+
 ## 最终发布文件 / Final release file
 
 发布使用重新构建并检查的正式源码包：
@@ -15,7 +32,7 @@ SHA-256:
 该文件的独立 `R CMD check --as-cran --no-manual` 为 `Status: OK`，
 退出码 0，339 项断言通过。日志：
 `outputs/release-0.2.8/publish-check/cncleanr.Rcheck/`。
-本地未检查 PDF 手册和远程 incoming；最终提交的远程 CI 将在发布前核对。
+本地未检查 PDF 手册和远程 incoming；最终提交的远程 CI 已核对，结果见上文。
 The release archive above was rebuilt with final installation documentation and
 NEWS, then checked independently: OK, exit 0, 339 assertions passed. It replaces
 the earlier candidate as the release attachment. Candidate evidence below is

@@ -1,7 +1,20 @@
 # 下一版发布准备 / Next-release preparation
 
-2026-10-12。这是准备材料，不是已发布版本或 CRAN 提交记录。
-Prepared on 2026-10-12; this is not a release or a CRAN submission record.
+## 当前发布状态 / Current publication status
+
+2026-10-12：[GitHub v0.2.8](https://github.com/Jorungandr/cncleanr/releases/tag/v0.2.8)
+已发布，固定标签为 `002fbbfa141edca7900d2645dac24feb72b6b7b7`。
+最终源码附件、五项 CI、下载校验和独立安装已验收，详见
+[发布验收记录 / release validation](release-0.2.8-report.md)。本次未提交 CRAN。
+GitHub v0.2.8 is published at the fixed commit above; the checked source asset,
+five CI jobs, downloaded checksum and isolated installation were verified.
+No CRAN submission was made.
+
+## 准备阶段历史 / Preparation-stage history
+
+以下保留发布前的准备记录；其中候选状态和 v0.2.7 指发布前时点，不是当前状态。
+The preparation notes below are historical: candidate status and v0.2.7 refer
+to the pre-publication snapshot, not the current release.
 
 ## 用户可见变化 / User-facing changes
 
