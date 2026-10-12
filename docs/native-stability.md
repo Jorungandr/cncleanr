@@ -3,6 +3,24 @@
 2026-10-12，cncleanr 0.2.9。本轮只做正确性和原生安全检查，不扩充语法，
 不继续性能调优，不提交 CRAN。
 
+## 发布完成 / Published
+
+[GitHub v0.2.9](https://github.com/Jorungandr/cncleanr/releases/tag/v0.2.9)
+已于 2026-10-12 正式发布，固定标签指向
+`761dffa4cadb7748a8b0242d5bfac512142f08e2`，旧标签和附件未改动。
+正式源码附件为 34,641 字节，GitHub digest 和正式发布后重新下载文件的
+SHA-256 均与下文已检查文件一致。在独立库
+`outputs/native-stability/public-library/` 安装后确认 0.2.9，三个公开解析函数、
+科学记数区间及非法 UTF-8 回归均通过。双语 README 和 Release 说明已同步。
+CRAN 未提交。
+
+Published at the fixed commit above, without moving prior tags. The public
+34,641-byte source attachment was downloaded again after publication; both
+its checksum and GitHub digest match the checked archive below. Isolated
+installation confirmed 0.2.9 and passed all three parser smoke checks plus
+malformed UTF-8 rejection. Bilingual documentation is synchronized. No CRAN
+submission was made.
+
 ## 实际修复 / Demonstrated fix
 
 旧版共享 C 规范化允许被标为 UTF-8 的非法字节继续进入后续文本操作。
@@ -29,7 +47,7 @@ the earlier Rterm shutdown issue. See R's [encoding validation documentation](ht
 
 ## 可复现回归 / Reproducible regressions
 
-`tests/testthat/test-native-stability.R`：固定种子 20261012，4,018 个混合输入，
+`tests/testthat/test-native-stability.R`：固定种子 20261012，4,016 个混合输入，
 包含随机格式组合、杂乱文本、区间和长文本；另有 factor、重复批次、空输入、
 数值非有限值、自定义缺失标记和八种表头单位。测试参照环境同时关闭数值 C
 路径并使用原来的 R 字符规范化；递归调用、数量和区间端点也通过参照环境。
@@ -62,18 +80,32 @@ Windows 本地使用 `docs/run-r.ps1`，清除子进程不适用的 `LANG/LC_ALL
   下载失败的外部警告不改变最终 OK。日志在 `outputs/native-stability/check/cncleanr.Rcheck/`。
 - 保留的公开多领域/多来源数据回归、100,000 混合单元格、20,000 不同数值、
   长非法文本、清洗示例及 CSV 往返全部通过，没有新增或声称新增数据来源。
+- 三个解析函数在单独 R 进程中开启 `gctorture(TRUE)`，各重复三次的
+  全角数值、近似数量和共享单位区间检查通过，结束时恢复垃圾回收设置。
 - 解析源码提交 `d53ff0b2ef42dbc1c710a894f1df67be7685acfc` 的
   [五项平台 CI](https://github.com/Jorungandr/cncleanr/actions/runs/38254533930)
   均成功、每项 509 个断言通过。四项为 OK；Linux release 只有缺少 HTML Tidy
   的 NOTE，PDF 手册为 OK。
 - 同一源码的 [R-hub 检查](https://github.com/Jorungandr/cncleanr/actions/runs/38254537724)：
-  clang-ASAN 和 clang-UBSAN 为 OK、509 项通过。Valgrind 首次在依赖下载阶段
-  失败，尚未运行包检查；已重试，完成后在此记录实际结果。
+  clang-ASAN、clang-UBSAN 和 Valgrind 均为 OK、509 项通过。Valgrind 首次在
+  依赖下载阶段失败，尚未运行包检查；重试后完整检查通过。已检查真实日志，
+  示例、基础回归和 testthat 的 Valgrind 摘要均为 `0 errors from 0 contexts`，
+  definitely/indirectly/possibly lost 均为 0 字节。
+- 最终标签提交 `761dffa4cadb7748a8b0242d5bfac512142f08e2` 的
+  [CI run 38255408250](https://github.com/Jorungandr/cncleanr/actions/runs/38255408250)
+  五项再次通过、每项 509 个断言，Linux release 的 PDF 手册为 OK，
+  仍只有缺少 Tidy 的 NOTE。已核对其原生源码和测试与 R-hub 检查点完全一致，
+  且最终源码包暂存文件与标签对应的包文件逐一校验一致。
 
 The archive, full local tests and retained data audits passed. Five platform
 jobs passed; Linux release had only the missing-Tidy NOTE and passed the PDF
-manual check. ASAN and UBSAN passed. The first Valgrind attempt failed during
-dependency downloads, before checking cncleanr; its retry is pending.
+manual check. Smoke checks for all three parsers also passed under forced
+garbage collection in a separate R process. ASAN, UBSAN and Valgrind passed.
+Valgrind's first attempt failed during dependency downloads; the retry completed
+all checks with zero errors and zero definitely/indirectly/possibly lost bytes
+in the inspected example/test summaries. Final-tag CI passed all five jobs again;
+native sources/tests match the R-hub checkpoint and staged package files match
+the checked final-tag payload.
 
 SHA-256 of the exact checked archive:
 
@@ -92,8 +124,8 @@ gh workflow run rhub.yaml --ref main -f config=clang-asan,clang-ubsan,valgrind
 平台用途见 [R-hub 官方容器列表](https://r-hub.github.io/containers/)。原生源码或
 边界逻辑更新后应重新运行，查看真实日志，不能只看绿色徽标。
 这些检查只说明已执行输入未报告对应错误，不能证明不存在任何内存错误，
-也不构成新的性能承诺。发布标签、最终提交 CI 和下载安装结果将在发布时补记。
+也不构成新的性能承诺。发布标签、最终提交 CI 和下载安装结果见上文。
 
 Native checks cover executed cases only, not a proof that every possible input
 is memory-safe. No performance guarantee is added. Publication and downloaded
-asset verification will be recorded after completion.
+asset verification are recorded above.

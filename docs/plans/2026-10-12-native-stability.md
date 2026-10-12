@@ -48,3 +48,6 @@ No unexplained native/reference differences on tested inputs; full local and
 cross-platform tests pass; native checker results inspected and documented.
 No moving existing release tags, no loss of source rows or diagnostic detail,
 no edits to user-owned `.vscode/` or historical `outputs/`.
+
+Completed: the demonstrated UTF-8 fix was released as GitHub v0.2.9; full
+validation and publication evidence is recorded in `docs/native-stability.md`.
