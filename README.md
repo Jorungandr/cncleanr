@@ -10,20 +10,53 @@
 
 ## 安装
 
-从 [CRAN](https://CRAN.R-project.org/package=cncleanr) 安装（当前为 0.2.5；下文表头单位功能需要 GitHub 0.2.6）：
+### 正式版本
+
+从 [CRAN](https://CRAN.R-project.org/package=cncleanr) 安装（2026-10-12 核对为 0.2.5；下文表头单位功能从 0.2.6 开始提供）：
 
 ```r
 install.packages("cncleanr")
 ```
 
-也可以从 GitHub 安装当前正式版本：
+也可以从 GitHub 安装固定的正式版本 v0.2.7，包含表头单位及组合近似限定词，但不含本轮 C 加速：
 
 ```r
 install.packages("pak")
 pak::pak("Jorungandr/cncleanr@v0.2.7")
 ```
 
-开发分支（尚未发布）加入了常见数值格式的 C 加速，R 接口不变；其他格式继续使用完整的 R 解析器。从源码安装开发分支需要 C 编译工具，Windows 建议使用与 R 版本匹配的 [Rtools](https://cran.r-project.org/bin/windows/Rtools/)。此变化不属于上面的 v0.2.7 正式版本。
+### 开发版本与源码安装
+
+需要本轮优化时，安装尚未发布的开发分支（`main` 会随开发变化；可将 `main` 换成完整提交 SHA 来固定代码）：
+
+```r
+install.packages("pak")
+pak::pak("Jorungandr/cncleanr@main")
+```
+
+开发版仍是一个 R 包、一套 R 接口，内含注册的 C 数值和字符规范化函数。源码安装必须先准备编译工具；没有可用编译器时会安装失败，不会自动改装为纯 R 版本。
+
+- Windows：安装与 R 版本匹配的 [Rtools](https://cran.r-project.org/bin/windows/Rtools/)。
+- macOS：准备 Xcode Command Line Tools 和与 R 兼容的 C 编译器，参见 [R 官方安装说明](https://cran.r-project.org/doc/manuals/r-release/R-admin.html#macOS)。
+- Linux：准备 C 编译器、`make` 和 R 开发文件，参见 [R 官方源码包安装说明](https://cran.r-project.org/doc/manuals/r-release/R-admin.html#Installing-packages)。
+
+本包自身没有 Fortran、OpenMP 或额外运行时 R 依赖。若安装适合系统和 R 版本的预编译二进制包，不需要本地编译本包；GitHub `main` 安装属于源码安装，不要假设有对应二进制包。
+
+安装后重启 R 会话，再检查实际加载的版本和路径：
+
+```r
+library(cncleanr)
+packageVersion("cncleanr")
+find.package("cncleanr")
+parse_cn_number(c("3万", "１２．５％"))
+#> [1] 30000.000     0.125
+```
+
+当前开发树的 `DESCRIPTION` 仍为 0.2.7，版本号本身不能区分正式版与开发代码；需要复现时记录安装的提交 SHA。下一版正式发布前会更新版本号。
+
+### 性能与发布准备
+
+跨平台验收和用户可见的更新摘要见[下一版发布准备](docs/release-next.md)。
 
 开发版性能记录：[C 数值加速](docs/native-optimization.md)、[限定词与字符标准化优化](docs/qualifier-optimization.md)、[混合批次优化](docs/mixed-optimization.md)、[格式化数值优化](docs/formatted-optimization.md)。计时随格式和重复率变化，不保证所有输入达到相同耗时。
 

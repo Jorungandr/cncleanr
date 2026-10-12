@@ -10,20 +10,53 @@ It does not merely extract the first number it encounters. A non-missing value t
 
 ## Installation
 
-Install from [CRAN](https://CRAN.R-project.org/package=cncleanr) (currently 0.2.5; the table-header unit feature below requires GitHub 0.2.6):
+### Released versions
+
+Install from [CRAN](https://CRAN.R-project.org/package=cncleanr) (verified as 0.2.5 on 2026-10-12; table-header units were introduced in 0.2.6):
 
 ```r
 install.packages("cncleanr")
 ```
 
-Alternatively, install the current GitHub release:
+Alternatively, pin the GitHub release v0.2.7, which includes table-header units and combined approximation qualifiers, but not this round of C acceleration:
 
 ```r
 install.packages("pak")
 pak::pak("Jorungandr/cncleanr@v0.2.7")
 ```
 
-The unreleased development branch adds C acceleration for common numeric formats without changing the R API. Other formats retain the complete R parser. Installing that branch from source requires a C compiler; on Windows, use [Rtools](https://cran.r-project.org/bin/windows/Rtools/) matching your R version. This change is not part of the v0.2.7 release above.
+### Development version and source installation
+
+To use this round of optimizations, install the unreleased development branch (`main` changes over time; replace it with a full commit SHA to pin the code):
+
+```r
+install.packages("pak")
+pak::pak("Jorungandr/cncleanr@main")
+```
+
+The development version remains one R package with one R API and registered C numeric/character-normalization routines. Source installation requires build tools; it fails without a suitable compiler rather than silently installing a pure-R variant.
+
+- Windows: install [Rtools](https://cran.r-project.org/bin/windows/Rtools/) matching your R version.
+- macOS: use Xcode Command Line Tools and a C compiler compatible with R; see the [official R installation guide](https://cran.r-project.org/doc/manuals/r-release/R-admin.html#macOS).
+- Linux: provide a C compiler, `make`, and R development files; see the [official source-package installation guide](https://cran.r-project.org/doc/manuals/r-release/R-admin.html#Installing-packages).
+
+The package itself has no Fortran, OpenMP, or additional runtime R dependency. A prebuilt binary compatible with your system and R version does not require local compilation of this package. Installing GitHub `main` is a source installation; do not assume that a matching binary exists.
+
+Restart R after installation, then check the version and path actually loaded:
+
+```r
+library(cncleanr)
+packageVersion("cncleanr")
+find.package("cncleanr")
+parse_cn_number(c("3万", "１２．５％"))
+#> [1] 30000.000     0.125
+```
+
+The development tree's `DESCRIPTION` still reports 0.2.7, so its version number alone cannot distinguish released and development code. Record the installed commit SHA for reproducibility; the version number will change before the next release.
+
+### Performance and release preparation
+
+See the [next-release preparation](docs/release-next.md) for cross-platform validation and a user-facing change summary.
 
 Development benchmarks: [native numeric acceleration](docs/native-optimization.md), [qualifier/character-normalization optimization](docs/qualifier-optimization.md), [mixed-batch optimization](docs/mixed-optimization.md), and [formatted-number optimization](docs/formatted-optimization.md). Timing depends on input format and repetition; no universal latency is guaranteed.
 

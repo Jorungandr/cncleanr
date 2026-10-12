@@ -1,5 +1,23 @@
 # Development changes (unreleased)
 
+## User-facing summary
+
+* Keeps the existing R API, supported syntax and complete structured diagnostics.
+  Native routines accelerate numeric parsing and character normalization;
+  unsupported numeric formats retain the complete R fallback.
+* Improves mixed and repeated batches, qualifier matching, and closed-range
+  processing without discarding source rows or changing strict error precedence.
+  Performance varies by input format and repetition; no universal latency target
+  is promised. See `docs/performance-final.md` for reproducible measurements.
+* Source installation now requires a compatible C compiler and build tools.
+  Windows users need matching Rtools; macOS and Linux users need their platform's
+  R-compatible toolchain. No additional runtime R dependency is introduced.
+* The parser-source checkpoint `2d97758` passed five cross-platform CI jobs with
+  339 assertions each. Linux R-release also passed PDF manual generation; its
+  only NOTE was skipped HTML validation because `tidy` was unavailable.
+
+## Development history
+
 * Closes the current performance-tuning round with conditional deduplication of
   large repeated numeric fallback batches and reduced grouping-regex backtracking.
   Complete diagnostics, original indices, names and strict errors are retained.
