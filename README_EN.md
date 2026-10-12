@@ -18,11 +18,11 @@ Install from [CRAN](https://CRAN.R-project.org/package=cncleanr) (verified as 0.
 install.packages("cncleanr")
 ```
 
-Alternatively, pin the GitHub release v0.2.8, which includes table-header units, combined approximation qualifiers and this round of C acceleration:
+Alternatively, pin the GitHub release v0.2.9, which includes table-header units, combined approximation qualifiers, C acceleration and malformed UTF-8 protection:
 
 ```r
 install.packages("pak")
-pak::pak("Jorungandr/cncleanr@v0.2.8")
+pak::pak("Jorungandr/cncleanr@v0.2.9")
 ```
 
 ### Development version and source installation
@@ -35,6 +35,11 @@ pak::pak("Jorungandr/cncleanr@main")
 ```
 
 The development version remains one R package with one R API and registered C numeric/character-normalization routines. Source installation requires build tools; it fails without a suitable compiler rather than silently installing a pure-R variant.
+
+Since 0.2.9, normalization explicitly rejects malformed UTF-8 (such as truncated byte sequences)
+instead of continuing with damaged text. Encoding errors are not ordinary numeric parsing failures:
+they also stop with `strict = FALSE`, without returning a usable partial result.
+Import or convert data using its actual encoding first; valid UTF-8 and Latin-1 handling is unchanged.
 
 - Windows: install [Rtools](https://cran.r-project.org/bin/windows/Rtools/) matching your R version.
 - macOS: use Xcode Command Line Tools and a C compiler compatible with R; see the [official R installation guide](https://cran.r-project.org/doc/manuals/r-release/R-admin.html#macOS).

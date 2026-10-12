@@ -90,3 +90,9 @@ verification. Do not require separate confirmations for each ordinary step.
 Pause only for blockers, ambiguity or materially new authority. Requests limited
 to explanation/review do not authorize publication; CRAN submission always
 requires separate authorization. Never move an existing published version tag.
+
+For native-code changes, run the fixed-seed differential and encoding regressions
+in `tests/testthat/test-native-stability.R` as part of the full test suite. Use
+the existing R-hub workflow with `config=clang-asan,clang-ubsan,valgrind` and
+inspect the actual check logs before publishing; normal platform checks alone
+are not memory-safety evidence. See `docs/native-stability.md` for this audit.

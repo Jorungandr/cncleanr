@@ -18,11 +18,11 @@
 install.packages("cncleanr")
 ```
 
-也可以从 GitHub 安装正式版本 v0.2.8，包含表头单位、组合近似限定词及本轮 C 加速：
+也可以从 GitHub 安装正式版本 v0.2.9，包含表头单位、组合近似限定词、C 加速及非法 UTF-8 防护：
 
 ```r
 install.packages("pak")
-pak::pak("Jorungandr/cncleanr@v0.2.8")
+pak::pak("Jorungandr/cncleanr@v0.2.9")
 ```
 
 ### 开发版本与源码安装
@@ -35,6 +35,10 @@ pak::pak("Jorungandr/cncleanr@main")
 ```
 
 开发版仍是一个 R 包、一套 R 接口，内含注册的 C 数值和字符规范化函数。源码安装必须先准备编译工具；没有可用编译器时会安装失败，不会自动改装为纯 R 版本。
+
+从 0.2.9 开始，规范化会明确拒绝非法 UTF-8（如截断字节序列），而不是继续处理损坏的文本。
+这是编码错误，不是普通的数值解析失败；`strict = FALSE` 也会报错，不会产生可继续使用的部分结果。
+请先按数据实际编码正确导入或转换；有效 UTF-8 和 Latin-1 文本的处理不变。
 
 - Windows：安装与 R 版本匹配的 [Rtools](https://cran.r-project.org/bin/windows/Rtools/)。
 - macOS：准备 Xcode Command Line Tools 和与 R 兼容的 C 编译器，参见 [R 官方安装说明](https://cran.r-project.org/doc/manuals/r-release/R-admin.html#macOS)。

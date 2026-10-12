@@ -1,7 +1,8 @@
 args <- commandArgs(trailingOnly=TRUE)
 .libPaths(c(if (length(args)) args[[1]] else 'outputs/release-0.2.7/library', .libPaths()))
 library(cncleanr)
-stopifnot(as.character(packageVersion('cncleanr')) %in% c('0.2.7', '0.2.8', '0.2.9'))
+version <- as.character(packageVersion('cncleanr'))
+stopifnot(version %in% c('0.2.7', '0.2.8', '0.2.9'))
 root <- 'outputs/broad-data-audit'
 x <- read.delim(file.path(root, 'cases.tsv'), colClasses='character',
                 na.strings=character(), fileEncoding='UTF-8')
@@ -20,7 +21,7 @@ r <- suppressWarnings(parse_cn_range(x$input[interval]))
 x$outcome[interval] <- ifelse(equal(r$lower,gold[interval]) &
   equal(r$upper,as.double(x$upper[interval])) & r$lower_inclusive & r$upper_inclusive,'range_correct','wrong')
 print(with(x, table(source,outcome)))
-write.table(x, file.path(root,'results-0.2.7.tsv'), sep='\t',row.names=FALSE,fileEncoding='UTF-8')
+write.table(x, file.path(root,paste0('results-',version,'.tsv')), sep='\t',row.names=FALSE,fileEncoding='UTF-8')
 print(x[x$outcome %in% c('wrong','review_accepted'),c('source','row','field','input','outcome')])
 stopifnot(!anyNA(x$outcome), !any(x$outcome %in% c('wrong','review_accepted')))
 cat('PASS: raw cells and separately labelled derived salary intervals\n')
