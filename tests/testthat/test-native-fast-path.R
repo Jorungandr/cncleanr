@@ -157,3 +157,18 @@ test_that('filtered grouping failures merge in source order with syntax failures
   expect_identical(cn_problems(all_spacing)$reason,
     rep('digits use invalid whitespace grouping', 2L))
 })
+
+test_that('large repeated fallback batches preserve complete diagnostics', {
+  x <- rep(c('2\u4e07', 'bad', '1 2', '1e309', ' RMB 3 \u4e07 ', '\uff0d'), 400L)
+  names(x) <- as.character(seq_along(x))
+  expect_warning(result <- parse_cn_number(x), 'positions 2, 3, 4, 8, 9')
+  expect_identical(unname(as.numeric(result)), rep(c(20000, NA, NA, NA, 30000, NA), 400L))
+  failed <- which(rep(c(FALSE, TRUE, TRUE, TRUE, FALSE, FALSE), 400L))
+  expect_identical(cn_problems(result)$index, failed)
+  expect_identical(cn_problems(result)$value, unname(x[failed]))
+  expect_identical(names(result), names(x))
+  expect_error(parse_cn_number(x, strict = TRUE), 'First problem: value does not match')
+  expect_warning(overridden <- parse_cn_number(x, na = c('NA', 'bad', '1 2', '-')), 'positions 4, 10')
+  expect_identical(cn_problems(overridden)$index, seq.int(4L, length(x), 6L))
+  expect_identical(parse_cn_number(rep(' 3 ', 1200), unit = '\u4e07'), rep(30000, 1200))
+})

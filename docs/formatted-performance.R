@@ -1,8 +1,10 @@
-# Rscript docs/formatted-performance.R [baseline library] [candidate library] [rows]
+# Rscript docs/formatted-performance.R [baseline library] [candidate library] [rows] [number|quantity|range]
 args <- commandArgs(trailingOnly = TRUE)
 baseline <- if (length(args)) args[[1L]] else 'outputs/mixed-optimization/library'
 candidate_library <- if (length(args) > 1L) args[[2L]] else 'outputs/formatted-optimization/library'
 size <- if (length(args) > 2L) suppressWarnings(as.numeric(args[[3L]])) else 100000L
+benchmark_kind <- if (length(args) > 3L) args[[4L]] else 'number'
+stopifnot(benchmark_kind %in% c('number', 'quantity', 'range'))
 stopifnot(length(size) == 1L, is.finite(size), size > 0,
           size == floor(size), size <= .Machine$integer.max)
 .libPaths(c(baseline, .libPaths()))
@@ -42,24 +44,44 @@ for (unit in c('\u5143', '\u5343\u5143', '\u4e07', '\u4ebf', '\u4e07\u4ebf'))
     suppressWarnings(candidate$parse_cn_number(x, unit = unit))))
 
 id <- seq_len(size)
-samples <- list(plain = paste0(id, '\u4e07'), currency = paste0('RMB', id, '\u4e07'),
+samples <- if (benchmark_kind == 'number') list(plain = paste0(id, '\u4e07'), currency = paste0('RMB', id, '\u4e07'),
   spaced_currency = paste0('RMB ', id, ' \u4e07'), accounting = paste0('(RMB', id, '\u5143)'),
   fullwidth = paste0(chartr('0123456789', '\uff10\uff11\uff12\uff13\uff14\uff15\uff16\uff17\uff18\uff19', as.character(id)), '\u4e07'),
-  grouped = paste0(id, ' 123\u4e07'), invalid = rep('bad', length(id)))
+  grouped = paste0(id, ' 123\u4e07'), invalid = rep('bad', length(id)),
+  invalid_distinct = paste0('bad', id),
+  repeated_formatted = rep(c(' RMB 3 \u4e07 ', '\uff11\uff12\uff0e\uff15%'), length.out = length(id)),
+  mixed_errors = rep(c('2\u4e07', 'bad', '1 2', '1e309', ' RMB 3 \u4e07 '), length.out = length(id))) else NULL
+if (benchmark_kind == 'quantity') samples <- list(
+  distinct_approx = paste0('\u7ea6', id, '\u4e07'),
+  repeated_approx = rep('\u7ea63\u4e07', size), invalid_distinct = paste0('bad', id))
+if (benchmark_kind == 'range') samples <- list(
+  distinct_closed = paste0(id, '-', id + 1, '\u4e07'),
+  repeated_closed = rep('3-5\u4e07', size), invalid_distinct = paste0('bad', id))
+functions <- list(get(paste0('parse_cn_', benchmark_kind)), candidate[[paste0('parse_cn_', benchmark_kind)]])
 for (name in names(samples)) {
   input <- samples[[name]]
-  stopifnot(identical(suppressWarnings(parse_cn_number(input)),
-    suppressWarnings(candidate$parse_cn_number(input))))
-  functions <- list(parse_cn_number, candidate$parse_cn_number)
+  limited_baseline <- benchmark_kind == 'range' && name == 'distinct_closed' && size > 10000L
+  comparison <- if (limited_baseline) head(input, 10000L) else input
+  stopifnot(identical(suppressWarnings(functions[[1L]](comparison)),
+    suppressWarnings(functions[[2L]](comparison))))
+  if (limited_baseline) {
+    result <- functions[[2L]](input)
+    stopifnot(identical(result$lower, as.double(id) * 1e4),
+      identical(result$upper, as.double(id + 1) * 1e4),
+      all(result$lower_inclusive & result$upper_inclusive), nrow(cn_problems(result)) == 0L)
+  }
   repeats <- if (size < 1000000L) 5L else 1L
   elapsed <- matrix(NA_real_, nrow = 5L, ncol = 2L)
   for (round in seq_len(5L)) {
     for (version in if (round %% 2L) 1:2 else 2:1) {
+      # ponytail: cap the known slow closed-range baseline; validate full candidate bounds independently.
+      if (limited_baseline && version == 1L) next
       elapsed[round, version] <- system.time(
         for (i in seq_len(repeats)) suppressWarnings(functions[[version]](input))
       )[['elapsed']] / repeats
     }
   }
-  cat(name, size, 'rows; baseline/candidate median seconds:', apply(elapsed, 2L, median), '\n')
+  cat(benchmark_kind, name, size, 'rows; baseline/candidate median seconds:', apply(elapsed, 2L, median),
+    if (limited_baseline) '(baseline capped at 10000 for equivalence only)' else '', '\n')
 }
 cat('PASS: formatted grid, all parsers, header units, missing markers and strict messages\n')

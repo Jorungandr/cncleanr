@@ -149,3 +149,14 @@ test_that("grouped endpoint candidates retain signs and original positions", {
   expect_equal(cn_problems(result)$index, c(1L, 5L, 6L, 7L))
   expect_equal(cn_problems(result)$value, input[c(1L, 5L, 6L, 7L)])
 })
+
+test_that("distinct single-separator ranges propagate suffixes in batches", {
+  id <- seq_len(10000L)
+  result <- parse_cn_range(paste0(id, "-", id + 1L, "\u4e07"))
+  expect_identical(result$lower, as.double(id) * 1e4)
+  expect_identical(result$upper, as.double(id + 1L) * 1e4)
+  expect_true(all(result$lower_inclusive & result$upper_inclusive))
+  expect_equal(nrow(cn_problems(result)), 0L)
+  expect_warning(reversed <- parse_cn_range(c("5-3\u4e07", "bad", "3-5\u4e07")), "positions 1, 2")
+  expect_identical(cn_problems(reversed)$index, 1:2)
+})

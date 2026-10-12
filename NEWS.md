@@ -1,5 +1,14 @@
 # Development changes (unreleased)
 
+* Closes the current performance-tuning round with conditional deduplication of
+  large repeated numeric fallback batches and reduced grouping-regex backtracking.
+  Complete diagnostics, original indices, names and strict errors are retained.
+  Benchmarks cover distinct/repeated inputs across all three parsers.
+
+* Batches single-separator range splitting and shared-suffix propagation, stores
+  endpoint results in a matrix, and counts valid candidates without per-source
+  lists. Signed/scientific multi-separator cases retain complete validation.
+
 * Filters number-syntax failures before extracting captures and converting
   numeric fields. Syntax, grouping and validation errors retain complete
   original-order diagnostics, including entirely invalid batches.

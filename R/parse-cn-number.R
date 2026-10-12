@@ -113,6 +113,29 @@ parse_cn_number <- function(
   original <- x
   pending <- which(is.na(fast) & !missing_fast)
   x <- x[pending]
+  # ponytail: deduplicate only large fallback batches with substantial repetition.
+  if (length(x) >= 1000L && anyDuplicated(x[seq_len(256L)])) {
+    unique_text <- unique(x)
+    if (length(unique_text) < length(x) / 2) {
+      mapping <- match(x, unique_text)
+      parsed <- suppressWarnings(parse_cn_number(unique_text, na = na, unit = unit))
+      output <- fast
+      output[pending] <- as.numeric(parsed)[mapping]
+      names(output) <- input_names
+      unique_problems <- attr(parsed, "problems")
+      if (!is.null(unique_problems)) {
+        problem_map <- match(mapping, unique_problems$index)
+        failed <- which(!is.na(problem_map))
+        problems <- data.frame(index = pending[failed], value = original[pending[failed]],
+          reason = unique_problems$reason[problem_map[failed]], stringsAsFactors = FALSE)
+        message <- format_cn_parse_failure(problems)
+        if (strict) stop(message, call. = FALSE)
+        attr(output, "problems") <- problems
+        warning(message, call. = FALSE)
+      }
+      return(output)
+    }
+  }
   characters <- normalize_cn_number_characters(x)
   invalid_spacing <- has_invalid_cn_digit_spacing(characters, characters_normalized = TRUE)
   normalized <- normalize_cn_number_text(characters, characters_normalized = TRUE)
@@ -244,8 +267,8 @@ has_invalid_cn_digit_spacing <- function(x, characters_normalized = FALSE) {
   rows <- which(has_digit_spacing)
   has_digit_spacing[rows] <- !grepl(
     paste0(
-      "^[^0-9]*",
-      "[0-9]{1,3}(?:", spacing, "+[0-9]{3})+",
+      "^[^0-9]*+",
+      "[0-9]{1,3}+(?:", spacing, "++[0-9]{3})++",
       "(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?",
       "[^0-9]*$"
     ),

@@ -31,6 +31,8 @@ The development version shares a native scan for full-width characters and PDF m
 
 Whitespace removal now reuses this native scan. Spaces between digits are still checked for valid grouping first, so `1 2` is not silently parsed as `12`.
 
+See the [performance closeout](docs/performance-final.md) for 100k/million-row measurements across all three parsers with complete diagnostics retained. Future maintenance prioritizes correctness, compatibility and real issues; no universal 0.1-second latency is promised.
+
 ## Enterprise revenue cleaning example
 
 Complete walkthrough: [real financial tables, mixed units, and failure tracing](docs/financial-table-example_EN.md).

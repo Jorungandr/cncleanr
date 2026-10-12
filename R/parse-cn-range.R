@@ -81,17 +81,24 @@ parse_cn_range <- function(
     active_map <- match(normalized[active], unique_text)
     unique_output <- output[seq_along(unique_text), , drop = FALSE]
     unique_reason <- rep(NA_character_, length(unique_text))
-    quantity <- suppressWarnings(parse_cn_quantity(unique_text, na = normalized_na))
-    quantity_failed <- cn_problems(quantity)$index
-    quantity_ok <- setdiff(seq_along(unique_text), quantity_failed)
+    obvious_range <- grepl(paste0(
+      "^[0-9]+(?:\\.[0-9]+)?(?:(?:\u4e07\u4ebf|\u4e07|\u4ebf)(?:\u5143)?|\u5343\u5143|\u5143|%)?",
+      "[\u81f3\u5230~\uff5e\u2014\u2013-][0-9]"), unique_text, perl = TRUE)
+    quantity_rows <- which(!obvious_range)
+    quantity <- suppressWarnings(parse_cn_quantity(unique_text[quantity_rows], na = normalized_na))
+    local_failed <- cn_problems(quantity)$index
+    quantity_failed <- sort(c(which(obvious_range), quantity_rows[local_failed]))
+    local_ok <- setdiff(seq_along(quantity_rows), local_failed)
+    quantity_ok <- quantity_rows[local_ok]
 
-    qualifier <- quantity$qualifier[quantity_ok]
+    qualifier <- quantity$qualifier[local_ok]
     approximate <- quantity_ok[qualifier %in% "approx"]
     unique_reason[approximate] <- "an approximate value does not define explicit bounds"
-    bounded <- quantity_ok[qualifier %in%
-      c("exact", "at_least", "greater_than", "at_most", "less_than")]
-    qualifier <- quantity$qualifier[bounded]
-    value <- quantity$value[bounded]
+    bounded_local <- which(qualifier %in%
+      c("exact", "at_least", "greater_than", "at_most", "less_than"))
+    bounded <- quantity_ok[bounded_local]
+    value <- quantity$value[local_ok[bounded_local]]
+    qualifier <- qualifier[bounded_local]
     unique_output$lower[bounded] <- ifelse(
       qualifier %in% c("at_most", "less_than"), -Inf, value)
     unique_output$upper[bounded] <- ifelse(
@@ -104,23 +111,14 @@ parse_cn_range <- function(
         unique_text[quantity_failed],
         normalized_na
       )
-      valid_range <- rep(FALSE, length(quantity_failed))
-      for (j in seq_along(quantity_failed)) {
-        i <- quantity_failed[[j]]
-        values <- ranges$values[[j]]
-        if (is.null(values)) {
-          unique_reason[[i]] <- ranges$reason[[j]]
-        } else if (values[[1L]] > values[[2L]]) {
-          unique_reason[[i]] <-
-            "range lower bound is greater than its upper bound"
-        } else {
-          valid_range[[j]] <- TRUE
-        }
-      }
+      unique_reason[quantity_failed] <- ranges$reason
+      valid_range <- is.na(ranges$reason)
+      reversed <- which(valid_range & ranges$values[, 1L] > ranges$values[, 2L])
+      unique_reason[quantity_failed[reversed]] <- "range lower bound is greater than its upper bound"
+      valid_range[reversed] <- FALSE
       rows <- quantity_failed[valid_range]
-      endpoints <- ranges$values[valid_range]
-      unique_output$lower[rows] <- vapply(endpoints, `[[`, numeric(1), 1L)
-      unique_output$upper[rows] <- vapply(endpoints, `[[`, numeric(1), 2L)
+      unique_output$lower[rows] <- ranges$values[valid_range, 1L]
+      unique_output$upper[rows] <- ranges$values[valid_range, 2L]
       unique_output$lower_inclusive[rows] <- TRUE
       unique_output$upper_inclusive[rows] <- TRUE
     }
@@ -141,18 +139,30 @@ parse_cn_range <- function(
 
 find_cn_range_endpoints_batch <- function(text, na) {
   size <- length(text)
-  values <- vector("list", size)
+  values <- matrix(NA_real_, nrow = size, ncol = 2L)
   reason <- rep("one or both range endpoints are invalid", size)
-  positions_by_text <- gregexpr(
-    "[\u81f3\u5230~\uff5e\u2014\u2013-]", text, perl = TRUE)
-  capacity <- sum(lengths(positions_by_text))
+  separator <- "[\u81f3\u5230~\uff5e\u2014\u2013-]"
+  first <- regexpr(separator, text, perl = TRUE)
+  reason[first < 0L] <- "value is not a supported range or bound"
+  right <- substring(text, pmax(first + 1L, 1L))
+  single <- which(first > 1L & nzchar(right) & !grepl(separator, right, perl = TRUE))
+  complex <- setdiff(which(first > 0L), single)
+  positions_by_text <- gregexpr(separator, text[complex], perl = TRUE)
+  capacity <- length(single) + sum(lengths(positions_by_text))
   candidate_source <- integer(capacity)
   candidate_left <- character(capacity)
   candidate_right <- character(capacity)
-  candidate_count <- 0L
+  candidate_count <- length(single)
+  if (candidate_count) {
+    endpoints <- propagate_cn_range_suffix(substring(text[single], 1L, first[single] - 1L), right[single])
+    candidate_source[seq_len(candidate_count)] <- single
+    candidate_left[seq_len(candidate_count)] <- endpoints$left
+    candidate_right[seq_len(candidate_count)] <- endpoints$right
+  }
 
-  for (i in seq_along(text)) {
-    positions <- positions_by_text[[i]]
+  for (j in seq_along(complex)) {
+    i <- complex[[j]]
+    positions <- positions_by_text[[j]]
     if (identical(positions[[1L]], -1L)) {
       reason[[i]] <- "value is not a supported range or bound"
       next
@@ -164,11 +174,11 @@ find_cn_range_endpoints_batch <- function(text, na) {
       if (!nzchar(left) || !nzchar(right)) {
         next
       }
-      endpoints <- propagate_cn_range_suffix(c(left, right))
+      endpoints <- propagate_cn_range_suffix(left, right)
       candidate_count <- candidate_count + 1L
       candidate_source[[candidate_count]] <- i
-      candidate_left[[candidate_count]] <- endpoints[[1L]]
-      candidate_right[[candidate_count]] <- endpoints[[2L]]
+      candidate_left[[candidate_count]] <- endpoints$left
+      candidate_right[[candidate_count]] <- endpoints$right
     }
   }
 
@@ -190,36 +200,31 @@ find_cn_range_endpoints_batch <- function(text, na) {
     !invalid_endpoint[seq.int(2L, length(parsed), by = 2L)]
   parsed <- matrix(as.numeric(parsed), ncol = 2L, byrow = TRUE)
 
-  matches_by_source <- split(which(candidate_valid), candidate_source[candidate_valid])
-  source_ids <- as.integer(names(matches_by_source))
-  for (group in seq_along(matches_by_source)) {
-    i <- source_ids[[group]]
-    matches <- matches_by_source[[group]]
-    if (length(matches) == 1L) {
-      values[[i]] <- parsed[matches, ]
-      reason[[i]] <- NA_character_
-    } else if (length(matches) > 1L) {
-      reason[[i]] <- "range contains more than one valid separator"
-    }
-  }
+  counts <- tabulate(candidate_source[candidate_valid], nbins = size)
+  accepted <- which(candidate_valid & counts[candidate_source] == 1L)
+  values[candidate_source[accepted], ] <- parsed[accepted, , drop = FALSE]
+  reason[counts == 1L] <- NA_character_
+  reason[counts > 1L] <- "range contains more than one valid separator"
 
   list(values = values, reason = reason)
 }
 
-propagate_cn_range_suffix <- function(endpoints) {
+propagate_cn_range_suffix <- function(left, right) {
   suffix_pattern <- paste0(
     "((?:\u4e07\u4ebf|\u4e07|\u4ebf)(?:\u4eba\u6c11\u5e01|\u5757\u94b1|\u5143|\u5757)?|\u5343\u5143|",
     "(?:\u4eba\u6c11\u5e01|\u5757\u94b1|\u5143|\u5757)|%)$"
   )
-  suffixes <- vapply(endpoints, function(value) {
-    match <- regmatches(value, regexpr(suffix_pattern, value, perl = TRUE))
-    if (length(match) == 0L || identical(match, character(0))) "" else match
-  }, character(1), USE.NAMES = FALSE)
-
-  if (!nzchar(suffixes[[1L]]) && nzchar(suffixes[[2L]])) {
-    endpoints[[1L]] <- paste0(endpoints[[1L]], suffixes[[2L]])
-  } else if (nzchar(suffixes[[1L]]) && !nzchar(suffixes[[2L]])) {
-    endpoints[[2L]] <- paste0(endpoints[[2L]], suffixes[[1L]])
-  }
-  endpoints
+  text <- c(left, right)
+  matches <- regexpr(suffix_pattern, text, perl = TRUE)
+  suffixes <- rep("", length(text))
+  present <- which(matches > 0L)
+  suffixes[present] <- substring(text[present], matches[present],
+    matches[present] + attr(matches, "match.length")[present] - 1L)
+  left_suffix <- suffixes[seq_along(left)]
+  right_suffix <- suffixes[length(left) + seq_along(right)]
+  add_left <- !nzchar(left_suffix) & nzchar(right_suffix)
+  add_right <- nzchar(left_suffix) & !nzchar(right_suffix)
+  left[add_left] <- paste0(left[add_left], right_suffix[add_left])
+  right[add_right] <- paste0(right[add_right], left_suffix[add_right])
+  list(left = left, right = right)
 }
