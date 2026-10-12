@@ -12,6 +12,9 @@
 本次不扩充新语法、不继续提速、不提交 CRAN。附件是源码包，仍需与 R
 兼容的 C 编译工具；不是 Windows 二进制包。
 
+最终源码包本地检查为 OK，五项平台 CI 均成功，每项 539 个断言通过。
+Linux release 仅有缺少 HTML Tidy 的 NOTE，PDF 手册检查通过。
+
 ## English
 
 - Fixes valid whitespace-grouped ranges being rejected as whole-string grouping
@@ -26,5 +29,9 @@
 
 No new syntax, speed-tuning round or CRAN submission. The attachment is a source
 package, not a Windows binary; an R-compatible C toolchain is still required.
+
+The exact source archive passed local checks. All five platform CI jobs passed
+539 assertions each; Linux release had only the missing-HTML-Tidy NOTE and
+passed PDF manual generation.
 
 [Validation / 验收记录](https://github.com/Jorungandr/cncleanr/blob/main/docs/range-grouping.md)

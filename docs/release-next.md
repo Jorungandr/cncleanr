@@ -2,14 +2,16 @@
 
 ## 当前发布状态 / Current publication status
 
-2026-10-12：[GitHub v0.2.9](https://github.com/Jorungandr/cncleanr/releases/tag/v0.2.9)
-已发布，固定标签为 `761dffa4cadb7748a8b0242d5bfac512142f08e2`。
+2026-10-12：[GitHub v0.2.10](https://github.com/Jorungandr/cncleanr/releases/tag/v0.2.10)
+已发布，固定标签为 `c46519ccb9ba8163dae0452b994d230afa194c2b`。
 最终源码附件、五项 CI、下载校验和独立安装已验收，详见
-[原生稳定性与发布验收 / native stability and release validation](native-stability.md)。
-ASAN、UBSAN 和 Valgrind 均通过；本次未提交 CRAN。
-GitHub v0.2.9 is published at the fixed commit above; the checked source asset,
+[区间分组与发布验收 / range grouping and release validation](range-grouping.md)。
+本轮 539 项断言通过，C 源码不变；上一版原生工具结果保留在
+[原生稳定性记录](native-stability.md)，不是本轮重新检查。本次未提交 CRAN。
+GitHub v0.2.10 is published at the fixed commit above; the checked source asset,
 five CI jobs, downloaded checksum and isolated installation were verified.
-ASAN, UBSAN and Valgrind passed. No CRAN submission was made.
+539 assertions passed. C sources are unchanged; previous native-tool results
+are retained as historical evidence, not a rerun. No CRAN submission was made.
 
 ## 准备阶段历史 / Preparation-stage history
 

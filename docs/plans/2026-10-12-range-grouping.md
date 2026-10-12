@@ -39,3 +39,7 @@ No speed tuning, C changes, or CRAN submission.
    the public attachment and test the fixed grouping and safe rejections.
 5. Push excluded publication records without moving the tag. Preserve existing
    releases, unrelated user files and historical test artifacts.
+
+Completed as GitHub v0.2.10. Local exact-archive checking and five platform CI
+jobs passed 539 assertions; public asset download/install verification passed.
+See `docs/range-grouping.md` for fixed commit, checksum and check limitations.
