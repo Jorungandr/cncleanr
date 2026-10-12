@@ -37,6 +37,8 @@ Converts closed ranges such as \code{"3\\u4e07-5\\u4e07"} and open bounds such a
 \code{"10\\u4e07\\u5143\\u4ee5\\u4e0a"} into explicit lower and upper bounds. A shared suffix in
 \code{"3-5\\u4e07"} is applied to both endpoints. Signs used by negative numbers and
 scientific notation are distinguished from range separators.
+Digit grouping is validated independently at each range endpoint, so
+\code{"1 234-2 345"} is accepted but \code{"1 23-2 345"} is not.
 }
 \examples{
 parse_cn_range(c("3\u4e07-5\u4e07", "3-5\u4e07", "10\u4e07\u5143\u4ee5\u4e0a"))

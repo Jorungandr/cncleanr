@@ -18,11 +18,11 @@ Install from [CRAN](https://CRAN.R-project.org/package=cncleanr) (verified as 0.
 install.packages("cncleanr")
 ```
 
-Alternatively, pin the GitHub release v0.2.9, which includes table-header units, combined approximation qualifiers, C acceleration and malformed UTF-8 protection:
+Alternatively, pin the GitHub release v0.2.10, which includes table-header units, combined approximation qualifiers, C acceleration, malformed UTF-8 protection and grouped-range endpoint fixes:
 
 ```r
 install.packages("pak")
-pak::pak("Jorungandr/cncleanr@v0.2.9")
+pak::pak("Jorungandr/cncleanr@v0.2.10")
 ```
 
 ### Development version and source installation
@@ -215,6 +215,12 @@ parse_cn_range(c("3万-5万", "3-5万", "10万元以上", "低于2亿"))
 
 A shared suffix in a form such as `3-5万` is applied to both endpoints of the numeric range; `3-5千元` means 3,000 to 5,000. Reversed ranges and invalid endpoints are reported as problems.
 Signs in scientific notation are not treated as range separators, so both `1e-3` and `1e-3-2e-3` are parsed correctly.
+
+Since 0.2.10, whitespace digit grouping is validated independently at each endpoint:
+`1 234-2 345` returns `1234` to `2345`, and `1 234-2 345万元` returns
+`12340000` to `23450000`. `1 23-2 345` still reports invalid grouping rather
+than silently joining digits; `2 345-1 234` reports reversed bounds. A single
+approximate value does not define explicit bounds.
 
 ## Return-value reference
 

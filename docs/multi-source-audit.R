@@ -1,15 +1,15 @@
-# Optional first argument: library containing installed 0.2.6 through 0.2.9.
+# Optional first argument: library containing installed cncleanr >= 0.2.6.
 args <- commandArgs(trailingOnly = TRUE)
 .libPaths(c(if (length(args)) args[[1L]] else 'outputs/release-0.2.6/library', .libPaths()))
 library(cncleanr)
 version <- as.character(packageVersion('cncleanr'))
-stopifnot(version %in% c('0.2.6', '0.2.7', '0.2.8', '0.2.9'))
+stopifnot(packageVersion('cncleanr') >= package_version('0.2.6'))
 root <- 'outputs/multi-source-audit'
 cases <- read.delim(file.path(root, 'cases.tsv'), quote = '"',
                    fileEncoding = 'UTF-8', stringsAsFactors = FALSE,
                    na.strings = character(), colClasses = 'character')
 expected <- suppressWarnings(as.double(cases$expected))
-if (version %in% c('0.2.7', '0.2.8', '0.2.9')) {
+if (packageVersion('cncleanr') >= package_version('0.2.7')) {
   revised <- cases$source == 'CSL' & cases$input == '约15％左右'
   stopifnot(sum(revised) == 1L)
   cases$status[revised] <- 'valid'

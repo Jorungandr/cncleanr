@@ -1,3 +1,13 @@
+# cncleanr 0.2.10
+
+* Fixes closed ranges with valid whitespace-grouped endpoints being rejected
+  by whole-string grouping validation. Each endpoint now retains its original
+  digit spacing during validation, including shared units and scientific signs.
+  Malformed groups remain invalid, and reversed grouped bounds report the
+  existing reversed-range reason. Number/quantity syntax is unchanged.
+* Adds known-answer regressions for grouping/separator variants, spaced units,
+  duplicate/factor inputs, missing whole cells and complete original diagnostics.
+
 # cncleanr 0.2.9
 
 * Rejects malformed UTF-8 in shared native normalization, including truncated

@@ -4,6 +4,8 @@
 #' `"10\u4e07\u5143\u4ee5\u4e0a"` into explicit lower and upper bounds. A shared suffix in
 #' `"3-5\u4e07"` is applied to both endpoints. Signs used by negative numbers and
 #' scientific notation are distinguished from range separators.
+#' Digit grouping is validated independently at each range endpoint, so
+#' `"1 234-2 345"` is accepted but `"1 23-2 345"` is not.
 #'
 #' @inheritParams parse_cn_number
 #' @param x A character, factor, or numeric vector. Numeric input is converted
@@ -127,6 +129,23 @@ parse_cn_range <- function(
     problem_reason[active] <- unique_reason[active_map]
   }
 
+  # A whole-string grouping check cannot validate two numbers. Retry rejected
+  # rows with original endpoint spacing; never concatenate their digits first.
+  spaced <- which(invalid_spacing)
+  if (length(spaced)) {
+    ranges <- find_cn_range_endpoints_batch(characters[spaced], normalized_na,
+                                           normalize_suffix = TRUE)
+    valid <- which(is.na(ranges$reason))
+    reversed <- valid[ranges$values[valid, 1L] > ranges$values[valid, 2L]]
+    problem_reason[spaced[reversed]] <- "range lower bound is greater than its upper bound"
+    valid <- setdiff(valid, reversed)
+    rows <- spaced[valid]
+    output$lower[rows] <- ranges$values[valid, 1L]
+    output$upper[rows] <- ranges$values[valid, 2L]
+    output$lower_inclusive[rows] <- output$upper_inclusive[rows] <- TRUE
+    problem_reason[rows] <- NA_character_
+  }
+
   failed <- which(!is.na(problem_reason))
   problems <- data.frame(
     index = failed,
@@ -137,7 +156,7 @@ parse_cn_range <- function(
   apply_cn_problems(output, problems, strict)
 }
 
-find_cn_range_endpoints_batch <- function(text, na) {
+find_cn_range_endpoints_batch <- function(text, na, normalize_suffix = FALSE) {
   size <- length(text)
   values <- matrix(NA_real_, nrow = size, ncol = 2L)
   reason <- rep("one or both range endpoints are invalid", size)
@@ -154,7 +173,8 @@ find_cn_range_endpoints_batch <- function(text, na) {
   candidate_right <- character(capacity)
   candidate_count <- length(single)
   if (candidate_count) {
-    endpoints <- propagate_cn_range_suffix(substring(text[single], 1L, first[single] - 1L), right[single])
+    endpoints <- propagate_cn_range_suffix(substring(text[single], 1L, first[single] - 1L),
+                                          right[single], normalize_suffix)
     candidate_source[seq_len(candidate_count)] <- single
     candidate_left[seq_len(candidate_count)] <- endpoints$left
     candidate_right[seq_len(candidate_count)] <- endpoints$right
@@ -174,7 +194,7 @@ find_cn_range_endpoints_batch <- function(text, na) {
       if (!nzchar(left) || !nzchar(right)) {
         next
       }
-      endpoints <- propagate_cn_range_suffix(left, right)
+      endpoints <- propagate_cn_range_suffix(left, right, normalize_suffix)
       candidate_count <- candidate_count + 1L
       candidate_source[[candidate_count]] <- i
       candidate_left[[candidate_count]] <- endpoints$left
@@ -209,12 +229,13 @@ find_cn_range_endpoints_batch <- function(text, na) {
   list(values = values, reason = reason)
 }
 
-propagate_cn_range_suffix <- function(left, right) {
+propagate_cn_range_suffix <- function(left, right, normalize_suffix = FALSE) {
   suffix_pattern <- paste0(
     "((?:\u4e07\u4ebf|\u4e07|\u4ebf)(?:\u4eba\u6c11\u5e01|\u5757\u94b1|\u5143|\u5757)?|\u5343\u5143|",
     "(?:\u4eba\u6c11\u5e01|\u5757\u94b1|\u5143|\u5757)|%)$"
   )
   text <- c(left, right)
+  if (normalize_suffix) text <- normalize_cn_number_text(text, characters_normalized = TRUE)
   matches <- regexpr(suffix_pattern, text, perl = TRUE)
   suffixes <- rep("", length(text))
   present <- which(matches > 0L)
