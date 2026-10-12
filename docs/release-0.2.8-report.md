@@ -57,9 +57,23 @@ the completed check; this does not establish a new online CRAN pretest.
 这是更改版本号之前的源码证据，不能冒充 0.2.8 的最终 CI 结果。
 更新提交推送后仍需核对该提交的五平台 CI；正式发布前以最终提交结果为准。
 
+0.2.8 候选提交 `a6f7ce6fdf002877ea456dd52d990779c469032e` 的
+[CI run 38248983865](https://github.com/Jorungandr/cncleanr/actions/runs/38248983865)
+已完成且整体成功。Windows、macOS、Linux R-devel、Linux R-oldrel-1
+的包检查均为 `Status: OK`；Linux R-release 为 `Status: 1 NOTE`，
+仅因缺少 `tidy` 跳过 HTML 验证。五项均为
+`FAIL 0 | WARN 0 | SKIP 0 | PASS 339`，Linux R-release 的 PDF 手册检查通过。
+逐项核对日志，而非只依赖总状态。上述源码包校验和仍保持不变。
+
+Candidate commit `a6f7ce6fdf002877ea456dd52d990779c469032e` passed all five
+jobs in run 38248983865. Four package checks reported OK; Linux R-release
+reported one NOTE for unavailable HTML Tidy. All five reported 339 passing
+assertions, and Linux R-release passed PDF manual generation. Individual logs
+were verified. These results are candidate-commit evidence, not a CRAN pretest.
+
 The five-platform result for parser checkpoint `2d97758` predates the version
-bump; it is not the candidate commit's CI result. Verify the pushed 0.2.8 commit
-before publication. No tag, GitHub release or CRAN upload was created here.
+bump; the separate run above verifies the actual candidate commit. No tag,
+GitHub release or CRAN upload was created here.
 
 保留已有标签和发布附件，不替换 v0.2.7。发布前记录最终提交 SHA，核对待上传
 源码包与上述校验和一致；正式发布需维护者确认。

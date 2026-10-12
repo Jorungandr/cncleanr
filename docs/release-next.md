@@ -56,6 +56,7 @@ validation due to unavailable `tidy`; do not describe all jobs as NOTE-free.
 ## 正式发布前 / Before release
 
 1. 已将版本号和 NEWS 更新为 0.2.8 发布候选；按该版本构建、独立安装和检查，证据见 [0.2.8 候选验收](release-0.2.8-report.md)。
+   候选提交 `a6f7ce6` 的五项 CI 已通过，包括 Linux PDF 手册；唯一 NOTE 为缺少 HTML Tidy。
 2. 从最终源码包记录校验和，确认与 GitHub 标签和附件一致；保留旧标签与发布附件作为回退依据。
 3. 创建 GitHub 正式发布需维护者明确确认；若计划更新 CRAN，需重新获取最终包的预检查结果，
    不能复用旧版邮件，并在提交前核对 CRAN 状态及政策。
