@@ -8,6 +8,22 @@
 
 static int digit(unsigned char c) { return c >= '0' && c <= '9'; }
 
+/* Validate before reading each continuation byte, including truncated strings. */
+static int utf8_width(const unsigned char *p)
+{
+    unsigned char lead = p[0];
+    int width = lead >= 0xc2 && lead <= 0xdf ? 2 :
+        lead >= 0xe0 && lead <= 0xef ? 3 : lead >= 0xf0 && lead <= 0xf4 ? 4 : 0;
+    if (!width) Rf_error("Invalid UTF-8 in normalization input.");
+    for (int j = 1; j < width; ++j)
+        if (!p[j] || (p[j] & 0xc0) != 0x80)
+            Rf_error("Invalid UTF-8 in normalization input.");
+    if ((lead == 0xe0 && p[1] < 0xa0) || (lead == 0xed && p[1] >= 0xa0) ||
+        (lead == 0xf0 && p[1] < 0x90) || (lead == 0xf4 && p[1] >= 0x90))
+        Rf_error("Invalid UTF-8 in normalization input.");
+    return width;
+}
+
 static int ascii_prefix(const char *p, const char *upper)
 {
     for (int i = 0; i < 3; ++i)
@@ -133,10 +149,10 @@ static SEXP normalize_characters(SEXP text, SEXP strip)
                 continue;
             }
             ascii = 0;
+            int width = utf8_width(p);
             if (strip_spaces && p[0] == 0xc2 && p[1] == 0xa0) { changed = 1; p += 2; continue; }
             unsigned int code = 0;
-            if (p[0] >= 0xe0 && p[0] <= 0xef && p[1] && p[2] &&
-                (p[1] & 0xc0) == 0x80 && (p[2] & 0xc0) == 0x80)
+            if (width == 3)
                 code = ((p[0] & 0x0f) << 12) | ((p[1] & 0x3f) << 6) | (p[2] & 0x3f);
             if (code == 0xfffe || code == 0xffff)
                 Rf_error("Invalid Unicode noncharacter in normalization input.");
@@ -159,7 +175,7 @@ static SEXP normalize_characters(SEXP text, SEXP strip)
             }
             if (replacement) { changed = 1; *out++ = (char) replacement; p += 3; }
             else if (code == 0xffe5) { changed = 1; *out++ = (char) 0xc2; *out++ = (char) 0xa5; p += 3; }
-            else *out++ = (char) *p++;
+            else { memcpy(out, p, width); out += width; p += width; }
         }
         *out = '\0';
         SET_STRING_ELT(result, i, !changed && (ascii || Rf_getCharCE(cell) == CE_UTF8) ? cell :

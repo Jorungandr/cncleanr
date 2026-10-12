@@ -1,3 +1,12 @@
+# cncleanr 0.2.9
+
+* Rejects malformed UTF-8 in shared native normalization, including truncated
+  sequences, overlong encodings, surrogate code points and values above U+10FFFF.
+  All three parsers now fail explicitly instead of passing malformed bytes to
+  downstream text operations. Valid UTF-8 and Latin-1 conversion are unchanged.
+* Adds fixed-seed native/R differential tests for complete results, diagnostics,
+  warnings and strict errors, plus short/long strings and native argument checks.
+
 # cncleanr 0.2.8
 
 ## User-facing summary
