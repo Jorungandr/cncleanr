@@ -153,10 +153,15 @@ parse_cn_number <- function(
   )
   matches <- regexpr(pattern, work, perl = TRUE)
   matched <- matches > 0L
+  syntax_failed <- active[!matched]
+  active <- active[matched]
+  work <- work[matched]
+  accounting <- accounting[matched]
   reasons <- rep("value does not match the supported number syntax", length(work))
 
-  starts <- attr(matches, "capture.start")
-  ends <- starts + attr(matches, "capture.length") - 1L
+  starts <- if (length(matches)) attr(matches, "capture.start")[matched, , drop = FALSE] else matrix(integer(), 0L, 7L)
+  ends <- if (length(matches)) starts + attr(matches, "capture.length")[matched, , drop = FALSE] - 1L else starts
+  matched <- rep(TRUE, length(work))
   fields <- if (length(work)) {
     lapply(seq_len(7L), function(j) substring(work, starts[, j], ends[, j]))
   } else rep(list(character()), 7L)
@@ -195,11 +200,12 @@ parse_cn_number <- function(
   output[active[matched]] <- value[matched]
 
   failed_local <- which(!matched)
-  failed <- c(spacing_failed, active[failed_local])
+  failed <- c(spacing_failed, syntax_failed, active[failed_local])
   if (length(failed) > 0L) {
     failure_reasons <- c(rep("digits use invalid whitespace grouping", length(spacing_failed)),
+                        rep("value does not match the supported number syntax", length(syntax_failed)),
                         reasons[failed_local])
-    failure_order <- if (length(spacing_failed) && length(failed_local)) order(failed) else seq_along(failed)
+    failure_order <- order(failed)
     failed <- failed[failure_order]
     problems <- data.frame(
       index = failed,

@@ -138,6 +138,10 @@ test_that('invalid spacing short-circuit preserves original text and precedence'
 })
 
 test_that('filtered grouping failures merge in source order with syntax failures', {
+  expect_warning(all_syntax <- parse_cn_number(c(a = 'bad', b = '???')), 'positions 1, 2')
+  expect_identical(cn_problems(all_syntax)$index, 1:2)
+  expect_identical(cn_problems(all_syntax)$reason,
+    rep('value does not match the supported number syntax', 2L))
   x <- c(a = 'bad', b = '1 23', c = '1e309', d = '2 34', e = '2\u4e07')
   expect_warning(result <- parse_cn_number(x), 'positions 1, 2, 3, 4')
   expect_identical(cn_problems(result)$index, 1:4)

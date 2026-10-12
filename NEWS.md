@@ -1,5 +1,9 @@
 # Development changes (unreleased)
 
+* Filters number-syntax failures before extracting captures and converting
+  numeric fields. Syntax, grouping and validation errors retain complete
+  original-order diagnostics, including entirely invalid batches.
+
 * Handles ASCII bytes directly during native normalization and reuses unchanged
   ASCII/UTF-8 string objects instead of rebuilding them. Other encodings still
   receive UTF-8 conversion; grouping checks and diagnostics are unchanged.

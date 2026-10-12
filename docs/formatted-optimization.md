@@ -383,3 +383,57 @@ The million-row invalid sample was essentially flat/slightly slower; unchanged
 string reuse alone does not solve the cost of constructing complete diagnostics.
 两种规模的差异验证均通过；百万条全无效样本基本持平且略慢，
 仅复用字符串尚不能解决完整错误报告的构造开销。
+
+### Syntax-failure filtering / 语法失败提前过滤 (2026-10-12)
+
+Number syntax failures now leave the capture/conversion vectors immediately
+after regex matching. Only syntactically matched rows extract seven fields and
+undergo sign, unit and finite-range validation. Syntax failures merge with
+grouping and later validation failures in original input order. No diagnostic
+rows are discarded; strict first-error behavior and original text are retained.
+语法不匹配的行不再提取七组字段或做数值转换；最终仍保留全部错误报告及原始顺序。
+
+Baseline: installed unchanged-string stage (`ac12a80`); candidate: current
+byte-compiled R source with the same DLL. Paired 100k median elapsed seconds:
+
+| Input / 输入 | Baseline / 基线 | Candidate / 当前 |
+| --- | ---: | ---: |
+| Plain / 普通数值 | 0.022 s | 0.022 s |
+| Currency / 货币前缀 | 0.020 s | 0.022 s |
+| Spaced currency / 带空白货币前缀 | 0.116 s | 0.104 s |
+| Accounting / 括号负数 | 0.018 s | 0.018 s |
+| Full-width / 全角数字 | 0.114 s | 0.116 s |
+| Mixed grouping / 混合空白分组 | 0.156 s | 0.156 s |
+| Invalid / 全无效 | 0.158 s | 0.068 s |
+
+The invalid sample improved about 57% in this paired run. Other samples do not
+establish a broad speedup; several return before reaching the changed path.
+Differential comparisons passed for all three parsers, missing markers, header
+units, names and strict messages. Added regression assertions for an all-syntax-
+failure batch alongside existing interleaved grouping/syntax/overflow coverage.
+全无效样本约改善 57%，不代表所有输入提速；全失败及混合错误顺序有回归覆盖。
+
+Independent source build and `R CMD check --as-cran --no-manual` completed with
+`Status: OK`, exit 0, `FAIL 0 | WARN 0 | SKIP 0 | PASS 324`. Logs:
+`outputs/syntax-filter/check/cncleanr.Rcheck/`. PDF manual and remote incoming
+checks were not run. The million-row benchmark overlapped the independent
+check, so its absolute times must not be compared with earlier idle runs.
+独立构建及整包检查通过，324 项断言通过；未检查 PDF 手册和远程 incoming。
+百万条计时与独立检查部分重叠，仅使用同轮配对比较，不与其他轮绝对耗时比较。
+
+| Million-row input / 百万条输入 | Baseline / 基线 | Candidate / 当前 |
+| --- | ---: | ---: |
+| Plain / 普通数值 | 0.22 s | 0.22 s |
+| Currency / 货币前缀 | 0.21 s | 0.21 s |
+| Spaced currency / 带空白货币前缀 | 1.22 s | 1.20 s |
+| Accounting / 括号负数 | 0.23 s | 0.22 s |
+| Full-width / 全角数字 | 1.17 s | 1.14 s |
+| Mixed grouping / 混合空白分组 | 2.10 s | 2.11 s |
+| Invalid / 全无效 | 1.95 s | 0.46 s |
+
+Million-row invalid text improved about 76% in this paired run. All other
+samples were essentially flat, as expected for this syntax-failure-specific
+change. Exact comparisons passed at both sizes, including complete problem
+attributes and strict messages; no diagnostic truncation was introduced.
+百万条全无效文本约改善 76%，其他样本基本持平；两种规模的差异验证均通过，
+包括完整错误属性和严格错误信息，没有通过截断报告来缩短耗时。
