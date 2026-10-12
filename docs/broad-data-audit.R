@@ -1,7 +1,7 @@
 args <- commandArgs(trailingOnly=TRUE)
 .libPaths(c(if (length(args)) args[[1]] else 'outputs/release-0.2.7/library', .libPaths()))
 library(cncleanr)
-stopifnot(as.character(packageVersion('cncleanr')) == '0.2.7')
+stopifnot(as.character(packageVersion('cncleanr')) %in% c('0.2.7', '0.2.8'))
 root <- 'outputs/broad-data-audit'
 x <- read.delim(file.path(root, 'cases.tsv'), colClasses='character',
                 na.strings=character(), fileEncoding='UTF-8')

@@ -29,11 +29,11 @@ Prepared on 2026-10-12; this is not a release or a CRAN submission record.
 
 截至上述日期，CRAN 的 [DESCRIPTION](https://cran.r-project.org/web/packages/cncleanr/DESCRIPTION)
 为 0.2.5，GitHub 正式版为 [v0.2.7](https://github.com/Jorungandr/cncleanr/releases/tag/v0.2.7)。
-两者均不包含本轮 C 加速。`main` 含未发布改动，开发树版本号暂仍为 0.2.7；
-复现开发代码应记录提交 SHA，不能只看 `packageVersion()`。
+两者均不包含本轮 C 加速。`main` 现为 0.2.8 发布候选版，尚未创建 v0.2.8 发布；
+复现开发代码仍应记录提交 SHA，不能只看 `packageVersion()`。
 CRAN was verified at 0.2.5 and GitHub at v0.2.7; neither includes this native
-optimization round. Development code still reports 0.2.7, so record its commit
-SHA rather than relying on the package version alone.
+optimization round. Development code is now a 0.2.8 release candidate, not a
+published v0.2.8 release; record its commit SHA as well as its version.
 
 解析源码验收点：`2d977584b539427ad6b47800763d3e24af184bc7`。
 [CI run 38244901525](https://github.com/Jorungandr/cncleanr/actions/runs/38244901525)
@@ -55,7 +55,7 @@ validation due to unavailable `tidy`; do not describe all jobs as NOTE-free.
 
 ## 正式发布前 / Before release
 
-1. 确定并更新下一正式版本号，移动 NEWS 未发布摘要；按最终版本重新构建、独立安装和检查。
+1. 已将版本号和 NEWS 更新为 0.2.8 发布候选；按该版本构建、独立安装和检查，证据见 [0.2.8 候选验收](release-0.2.8-report.md)。
 2. 从最终源码包记录校验和，确认与 GitHub 标签和附件一致；保留旧标签与发布附件作为回退依据。
 3. 创建 GitHub 正式发布需维护者明确确认；若计划更新 CRAN，需重新获取最终包的预检查结果，
    不能复用旧版邮件，并在提交前核对 CRAN 状态及政策。
@@ -65,7 +65,8 @@ checksum, and keep prior release artifacts. GitHub release publication requires
 maintainer confirmation. A CRAN update additionally needs fresh pretests and
 submission-time checks; historical emails are not final-package evidence.
 
-本次未改版本号、未创建标签或正式发布、未上传 CRAN。性能迭代已经结束；
+本次仅准备 0.2.8 候选包，未创建标签或正式发布、未上传 CRAN。性能迭代已经结束；
 这些待办属于发布验证和文档维护，不是继续调优。
-This preparation does not change the version, publish a tag/release or submit
-to CRAN. Remaining work is release verification and maintenance, not speed tuning.
+This preparation sets the candidate version to 0.2.8 but does not publish a
+tag/release or submit to CRAN. Remaining work is release verification and
+maintenance, not speed tuning.

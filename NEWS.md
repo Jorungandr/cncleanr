@@ -1,4 +1,4 @@
-# Development changes (unreleased)
+# cncleanr 0.2.8 (release candidate)
 
 ## User-facing summary
 

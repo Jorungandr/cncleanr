@@ -52,7 +52,7 @@ parse_cn_number(c("3万", "１２．５％"))
 #> [1] 30000.000     0.125
 ```
 
-The development tree's `DESCRIPTION` still reports 0.2.7, so its version number alone cannot distinguish released and development code. Record the installed commit SHA for reproducibility; the version number will change before the next release.
+The development tree is now a 0.2.8 release candidate; no v0.2.8 release has been published. Since `main` can still change, record the installed commit SHA for reproducibility. The v0.2.7 command above remains pinned to the existing release.
 
 ### Performance and release preparation
 
