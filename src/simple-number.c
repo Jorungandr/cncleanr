@@ -123,16 +123,24 @@ static SEXP normalize_characters(SEXP text, SEXP strip)
         if (cell == NA_STRING) { SET_STRING_ELT(result, i, cell); continue; }
         const unsigned char *p = (const unsigned char *) Rf_translateCharUTF8(cell);
         char *out = buffer;
+        int changed = 0;
+        int ascii = 1;
         while (*p) {
-            if (strip_spaces && (*p == ' ' || (*p >= '\t' && *p <= '\r'))) { ++p; continue; }
-            if (strip_spaces && p[0] == 0xc2 && p[1] == 0xa0) { p += 2; continue; }
+            if (*p < 0x80) {
+                if (strip_spaces && (*p == ' ' || (*p >= '\t' && *p <= '\r'))) {
+                    changed = 1; ++p;
+                } else *out++ = (char) *p++;
+                continue;
+            }
+            ascii = 0;
+            if (strip_spaces && p[0] == 0xc2 && p[1] == 0xa0) { changed = 1; p += 2; continue; }
             unsigned int code = 0;
             if (p[0] >= 0xe0 && p[0] <= 0xef && p[1] && p[2] &&
                 (p[1] & 0xc0) == 0x80 && (p[2] & 0xc0) == 0x80)
                 code = ((p[0] & 0x0f) << 12) | ((p[1] & 0x3f) << 6) | (p[2] & 0x3f);
             if (code == 0xfffe || code == 0xffff)
                 Rf_error("Invalid Unicode noncharacter in normalization input.");
-            if (strip_spaces && (code == 0x3000 || code == 0x202f)) { p += 3; continue; }
+            if (strip_spaces && (code == 0x3000 || code == 0x202f)) { changed = 1; p += 3; continue; }
             int replacement = 0;
             if (code >= 0xff10 && code <= 0xff19) replacement = '0' + code - 0xff10;
             else switch (code) {
@@ -149,12 +157,13 @@ static SEXP normalize_characters(SEXP text, SEXP strip)
                 case 0xff25: replacement = 'E'; break;
                 case 0xff45: replacement = 'e'; break;
             }
-            if (replacement) { *out++ = (char) replacement; p += 3; }
-            else if (code == 0xffe5) { *out++ = (char) 0xc2; *out++ = (char) 0xa5; p += 3; }
+            if (replacement) { changed = 1; *out++ = (char) replacement; p += 3; }
+            else if (code == 0xffe5) { changed = 1; *out++ = (char) 0xc2; *out++ = (char) 0xa5; p += 3; }
             else *out++ = (char) *p++;
         }
         *out = '\0';
-        SET_STRING_ELT(result, i, Rf_mkCharCE(buffer, CE_UTF8));
+        SET_STRING_ELT(result, i, !changed && (ascii || Rf_getCharCE(cell) == CE_UTF8) ? cell :
+            Rf_mkCharCE(buffer, CE_UTF8));
     }
     Rf_setAttrib(result, R_NamesSymbol, Rf_getAttrib(text, R_NamesSymbol));
     UNPROTECT(1);

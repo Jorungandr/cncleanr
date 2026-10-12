@@ -1,5 +1,9 @@
 # Development changes (unreleased)
 
+* Handles ASCII bytes directly during native normalization and reuses unchanged
+  ASCII/UTF-8 string objects instead of rebuilding them. Other encodings still
+  receive UTF-8 conversion; grouping checks and diagnostics are unchanged.
+
 * Removes supported whitespace in the existing native normalization scan,
   avoiding a separate regex replacement. Digit-grouping validation still runs
   before whitespace removal, preserving diagnostics and missing-marker rules.

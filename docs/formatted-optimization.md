@@ -322,3 +322,64 @@ this run. This is a whitespace-path improvement, not a universal acceleration.
 Avoiding work on unchanged/no-whitespace text remains a follow-up target.
 百万条结果一致性检查通过。带空白货币约改善 17%，分组约改善 8%，
 但全角及全无效样本本次退步，需继续减少无空白/未改变文本的处理开销。
+
+### Unchanged-string reuse / 未改变字符串复用 (2026-10-12)
+
+The native loop now handles ASCII bytes before Unicode decoding and tracks
+whether removal or replacement actually occurred. Unchanged ASCII/UTF-8 cells
+reuse their existing R string object, bypassing string reconstruction/interning.
+Other encodings still produce UTF-8 output. The scratch buffer and length
+prepass remain; this is not zero-copy normalization for changed text.
+ASCII 字节不再进入 Unicode 分支；未改变的 ASCII/UTF-8 文本复用原字符串对象。
+仍保留长度预扫描及缓冲区，改变的文本仍需构造，未修改错误处理或分组规则。
+
+Baseline: retained whitespace-stage library (`90c044f`); candidate: independently
+installed package with this C change. Same alternating paired benchmark:
+
+| Input / 输入 | 100k baseline / 基线 | 100k candidate / 当前 |
+| --- | ---: | ---: |
+| Plain / 普通数值 | 0.010 s | 0.006 s |
+| Currency / 货币前缀 | 0.006 s | 0.006 s |
+| Spaced currency / 带空白货币前缀 | 0.106 s | 0.100 s |
+| Accounting / 括号负数 | 0.018 s | 0.018 s |
+| Full-width / 全角数字 | 0.112 s | 0.104 s |
+| Mixed grouping / 混合空白分组 | 0.148 s | 0.130 s |
+| Invalid / 全无效 | 0.132 s | 0.128 s |
+
+The complete differential grid and all three parsers matched at 100k rows.
+These measurements do not establish that every earlier regression is resolved;
+do not combine times from separate runs into cumulative speedup ratios.
+十万条差异验证通过；不能用跨轮计时拼接累计收益，也不能据此断言此前所有退步已消除。
+
+Independent `R CMD check --as-cran --no-manual`: `Status: OK`, exit 0,
+`FAIL 0 | WARN 0 | SKIP 0 | PASS 321`. Logs:
+`outputs/unchanged-c/check/cncleanr.Rcheck/`. Additional GC/encoding checks passed
+for unchanged ASCII/UTF-8 text, names, NA, converted full-width text and Latin-1.
+No PDF manual or remote incoming check was run. The million-row benchmark was
+started while the package check was still completing; timings may reflect that
+background load, so only within-run paired comparisons are meaningful.
+独立整包检查及 321 项断言通过，垃圾回收和编码检查通过。
+百万条计时开始时整包检查尚未完全结束，可能受后台负载影响，避免跨轮绝对耗时比较。
+
+Million-row paired results:
+
+| Input / 输入 | Baseline / 基线 | Candidate / 当前 |
+| --- | ---: | ---: |
+| Plain / 普通数值 | 0.22 s | 0.19 s |
+| Currency / 货币前缀 | 0.19 s | 0.19 s |
+| Spaced currency / 带空白货币前缀 | 1.42 s | 1.14 s |
+| Accounting / 括号负数 | 0.20 s | 0.21 s |
+| Full-width / 全角数字 | 1.45 s | 1.10 s |
+| Mixed grouping / 混合空白分组 | 2.20 s | 1.95 s |
+| Invalid / 全无效 | 1.68 s | 1.71 s |
+
+Full-width improved about 24%, spaced currency about 20%, and grouping about
+11% in this run. Accounting/plain fast-path variation is not attributable to
+the changed normalization loop, since those samples return before reaching it.
+全角本轮约改善 24%，带空白货币约改善 20%，分组约改善 11%。
+普通和括号样本绕过规范化，本轮波动不能归因于该 C 循环改动。
+Both sizes passed exact baseline/candidate comparisons for all three parsers.
+The million-row invalid sample was essentially flat/slightly slower; unchanged
+string reuse alone does not solve the cost of constructing complete diagnostics.
+两种规模的差异验证均通过；百万条全无效样本基本持平且略慢，
+仅复用字符串尚不能解决完整错误报告的构造开销。
