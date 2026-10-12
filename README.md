@@ -27,6 +27,8 @@ pak::pak("Jorungandr/cncleanr@v0.2.7")
 
 开发版性能记录：[C 数值加速](docs/native-optimization.md)、[限定词与字符标准化优化](docs/qualifier-optimization.md)、[混合批次优化](docs/mixed-optimization.md)、[格式化数值优化](docs/formatted-optimization.md)。计时随格式和重复率变化，不保证所有输入达到相同耗时。
 
+开发版已将全角字符和特殊负号转换合并为共享 C 扫描，供数字、数量和区间解析复用；空白分组检查仍保留。本地百万条全角样本耗时由 0.99 秒降至 0.66 秒，详见上述格式化数值性能记录。
+
 ## 企业营收清洗示例
 
 完整案例：[真实财报清洗：表头单位、混合指标与异常定位](docs/financial-table-example.md)。

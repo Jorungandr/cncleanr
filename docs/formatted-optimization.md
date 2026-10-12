@@ -219,3 +219,46 @@ or a new `R CMD check`. Initial harness attempts failed because of locked
 namespace bindings and a relative library path after the test runner changed
 directory; the corrected absolute-path run exited successfully.
 新旧结果对比和完整测试目录通过；使用已有 DLL 与本轮 R 源码，未重新安装或整包检查。
+
+### Native character normalization / C 字符规范化 (2026-10-12)
+
+The shared character helper now calls registered native normalization instead
+of separate `chartr` and minus-sign regex passes. Each string is transformed
+once; a length prepass sizes one reusable R-managed scratch buffer. Names and
+missing values are retained, unrelated UTF-8 bytes pass through, and byte-encoded
+inputs are rejected. U+FFFE/U+FFFF are rejected explicitly rather than receiving
+the previous platform-specific `chartr` error. Whitespace removal and grouping
+validation remain unchanged in R. No dependency or public API was added.
+共享字符转换改为 C 扫描，合并全角字符和特殊负号处理；长度预扫描决定可复用缓冲区大小。
+保留名称、缺失值及其他 UTF-8 文本，空白清理与分组验证保持原实现。
+
+The paired benchmark compares the retained grouping-filter package against this
+candidate, with the new candidate DLL explicitly loaded by the script.
+
+| Input / 输入 | 100k baseline / 基线 | 100k candidate / 当前 | 1m baseline / 基线 | 1m candidate / 当前 |
+| --- | ---: | ---: | ---: | ---: |
+| Plain / 普通数值 | 0.010 s | 0.010 s | 0.11 s | 0.11 s |
+| Currency / 货币前缀 | 0.010 s | 0.010 s | 0.10 s | 0.10 s |
+| Spaced currency / 带空白货币前缀 | 0.092 s | 0.076 s | 1.22 s | 1.02 s |
+| Accounting / 括号负数 | 0.010 s | 0.008 s | 0.11 s | 0.11 s |
+| Full-width / 全角数字 | 0.074 s | 0.054 s | 0.99 s | 0.66 s |
+| Mixed grouping / 混合空白分组 | 0.106 s | 0.090 s | 1.60 s | 1.39 s |
+| Invalid / 全无效 | 0.092 s | 0.066 s | 1.09 s | 0.86 s |
+
+Million-row full-width input improved about 33% in this run; spaced currency
+about 16%. Plain/native-accepted input remained essentially flat. Measurements
+exclude input construction and I/O, and are not end-to-end latency guarantees.
+百万条全角样本约改善 33%，带空白货币约改善 16%；原生直接接受的普通输入基本持平。
+
+Verification: both differential benchmark sizes passed for all three parsers.
+A normalization regression compares the original R transformations across
+non-surrogate BMP characters through U+FFFD plus supplementary-plane samples,
+mixed text, names, NA, empty and long strings. Type, byte-encoding and
+noncharacter rejection are tested. Independent installation and
+`R CMD check --as-cran --no-manual` completed with `Status: OK`, exit 0,
+`FAIL 0 | WARN 0 | SKIP 0 | PASS 318`. Logs:
+`outputs/normalization-c/check/cncleanr.Rcheck/`. PDF manual and remote incoming
+checks were not run. An ASCII-prefilter experiment was discarded after slowing
+full-width input. Earlier historical scripts require a candidate DLL compatible
+with current source; the formatted benchmark was updated to load both symbols.
+独立安装、318 项断言及整包检查通过；未检查 PDF 手册和远程 incoming。

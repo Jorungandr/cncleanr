@@ -225,13 +225,7 @@ normalize_cn_number_text <- function(x, characters_normalized = FALSE) {
 }
 
 normalize_cn_number_characters <- function(x) {
-  x <- enc2utf8(x)
-  x <- chartr(
-    "\uff0d\uff10\uff11\uff12\uff13\uff14\uff15\uff16\uff17\uff18\uff19\uff0e\uff0c\uff05\uff0b\uff08\uff09\uffe5\uff1c\uff1e\uff1d\uff25\uff45",
-    "-0123456789.,%+()\u00a5<>=Ee",
-    x
-  )
-  gsub("[\u2212\ufe63\u2013]", "-", x, perl = TRUE)
+  .Call(C_normalize_characters, enc2utf8(x))
 }
 
 has_invalid_cn_digit_spacing <- function(x, characters_normalized = FALSE) {

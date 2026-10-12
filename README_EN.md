@@ -27,6 +27,8 @@ The unreleased development branch adds C acceleration for common numeric formats
 
 Development benchmarks: [native numeric acceleration](docs/native-optimization.md), [qualifier/character-normalization optimization](docs/qualifier-optimization.md), [mixed-batch optimization](docs/mixed-optimization.md), and [formatted-number optimization](docs/formatted-optimization.md). Timing depends on input format and repetition; no universal latency is guaranteed.
 
+The development version shares a native scan for full-width characters and PDF minus signs across number, quantity and range parsing, retaining whitespace-grouping validation. A local million-row full-width sample improved from 0.99 to 0.66 seconds; see the formatted-number benchmark above.
+
 ## Enterprise revenue cleaning example
 
 Complete walkthrough: [real financial tables, mixed units, and failure tracing](docs/financial-table-example_EN.md).

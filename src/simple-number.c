@@ -99,8 +99,66 @@ static SEXP simple_numbers(SEXP text, SEXP header)
     return values;
 }
 
+static SEXP normalize_characters(SEXP text)
+{
+    if (TYPEOF(text) != STRSXP) Rf_error("Invalid normalization arguments.");
+    R_xlen_t size = XLENGTH(text);
+    size_t capacity = 1;
+    for (R_xlen_t i = 0; i < size; ++i) {
+        if (i % 16384 == 0) R_CheckUserInterrupt();
+        SEXP cell = STRING_ELT(text, i);
+        if (cell == NA_STRING) continue;
+        if (Rf_getCharCE(cell) == CE_BYTES)
+            Rf_error("translating strings with bytes encoding is not allowed");
+        size_t length = strlen(Rf_translateCharUTF8(cell)) + 1;
+        if (length > capacity) capacity = length;
+    }
+    char *buffer = (char *) R_alloc(capacity, 1);
+    SEXP result = PROTECT(Rf_allocVector(STRSXP, size));
+    for (R_xlen_t i = 0; i < size; ++i) {
+        if (i % 16384 == 0) R_CheckUserInterrupt();
+        SEXP cell = STRING_ELT(text, i);
+        if (cell == NA_STRING) { SET_STRING_ELT(result, i, cell); continue; }
+        const unsigned char *p = (const unsigned char *) Rf_translateCharUTF8(cell);
+        char *out = buffer;
+        while (*p) {
+            unsigned int code = 0;
+            if (p[0] >= 0xe0 && p[0] <= 0xef && p[1] && p[2] &&
+                (p[1] & 0xc0) == 0x80 && (p[2] & 0xc0) == 0x80)
+                code = ((p[0] & 0x0f) << 12) | ((p[1] & 0x3f) << 6) | (p[2] & 0x3f);
+            if (code == 0xfffe || code == 0xffff)
+                Rf_error("Invalid Unicode noncharacter in normalization input.");
+            int replacement = 0;
+            if (code >= 0xff10 && code <= 0xff19) replacement = '0' + code - 0xff10;
+            else switch (code) {
+                case 0xff0d: case 0x2212: case 0xfe63: case 0x2013: replacement = '-'; break;
+                case 0xff0e: replacement = '.'; break;
+                case 0xff0c: replacement = ','; break;
+                case 0xff05: replacement = '%'; break;
+                case 0xff0b: replacement = '+'; break;
+                case 0xff08: replacement = '('; break;
+                case 0xff09: replacement = ')'; break;
+                case 0xff1c: replacement = '<'; break;
+                case 0xff1e: replacement = '>'; break;
+                case 0xff1d: replacement = '='; break;
+                case 0xff25: replacement = 'E'; break;
+                case 0xff45: replacement = 'e'; break;
+            }
+            if (replacement) { *out++ = (char) replacement; p += 3; }
+            else if (code == 0xffe5) { *out++ = (char) 0xc2; *out++ = (char) 0xa5; p += 3; }
+            else *out++ = (char) *p++;
+        }
+        *out = '\0';
+        SET_STRING_ELT(result, i, Rf_mkCharCE(buffer, CE_UTF8));
+    }
+    Rf_setAttrib(result, R_NamesSymbol, Rf_getAttrib(text, R_NamesSymbol));
+    UNPROTECT(1);
+    return result;
+}
+
 static const R_CallMethodDef methods[] = {
     {"simple_numbers", (DL_FUNC) &simple_numbers, 2},
+    {"normalize_characters", (DL_FUNC) &normalize_characters, 1},
     {NULL, NULL, 0}
 };
 

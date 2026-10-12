@@ -1,5 +1,9 @@
 # Development changes (unreleased)
 
+* Normalizes full-width characters and PDF minus signs in a shared native pass
+  for numbers, quantities and ranges. Preserves names and missing values;
+  retains whitespace-grouping validation in R.
+
 * Reuses normalized missing markers across native and fallback number parsing,
   avoiding duplicate normalization without changing missing-value precedence.
 

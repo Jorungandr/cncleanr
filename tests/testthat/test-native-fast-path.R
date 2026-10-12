@@ -1,3 +1,25 @@
+test_that('native character normalization matches the original R transformations', {
+  reference <- function(x) {
+    x <- chartr(
+      '\uff0d\uff10\uff11\uff12\uff13\uff14\uff15\uff16\uff17\uff18\uff19\uff0e\uff0c\uff05\uff0b\uff08\uff09\uffe5\uff1c\uff1e\uff1d\uff25\uff45',
+      '-0123456789.,%+()\u00a5<>=Ee', enc2utf8(x))
+    gsub('[\u2212\ufe63\u2013]', '-', x, perl = TRUE)
+  }
+  codes <- c(seq_len(0xd7ff), 0xe000:0xfffd, 0x1f600, 0x20000, 0x10fffd)
+  x <- vapply(codes, intToUtf8, character(1))
+  x <- c(empty = '', missing = NA_character_, x,
+    mixed = 'RMB \uff11\uff12\uff0e\uff15\u4e07\u2212\U0001f600')
+  expect_identical(cncleanr:::normalize_cn_number_characters(x), reference(x))
+  expect_identical(cncleanr:::normalize_cn_number_characters(character()), character())
+  expect_error(.Call(cncleanr:::C_normalize_characters, 1), 'Invalid normalization')
+  expect_error(cncleanr:::normalize_cn_number_characters('\ufffe'), 'noncharacter')
+  bytes <- '\xff'
+  Encoding(bytes) <- 'bytes'
+  expect_error(cncleanr:::normalize_cn_number_characters(bytes), 'bytes encoding')
+  long <- paste(rep('\uff11\U0001f600\u2212', 10000), collapse = '')
+  expect_identical(cncleanr:::normalize_cn_number_characters(long), reference(long))
+})
+
 test_that('native accepted cells agree with the complete R fallback', {
   r_parser <- parse_cn_number
   environment(r_parser) <- list2env(list(.Call = function(symbol, x, unit) rep(NA_real_, length(x))),
