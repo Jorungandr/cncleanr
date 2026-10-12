@@ -11,7 +11,11 @@ test_that('native character normalization matches the original R transformations
     mixed = 'RMB \uff11\uff12\uff0e\uff15\u4e07\u2212\U0001f600')
   expect_identical(cncleanr:::normalize_cn_number_characters(x), reference(x))
   expect_identical(cncleanr:::normalize_cn_number_characters(character()), character())
-  expect_error(.Call(cncleanr:::C_normalize_characters, 1), 'Invalid normalization')
+  expect_error(.Call(cncleanr:::C_normalize_characters, 1, FALSE), 'Invalid normalization')
+  expect_error(.Call(cncleanr:::C_normalize_characters, '1', NA), 'Invalid normalization')
+  stripped <- gsub('[[:space:]\u3000\u00a0\u202f]+', '', reference(x), perl = TRUE)
+  expect_identical(cncleanr:::normalize_cn_number_text(x), stripped)
+  expect_identical(cncleanr:::normalize_cn_number_text(reference(x), TRUE), stripped)
   expect_error(cncleanr:::normalize_cn_number_characters('\ufffe'), 'noncharacter')
   bytes <- '\xff'
   Encoding(bytes) <- 'bytes'

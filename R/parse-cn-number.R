@@ -220,12 +220,11 @@ parse_cn_number <- function(
 }
 
 normalize_cn_number_text <- function(x, characters_normalized = FALSE) {
-  if (!characters_normalized) x <- normalize_cn_number_characters(x)
-  gsub("[[:space:]\u3000\u00a0\u202f]+", "", x, perl = TRUE)
+  .Call(C_normalize_characters, enc2utf8(x), TRUE)
 }
 
 normalize_cn_number_characters <- function(x) {
-  .Call(C_normalize_characters, enc2utf8(x))
+  .Call(C_normalize_characters, enc2utf8(x), FALSE)
 }
 
 has_invalid_cn_digit_spacing <- function(x, characters_normalized = FALSE) {

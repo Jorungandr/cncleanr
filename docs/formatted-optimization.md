@@ -262,3 +262,63 @@ checks were not run. An ASCII-prefilter experiment was discarded after slowing
 full-width input. Earlier historical scripts require a candidate DLL compatible
 with current source; the formatted benchmark was updated to load both symbols.
 独立安装、318 项断言及整包检查通过；未检查 PDF 手册和远程 incoming。
+
+### Native whitespace removal / C 空白清理 (2026-10-12)
+
+The same registered routine now takes a validated private logical flag for
+whitespace removal. It removes ASCII space and U+0009–U+000D, NBSP (U+00A0),
+narrow NBSP (U+202F), and ideographic space (U+3000), matching the previous regex
+on the tested characters. Full-width/sign normalization and whitespace removal
+can occur in the same transformation. Digit-grouping checks remain unchanged
+and run before removal. The existing `characters_normalized` helper argument
+remains accepted; applying the character mapping again is idempotent.
+同一个原生函数增加私有逻辑参数，清理原来支持的 ASCII 和 Unicode 空白。
+仍先检查数字分组，再去空白；保留缺失标记匹配与错误顺序。
+
+Baseline is the retained native-character package (`2d45ab4`), candidate is this
+independently installed version. Five alternating paired trials, median seconds
+per call; data construction and I/O excluded. Local 100k results:
+
+| Input / 输入 | Baseline / 基线 | Candidate / 当前 |
+| --- | ---: | ---: |
+| Plain / 普通数值 | 0.006 s | 0.006 s |
+| Currency / 货币前缀 | 0.008 s | 0.008 s |
+| Spaced currency / 带空白货币前缀 | 0.140 s | 0.116 s |
+| Accounting / 括号负数 | 0.018 s | 0.018 s |
+| Full-width / 全角数字 | 0.112 s | 0.118 s |
+| Mixed grouping / 混合空白分组 | 0.176 s | 0.146 s |
+| Invalid / 全无效 | 0.066 s | 0.064 s |
+
+Spaced currency and grouping improved about 17%; full-width regressed slightly
+in this sample. Do not combine these timings with earlier tables to calculate
+speedups. Differential checks passed for all three parsers; the normalization
+regression also compares stripping against the original regex across the
+existing BMP/supplementary-character grid and both helper modes.
+带空白货币和分组样本约改善 17%，全角本次略慢；三种解析器差异验证通过。
+
+Independent installation and `R CMD check --as-cran --no-manual` completed:
+`Status: OK`, exit 0, `FAIL 0 | WARN 0 | SKIP 0 | PASS 321`. Logs:
+`outputs/whitespace-c/check/cncleanr.Rcheck/`. PDF manual and remote incoming
+checks were not run. A small mixed full-width/Unicode-whitespace/NA/signed-input
+check also passed with `gctorture(TRUE)` to exercise native buffer protection.
+独立安装及整包检查通过，321 项断言通过；强制垃圾回收下的混合输入检查通过。
+未检查 PDF 手册及远程 incoming。
+
+Million-row paired results for this whitespace change:
+
+| Input / 输入 | Baseline / 基线 | Candidate / 当前 |
+| --- | ---: | ---: |
+| Plain / 普通数值 | 0.09 s | 0.09 s |
+| Currency / 货币前缀 | 0.09 s | 0.09 s |
+| Spaced currency / 带空白货币前缀 | 0.86 s | 0.71 s |
+| Accounting / 括号负数 | 0.10 s | 0.09 s |
+| Full-width / 全角数字 | 0.57 s | 0.64 s |
+| Mixed grouping / 混合空白分组 | 2.25 s | 2.06 s |
+| Invalid / 全无效 | 0.80 s | 1.11 s |
+
+The million-row differential checks passed. Spaced currency improved about
+17%, grouping about 8%, but full-width and invalid-input timing regressed in
+this run. This is a whitespace-path improvement, not a universal acceleration.
+Avoiding work on unchanged/no-whitespace text remains a follow-up target.
+百万条结果一致性检查通过。带空白货币约改善 17%，分组约改善 8%，
+但全角及全无效样本本次退步，需继续减少无空白/未改变文本的处理开销。

@@ -29,6 +29,8 @@ Development benchmarks: [native numeric acceleration](docs/native-optimization.m
 
 The development version shares a native scan for full-width characters and PDF minus signs across number, quantity and range parsing, retaining whitespace-grouping validation. A local million-row full-width sample improved from 0.99 to 0.66 seconds; see the formatted-number benchmark above.
 
+Whitespace removal now reuses this native scan. Spaces between digits are still checked for valid grouping first, so `1 2` is not silently parsed as `12`.
+
 ## Enterprise revenue cleaning example
 
 Complete walkthrough: [real financial tables, mixed units, and failure tracing](docs/financial-table-example_EN.md).

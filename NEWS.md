@@ -1,5 +1,9 @@
 # Development changes (unreleased)
 
+* Removes supported whitespace in the existing native normalization scan,
+  avoiding a separate regex replacement. Digit-grouping validation still runs
+  before whitespace removal, preserving diagnostics and missing-marker rules.
+
 * Normalizes full-width characters and PDF minus signs in a shared native pass
   for numbers, quantities and ranges. Preserves names and missing values;
   retains whitespace-grouping validation in R.

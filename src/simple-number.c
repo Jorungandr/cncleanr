@@ -99,9 +99,11 @@ static SEXP simple_numbers(SEXP text, SEXP header)
     return values;
 }
 
-static SEXP normalize_characters(SEXP text)
+static SEXP normalize_characters(SEXP text, SEXP strip)
 {
-    if (TYPEOF(text) != STRSXP) Rf_error("Invalid normalization arguments.");
+    if (TYPEOF(text) != STRSXP || TYPEOF(strip) != LGLSXP || XLENGTH(strip) != 1 ||
+        LOGICAL(strip)[0] == NA_LOGICAL) Rf_error("Invalid normalization arguments.");
+    int strip_spaces = LOGICAL(strip)[0];
     R_xlen_t size = XLENGTH(text);
     size_t capacity = 1;
     for (R_xlen_t i = 0; i < size; ++i) {
@@ -122,12 +124,15 @@ static SEXP normalize_characters(SEXP text)
         const unsigned char *p = (const unsigned char *) Rf_translateCharUTF8(cell);
         char *out = buffer;
         while (*p) {
+            if (strip_spaces && (*p == ' ' || (*p >= '\t' && *p <= '\r'))) { ++p; continue; }
+            if (strip_spaces && p[0] == 0xc2 && p[1] == 0xa0) { p += 2; continue; }
             unsigned int code = 0;
             if (p[0] >= 0xe0 && p[0] <= 0xef && p[1] && p[2] &&
                 (p[1] & 0xc0) == 0x80 && (p[2] & 0xc0) == 0x80)
                 code = ((p[0] & 0x0f) << 12) | ((p[1] & 0x3f) << 6) | (p[2] & 0x3f);
             if (code == 0xfffe || code == 0xffff)
                 Rf_error("Invalid Unicode noncharacter in normalization input.");
+            if (strip_spaces && (code == 0x3000 || code == 0x202f)) { p += 3; continue; }
             int replacement = 0;
             if (code >= 0xff10 && code <= 0xff19) replacement = '0' + code - 0xff10;
             else switch (code) {
@@ -158,7 +163,7 @@ static SEXP normalize_characters(SEXP text)
 
 static const R_CallMethodDef methods[] = {
     {"simple_numbers", (DL_FUNC) &simple_numbers, 2},
-    {"normalize_characters", (DL_FUNC) &normalize_characters, 1},
+    {"normalize_characters", (DL_FUNC) &normalize_characters, 2},
     {NULL, NULL, 0}
 };
 
