@@ -56,3 +56,17 @@ test_that('generated grouped endpoints agree with known numeric bounds', {
   expect_true(all(result$lower_inclusive & result$upper_inclusive))
   expect_equal(nrow(cn_problems(result)), 0L)
 })
+
+test_that('large repeated grouped ranges retain expanded endpoint diagnostics', {
+  x <- rep(c('1 234-2 345', '1 23-2 345', '2 345-1 234'), 400L)
+  names(x) <- seq_along(x)
+  result <- suppressWarnings(parse_cn_range(x))
+  failed <- which(seq_along(x) %% 3L != 1L)
+  expect_identical(result$lower, rep(c(1234, NA_real_, NA_real_), 400L))
+  expect_identical(result$upper, rep(c(2345, NA_real_, NA_real_), 400L))
+  expect_identical(cn_problems(result)$index, failed)
+  expect_identical(cn_problems(result)$value, unname(x[failed]))
+  expect_identical(cn_problems(result)$reason, rep(c('digits use invalid whitespace grouping',
+    'range lower bound is greater than its upper bound'), 400L))
+  expect_error(parse_cn_range(x, strict = TRUE), 'positions 2, 3, 5, 6, 8')
+})
