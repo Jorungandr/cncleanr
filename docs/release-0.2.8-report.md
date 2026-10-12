@@ -1,4 +1,27 @@
-# 0.2.8 发布候选验收 / Release-candidate validation
+# 0.2.8 发布包验收 / Release validation
+
+## 最终发布文件 / Final release file
+
+发布使用重新构建并检查的正式源码包：
+`outputs/release-0.2.8/publish-artifacts/cncleanr_0.2.8.tar.gz`。
+它包含正式版安装说明和 NEWS，不是下文保留的早期候选文件。
+
+SHA-256:
+
+```text
+1AE8F2A98F2E0B4CA09E49199B22AE95399B9BDAA6A713130A78BF66213986CF
+```
+
+该文件的独立 `R CMD check --as-cran --no-manual` 为 `Status: OK`，
+退出码 0，339 项断言通过。日志：
+`outputs/release-0.2.8/publish-check/cncleanr.Rcheck/`。
+本地未检查 PDF 手册和远程 incoming；最终提交的远程 CI 将在发布前核对。
+The release archive above was rebuilt with final installation documentation and
+NEWS, then checked independently: OK, exit 0, 339 assertions passed. It replaces
+the earlier candidate as the release attachment. Candidate evidence below is
+retained as history, not a claim that both archive hashes are identical.
+
+## 候选阶段历史 / Candidate-stage history
 
 2026-10-12。版本号和 NEWS 已更新为 0.2.8 发布候选；解析算法没有再次改动。
 中英文 README 标明该候选尚未正式发布，v0.2.7 安装命令仍指向已有发布。

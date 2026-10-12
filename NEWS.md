@@ -1,4 +1,4 @@
-# cncleanr 0.2.8 (release candidate)
+# cncleanr 0.2.8
 
 ## User-facing summary
 

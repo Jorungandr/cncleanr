@@ -82,3 +82,11 @@ Package versions, release tags, GitHub releases, and CRAN submissions are
 maintainer responsibilities. Contributors should not update `Version` in
 `DESCRIPTION`, create release commits, or move tags unless a maintainer asks
 them to do so.
+
+For maintainer-requested cncleanr updates, complete the GitHub workflow in one
+pass: implementation, bilingual documentation, version/release notes, checks,
+fixed tag, checked source attachment, release publication and post-release
+verification. Do not require separate confirmations for each ordinary step.
+Pause only for blockers, ambiguity or materially new authority. Requests limited
+to explanation/review do not authorize publication; CRAN submission always
+requires separate authorization. Never move an existing published version tag.

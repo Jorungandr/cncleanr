@@ -18,16 +18,16 @@ Install from [CRAN](https://CRAN.R-project.org/package=cncleanr) (verified as 0.
 install.packages("cncleanr")
 ```
 
-Alternatively, pin the GitHub release v0.2.7, which includes table-header units and combined approximation qualifiers, but not this round of C acceleration:
+Alternatively, pin the GitHub release v0.2.8, which includes table-header units, combined approximation qualifiers and this round of C acceleration:
 
 ```r
 install.packages("pak")
-pak::pak("Jorungandr/cncleanr@v0.2.7")
+pak::pak("Jorungandr/cncleanr@v0.2.8")
 ```
 
 ### Development version and source installation
 
-To use this round of optimizations, install the unreleased development branch (`main` changes over time; replace it with a full commit SHA to pin the code):
+For subsequent development changes, install the development branch (`main` changes over time; replace it with a full commit SHA to pin the code):
 
 ```r
 install.packages("pak")
@@ -52,7 +52,7 @@ parse_cn_number(c("3万", "１２．５％"))
 #> [1] 30000.000     0.125
 ```
 
-The development tree is now a 0.2.8 release candidate; no v0.2.8 release has been published. Since `main` can still change, record the installed commit SHA for reproducibility. The v0.2.7 command above remains pinned to the existing release.
+The v0.2.8 release tag contains this optimization round; source installation requires the build tools above. Since `main` can still change, use a fixed tag or record the installed commit SHA for reproducibility.
 
 ### Performance and release preparation
 
