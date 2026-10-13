@@ -85,7 +85,7 @@ cn_encoding_call <- function(code, argument = "x") {
     message <- conditionMessage(error)
     if (!grepl("UTF-8|bytes.*encoding|Unicode noncharacter|invalid multibyte|utf8towcs", message)) stop(error)
     stop(structure(list(message = message, call = NULL, argument = argument,
-      original_message = message), class = c("cn_encoding_error", "error", "condition")))
+      original_message = message), class = c("cn_encoding_error", "simpleError", "error", "condition")))
   })
 }
 
@@ -102,9 +102,9 @@ cn_with_encoding_context <- function(x, na, code) {
     while (lo < hi) {
       middle <- floor((lo + hi) / 2)
       valid <- tryCatch({
-        .Call(C_normalize_characters, enc2utf8(input[seq.int(lo, middle)]), FALSE)
+        cn_encoding_call(.Call(C_normalize_characters, enc2utf8(input[seq.int(lo, middle)]), FALSE))
         TRUE
-      }, error = function(e) FALSE)
+      }, cn_encoding_error = function(e) FALSE)
       if (valid) lo <- middle + 1L else hi <- middle
     }
     error$index <- lo

@@ -67,6 +67,9 @@ test_that('ordinary diagnostics and valid encodings remain unchanged', {
   latin <- iconv('\u00a51', from = 'UTF-8', to = 'latin1')
   Encoding(latin) <- 'latin1'
   expect_identical(parse_cn_number(c(latin, '\uff11\u4e07')), c(1, 10000))
+  expect_error(parse_cn_number('\ufffe'), class = 'simpleError')
+  expect_error(cncleanr:::cn_with_encoding_context('1', character(),
+    cncleanr:::cn_encoding_call(stop('ordinary failure'))), 'ordinary failure')
   for (parser in list(parse_cn_number, parse_cn_quantity, parse_cn_range)) {
     input <- c('1', '2')
     expected <- parser(input)
