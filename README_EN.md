@@ -18,11 +18,11 @@ Install from [CRAN](https://CRAN.R-project.org/package=cncleanr) (verified as 0.
 install.packages("cncleanr")
 ```
 
-Alternatively, pin the GitHub release v0.2.10, which includes table-header units, combined approximation qualifiers, C acceleration, malformed UTF-8 protection and grouped-range endpoint fixes:
+Alternatively, pin the GitHub release v0.2.11, which includes table-header units, combined approximation qualifiers, C acceleration, malformed UTF-8 protection and range endpoint grouping/missing-marker fixes:
 
 ```r
 install.packages("pak")
-pak::pak("Jorungandr/cncleanr@v0.2.10")
+pak::pak("Jorungandr/cncleanr@v0.2.11")
 ```
 
 ### Development version and source installation
@@ -221,6 +221,13 @@ Since 0.2.10, whitespace digit grouping is validated independently at each endpo
 `12340000` to `23450000`. `1 23-2 345` still reports invalid grouping rather
 than silently joining digits; `2 345-1 234` reports reversed bounds. A single
 approximate value does not define explicit bounds.
+
+Since 0.2.11, textual endpoint missing markers are checked both before and after
+shared-unit propagation. With `na = "0"`, `0-5万` reports an invalid endpoint
+instead of resurrecting `0` by appending `万`; strict mode raises an error.
+Matching uses normalized text, not numeric equality, so `0万-5万` does not match
+the marker `"0"`. A whole cell matching `na` remains an ordinary missing value
+without a parsing problem.
 
 ## Return-value reference
 

@@ -1,3 +1,13 @@
+# cncleanr 0.2.11
+
+* Preserves original range endpoint missing markers before shared-unit
+  propagation. Configured markers such as `0` can no longer become valid
+  endpoints by receiving a magnitude or percentage suffix. Existing checks
+  after propagation and whole-cell missing precedence are retained.
+* Adds regression coverage for normalized, signed/scientific, grouped and
+  repeated endpoints, textual marker matching, factor inputs and strict errors.
+  Public APIs, numeric pass-through and native C sources are unchanged.
+
 # cncleanr 0.2.10
 
 * Fixes closed ranges with valid whitespace-grouped endpoints being rejected

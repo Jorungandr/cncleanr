@@ -6,6 +6,7 @@
 #' scientific notation are distinguished from range separators.
 #' Digit grouping is validated independently at each range endpoint, so
 #' `"1 234-2 345"` is accepted but `"1 23-2 345"` is not.
+#' Endpoint missing markers are checked before and after shared-unit propagation.
 #'
 #' @inheritParams parse_cn_number
 #' @param x A character, factor, or numeric vector. Numeric input is converted
@@ -174,7 +175,7 @@ find_cn_range_endpoints_batch <- function(text, na, normalize_suffix = FALSE) {
   candidate_count <- length(single)
   if (candidate_count) {
     endpoints <- propagate_cn_range_suffix(substring(text[single], 1L, first[single] - 1L),
-                                          right[single], normalize_suffix)
+                                          right[single], normalize_suffix, na)
     candidate_source[seq_len(candidate_count)] <- single
     candidate_left[seq_len(candidate_count)] <- endpoints$left
     candidate_right[seq_len(candidate_count)] <- endpoints$right
@@ -194,7 +195,7 @@ find_cn_range_endpoints_batch <- function(text, na, normalize_suffix = FALSE) {
       if (!nzchar(left) || !nzchar(right)) {
         next
       }
-      endpoints <- propagate_cn_range_suffix(left, right, normalize_suffix)
+      endpoints <- propagate_cn_range_suffix(left, right, normalize_suffix, na)
       candidate_count <- candidate_count + 1L
       candidate_source[[candidate_count]] <- i
       candidate_left[[candidate_count]] <- endpoints$left
@@ -229,13 +230,14 @@ find_cn_range_endpoints_batch <- function(text, na, normalize_suffix = FALSE) {
   list(values = values, reason = reason)
 }
 
-propagate_cn_range_suffix <- function(left, right, normalize_suffix = FALSE) {
+propagate_cn_range_suffix <- function(left, right, normalize_suffix = FALSE, na = character()) {
   suffix_pattern <- paste0(
     "((?:\u4e07\u4ebf|\u4e07|\u4ebf)(?:\u4eba\u6c11\u5e01|\u5757\u94b1|\u5143|\u5757)?|\u5343\u5143|",
     "(?:\u4eba\u6c11\u5e01|\u5757\u94b1|\u5143|\u5757)|%)$"
   )
   text <- c(left, right)
   if (normalize_suffix) text <- normalize_cn_number_text(text, characters_normalized = TRUE)
+  missing <- text %in% na
   matches <- regexpr(suffix_pattern, text, perl = TRUE)
   suffixes <- rep("", length(text))
   present <- which(matches > 0L)
@@ -247,5 +249,8 @@ propagate_cn_range_suffix <- function(left, right, normalize_suffix = FALSE) {
   add_right <- nzchar(left_suffix) & !nzchar(right_suffix)
   left[add_left] <- paste0(left[add_left], right_suffix[add_left])
   right[add_right] <- paste0(right[add_right], left_suffix[add_right])
+  # Appending a shared unit must not resurrect an original missing endpoint.
+  left[missing[seq_along(left)]] <- NA_character_
+  right[missing[length(left) + seq_along(right)]] <- NA_character_
   list(left = left, right = right)
 }
