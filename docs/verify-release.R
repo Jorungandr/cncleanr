@@ -19,8 +19,10 @@ verify <- function() {
   root <- file.path(directory, 'cncleanr')
   source_description <- read.dcf('DESCRIPTION')
   built_description <- read.dcf(file.path(root, 'DESCRIPTION'))
-  stopifnot(identical(unname(source_description),
-    unname(built_description[, colnames(source_description), drop = FALSE])))
+  canonical <- function(x) gsub('[[:space:]]+', ' ', x)
+  # R CMD build folds fields such as Suggests into one line.
+  stopifnot(identical(canonical(source_description),
+    canonical(built_description[, colnames(source_description), drop = FALSE])))
   required <- c('NAMESPACE', 'LICENSE', 'README.md', 'NEWS.md',
     list.files(c('R', 'src', 'man', 'tests', 'inst'), recursive = TRUE, full.names = TRUE))
   required <- required[!grepl('[.](o|dll|so)$|/symbols[.]rds$', required)]

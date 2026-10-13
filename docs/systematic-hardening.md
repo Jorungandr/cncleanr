@@ -44,6 +44,38 @@ Final source archive check, platform CI, native tools and public asset verificat
 are recorded below only after completion. Historical native results are not reused
 as fresh evidence. PDF/incoming checks unavailable locally are not claimed.
 
+## 最终源码包 / Checked source archive
+
+`outputs/systematic-hardening/artifacts/cncleanr_0.2.12.tar.gz`
+
+SHA-256: `9C9B6C06D7D2FB893C6F17AFE1C2C6D4BA55CE90D91B75144039F7353DF324E7`
+
+- Windows 11 x64, R 4.6.1, existing UCRT GCC 15.2: exact archive
+  `R CMD check --as-cran --no-manual` returned `Status: OK`, exit 0,
+  `FAIL 0 | WARN 0 | SKIP 0 | PASS 633`. Incoming disabled; no local PDF check.
+- `docs/verify-release.R` passed against the check-installed package and checked
+  archive, comparing package contents with the checkout (allowing CRLF/LF and
+  R CMD build's DCF whitespace folding). Wrong version tags are rejected.
+- All 633 development assertions, dependency-free `tests/parser.R`, retained
+  audits, batch stress and CSV round-trip passed. `gctorture(TRUE)` with all
+  three public parsers, full-width inputs and extreme scaling also passed.
+- [Source CI 38343202131](https://github.com/Jorungandr/cncleanr/actions/runs/38343202131)
+  at `5b58e6852f742a1c92e85126de7c054914a1134f`: all five platform checks
+  `Status: OK`, 633 assertions each. Linux release PDF and HTML manuals both OK;
+  installing Tidy removed the previous skipped-HTML NOTE.
+
+The archive package payload matches this source checkpoint. Later verification
+script/report changes are excluded from the package; the hash above identifies
+this specific checked archive, not every rebuild.
+
+Native tools: [R-hub 38343208232](https://github.com/Jorungandr/cncleanr/actions/runs/38343208232)
+checks the same source checkpoint. Completed clang-ASAN and clang-UBSAN logs
+report `Status: OK`, 633 assertions each. Valgrind evidence will be recorded
+after its full check completes; successful platform CI is not a substitute.
+
+Negative checks also verified stale installed-version rejection, wrong release
+tag-version rejection, invalid snapshot arguments and missing snapshot rejection.
+
 ## 留存限制 / Retained limits
 
 Double rounding above `2^53`; extract problems before transforming results;
