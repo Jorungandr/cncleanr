@@ -27,3 +27,10 @@ handling and existing range helpers. Do not introduce runtime dependencies.
    development tests and `tests/parser.R`, build/check the source package.
 6. Review diff, commit scoped files, push, verify CI, create matching tag/release,
    install the published asset and verify it. Never claim unavailable checks ran.
+
+## Completion
+
+All six tasks completed. Release v0.2.12 is fixed at `fd52a63`; checked/public
+archive SHA-256 and local, five-platform, sanitizer/Valgrind, data and published
+installation evidence are recorded in `docs/systematic-hardening.md`.
+No CRAN upload or changes to deferred semantic policies.

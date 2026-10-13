@@ -1,8 +1,8 @@
 # 下一版发布准备 / Next-release preparation
 
-0.2.12 系统整改与最新验收见[系统整改记录](systematic-hardening.md)。
-The current 0.2.12 hardening/check status is recorded there; the 0.2.11 and older
-publication sections below are historical and do not certify this candidate.
+0.2.12 已完成 GitHub 发布，系统整改与最新验收见[系统整改记录](systematic-hardening.md)。
+GitHub 0.2.12 is published; its hardening/check evidence is recorded there.
+The 0.2.11 and older publication sections below are historical.
 
 ## 当前发布状态 / Current publication status
 

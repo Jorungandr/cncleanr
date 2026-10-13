@@ -1,8 +1,8 @@
 # 系统整改与发布验收 / Systematic hardening and release validation
 
-2026-10-13，候选版本 0.2.12。集中完成已批准的正确性与工程整改；
+2026-10-13，GitHub 正式版本 0.2.12。集中完成已批准的正确性与工程整改；
 没有新增语法、运行时依赖、第二套解析包，也没有 CRAN 提交。
-Candidate 0.2.12 consolidates the approved audit fixes, without new syntax,
+Release 0.2.12 consolidates the approved audit fixes, without new syntax,
 runtime dependencies, a second parser package or CRAN submission.
 
 ## 修复与兼容性 / Fixes and compatibility
@@ -40,9 +40,9 @@ The unused normalization flag was removed rather than adding another abstraction
 - Launcher repair/restoration/exit-code checks passed. Compilation used existing
   local UCRT GCC; shell utilities needed a process-local PATH, not system changes.
 
-Final source archive check, platform CI, native tools and public asset verification
-are recorded below only after completion. Historical native results are not reused
-as fresh evidence. PDF/incoming checks unavailable locally are not claimed.
+Final source archive, platform CI, native tools and public asset evidence is
+recorded below. Historical native results are not reused as fresh evidence.
+PDF/incoming checks unavailable locally are not claimed.
 
 ## 最终源码包 / Checked source archive
 
@@ -69,12 +69,32 @@ script/report changes are excluded from the package; the hash above identifies
 this specific checked archive, not every rebuild.
 
 Native tools: [R-hub 38343208232](https://github.com/Jorungandr/cncleanr/actions/runs/38343208232)
-checks the same source checkpoint. Completed clang-ASAN and clang-UBSAN logs
-report `Status: OK`, 633 assertions each. Valgrind evidence will be recorded
-after its full check completes; successful platform CI is not a substitute.
+checks the same source checkpoint. clang-ASAN, clang-UBSAN and Valgrind all
+report `Status: OK`, 633 assertions each. Actual Valgrind logs for examples,
+dependency-free regression and testthat report `0 errors from 0 contexts`,
+with definitely/indirectly/possibly lost all zero bytes.
 
 Negative checks also verified stale installed-version rejection, wrong release
 tag-version rejection, invalid snapshot arguments and missing snapshot rejection.
+
+## 发布完成 / Published
+
+[GitHub v0.2.12](https://github.com/Jorungandr/cncleanr/releases/tag/v0.2.12)
+固定标签指向 `fd52a635a759c076d21f9241fd8c4b16db696f3d`，旧标签未改动。
+[最终标签 CI 38343908692](https://github.com/Jorungandr/cncleanr/actions/runs/38343908692)
+五项均 OK、633 个断言各自通过，Linux PDF 和 HTML 手册也均 OK。
+标签与原生检查点的包文件一致，后续差异仅为包外验收脚本/记录。
+正式附件为 40,792 字节，GitHub digest 和发布后重新下载的 SHA-256
+均与上面的已检查文件一致。独立库安装成功，发布验收脚本通过。
+下载附件安装后的完整 633 个断言与基础回归也全部通过。
+本次没有提交 CRAN。
+
+Published at the fixed tag above. All five final-tag CI checks passed 633
+assertions each, including Linux PDF/HTML validation. Package payload matches
+the native-tool checkpoint. The 40,792-byte public source attachment was
+downloaded, hash-verified, installed independently and passed release smoke
+verification, all 633 development assertions and the dependency-free regression.
+Existing tags/assets are preserved. No CRAN submission.
 
 ## 留存限制 / Retained limits
 
