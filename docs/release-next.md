@@ -1,5 +1,9 @@
 # 下一版发布准备 / Next-release preparation
 
+0.2.13 诊断更新与最新验收见[诊断工作流记录](diagnostic-workflow.md)。
+The current diagnostic update/check status is recorded there; older sections
+below retain their historical publication evidence.
+
 0.2.12 已完成 GitHub 发布，系统整改与最新验收见[系统整改记录](systematic-hardening.md)。
 GitHub 0.2.12 is published; its hardening/check evidence is recorded there.
 The 0.2.11 and older publication sections below are historical.

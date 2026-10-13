@@ -63,6 +63,7 @@ parse_cn_number <- function(
   strict = FALSE,
   unit = NULL
 ) {
+  cn_with_encoding_context(x, na, {
   input_names <- names(x)
   if (!is.logical(strict) || length(strict) != 1L || is.na(strict)) {
     stop("`strict` must be a single TRUE or FALSE value.", call. = FALSE)
@@ -106,9 +107,9 @@ parse_cn_number <- function(
     return(output)
   }
 
-  fast <- .Call(C_simple_numbers, x,
-                if (is.null(header_multiplier)) NA_real_ else header_multiplier)
-  normalized_na <- normalize_cn_number_text(na)
+  fast <- cn_encoding_call(.Call(C_simple_numbers, x,
+                if (is.null(header_multiplier)) NA_real_ else header_multiplier))
+  normalized_na <- normalize_cn_number_text(na, argument = "na")
   missing_fast <- is.na(x) | x %in% normalized_na
   fast[missing_fast] <- NA_real_
   if (all(!is.na(fast) | missing_fast)) {
@@ -151,8 +152,8 @@ parse_cn_number <- function(
   normalized_fast <- rep(NA_real_, length(normalized))
   retry <- which(!is_missing & !invalid_spacing & normalized != x)
   if (length(retry)) {
-    normalized_fast[retry] <- .Call(C_simple_numbers, normalized[retry],
-      if (is.null(header_multiplier)) NA_real_ else header_multiplier)
+    normalized_fast[retry] <- cn_encoding_call(.Call(C_simple_numbers, normalized[retry],
+      if (is.null(header_multiplier)) NA_real_ else header_multiplier))
   }
   output[pending] <- normalized_fast
   active_local <- which(!is_missing & is.na(normalized_fast))
@@ -262,6 +263,7 @@ parse_cn_number <- function(
   }
 
   output
+  })
 }
 
 convert_cn_scaled_boundary <- function(text, scale) {
@@ -281,12 +283,12 @@ convert_cn_scaled_boundary <- function(text, scale) {
   }, numeric(1))
 }
 
-normalize_cn_number_text <- function(x) {
-  .Call(C_normalize_characters, enc2utf8(x), TRUE)
+normalize_cn_number_text <- function(x, argument = "x") {
+  cn_encoding_call(.Call(C_normalize_characters, enc2utf8(x), TRUE), argument)
 }
 
 normalize_cn_number_characters <- function(x) {
-  .Call(C_normalize_characters, enc2utf8(x), FALSE)
+  cn_encoding_call(.Call(C_normalize_characters, enc2utf8(x), FALSE))
 }
 
 has_invalid_cn_digit_spacing <- function(x, characters_normalized = FALSE) {

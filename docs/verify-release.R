@@ -41,4 +41,7 @@ stopifnot(as.character(packageVersion('cncleanr', lib.loc = lib)) == expected,
           parse_cn_quantity('约3万')$qualifier == 'approx',
           parse_cn_range('3-5万')$upper == 50000,
           nrow(cn_problems(suppressWarnings(parse_cn_range('3%-5元')))) == 1L)
+selected <- cn_subset(suppressWarnings(parse_cn_number(c('bad', '2'))), c(2, 1, 1))
+stopifnot(identical(cn_problems(selected)$index, 2:3))
+source('docs/diagnostic-workflow.R', encoding = 'UTF-8')
 cat('PASS: checkout/archive/installed version and parser smoke checks:', expected, '\n')

@@ -41,6 +41,7 @@ parse_cn_range <- function(
   ),
   strict = FALSE
 ) {
+  cn_with_encoding_context(x, na, {
   validate_cn_parse_arguments(x, na, strict)
 
   if (is.numeric(x)) {
@@ -72,7 +73,7 @@ parse_cn_range <- function(
   characters <- normalize_cn_number_characters(x)
   invalid_spacing <- has_invalid_cn_digit_spacing(characters, characters_normalized = TRUE)
   normalized <- normalize_cn_number_text(characters)
-  normalized_na <- normalize_cn_number_text(na)
+  normalized_na <- normalize_cn_number_text(na, argument = "na")
   is_missing <- is.na(normalized) | normalized %in% normalized_na
   invalid_spacing <- invalid_spacing & !is_missing
   problem_reason <- rep(NA_character_, size)
@@ -158,6 +159,7 @@ parse_cn_range <- function(
     stringsAsFactors = FALSE
   )
   apply_cn_problems(output, problems, strict)
+  })
 }
 
 find_cn_range_endpoints_batch <- function(text, na, normalize_suffix = FALSE) {

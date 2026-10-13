@@ -18,11 +18,11 @@
 install.packages("cncleanr")
 ```
 
-也可以从 GitHub 安装版本 v0.2.12，包含上述功能，以及单位冲突、极端数值换算、名称保留和分组诊断修复：
+也可以从 GitHub 安装版本 v0.2.13，包含上述修复，以及显式筛选／重排诊断和编码错误位置：
 
 ```r
 install.packages("pak")
-pak::pak("Jorungandr/cncleanr@v0.2.12")
+pak::pak("Jorungandr/cncleanr@v0.2.13")
 ```
 
 ### 开发版本与源码安装
@@ -39,6 +39,8 @@ pak::pak("Jorungandr/cncleanr@main")
 从 0.2.9 开始，规范化会明确拒绝非法 UTF-8（如截断字节序列），而不是继续处理损坏的文本。
 这是编码错误，不是普通的数值解析失败；`strict = FALSE` 也会报错，不会产生可继续使用的部分结果。
 请先按数据实际编码正确导入或转换；有效 UTF-8 和 Latin-1 文本的处理不变。
+从 0.2.13 起，错误会指出 `x` 或 `na` 中首个失败值的原始位置，例如
+``Input `x` at position 3``，而不是去重或回退后的内部位置。
 
 - Windows：安装与 R 版本匹配的 [Rtools](https://cran.r-project.org/bin/windows/Rtools/)。
 - macOS：准备 Xcode Command Line Tools 和与 R 兼容的 C 编译器，参见 [R 官方安装说明](https://cran.r-project.org/doc/manuals/r-release/R-admin.html#macOS)。
@@ -258,6 +260,28 @@ parse_cn_number(c("2万", "abc"), strict = TRUE)
 
 无论使用哪种模式，自定义缺失值（例如默认支持的 `"暂无"`）都不算解析失败。
 
+### 筛选和排序时保留诊断
+
+从 0.2.13 起，使用 `cn_subset()` 显式筛选、重排或重复取行；数字向量和数据框的返回类型不变：
+
+```r
+parsed <- suppressWarnings(parse_cn_number(c("bad", "2万", "wrong", "1万")))
+rows <- c(3L, 2L, 1L, 3L)
+selected <- cn_subset(parsed, rows)
+cn_problems(selected)$index
+#> [1] 1 3 4
+cn_problems(selected)$value
+#> [1] "wrong" "bad" "wrong"
+clean <- cn_subset(parsed, !is.na(parsed))
+sorted <- cn_subset(parsed, order(parsed, na.last = TRUE))
+```
+
+问题行号始终对应当前结果的位置；如需原始编号，保留 `rows` 并通过
+`rows[cn_problems(selected)$index]` 映射回原输入。重复取行会重复对应的问题记录。
+逻辑筛选必须与输入等长；数值索引支持整数、零和负索引，不接受缺失、非整数或越界值。
+普通 `[]`、修改、合并结果仍不自动维护诊断；请先使用此函数，它不能修复已经丢失或过期的属性。
+可运行示例和验证记录见[诊断工作流](docs/diagnostic-workflow.md)。
+
 ## 常见失败原因
 
 `cn_problems()` 的 `reason` 可以直接用于定位以下问题：
@@ -294,7 +318,7 @@ Windows 本地开发若在 R 退出时遇到 `cli` 引发的崩溃，可使用
 百分比与金额/数量不能混成区间，例如 `3%-5元`；`3-5%` 和 `3万-5亿` 仍然有效。
 区间候选分隔符超过八个时明确拒绝，以限制异常文本的资源消耗。
 
-请在筛选、排序或合并结果前调用 `cn_problems()`；这些 R 操作可能丢失诊断属性，或留下对应原输入的旧行号。
+筛选或排序时用 `cn_subset()`；若使用普通 `[]` 或合并、修改结果，请事先提取 `cn_problems()`，这些操作不会自动维护诊断属性。
 缺失标记按文本匹配，不按数值相等匹配；限定数量仍匹配整格文本。矩阵/数组沿用展平行为，建议显式传入目标列。
 会计括号内单位的共享规则、无效 UTF-8 的整批中断策略保持不变。
 

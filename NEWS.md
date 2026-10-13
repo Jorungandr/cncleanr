@@ -1,3 +1,17 @@
+# cncleanr 0.2.13
+
+* Adds `cn_subset()` for explicit filtering/reordering of parser results, including
+  duplicated selections and chained subsets. Problems are remapped to selected
+  positions without adding result classes or repeating parse warnings.
+* Rejects missing, fractional, nonfinite and out-of-range selections; logical
+  selections must have exactly the original result length/row count.
+* Encoding failures identify the originating argument (`x` or `na`) and first
+  original position, including fallback/deduplicated paths and factors. Native
+  validation is reused only on failure; malformed text still stops the batch.
+* Adds focused regressions, a CI-executable example and bilingual usage guidance.
+  Existing ordinary diagnostics, return types, numeric pass-through and C sources
+  remain unchanged. Ordinary `[]` and arbitrary mutations still do not track problems.
+
 # cncleanr 0.2.12
 
 * Rejects ranges mixing percentage and non-percentage endpoints while retaining

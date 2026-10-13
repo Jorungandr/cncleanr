@@ -18,11 +18,11 @@ Install from [CRAN](https://CRAN.R-project.org/package=cncleanr) (verified as 0.
 install.packages("cncleanr")
 ```
 
-Alternatively, pin GitHub v0.2.12, which includes those features plus fixes for conflicting range units, extreme scaling, names and grouping diagnostics:
+Alternatively, pin GitHub v0.2.13, which includes those fixes plus explicit diagnostic-preserving selection/reordering and encoding-error locations:
 
 ```r
 install.packages("pak")
-pak::pak("Jorungandr/cncleanr@v0.2.12")
+pak::pak("Jorungandr/cncleanr@v0.2.13")
 ```
 
 ### Development version and source installation
@@ -40,6 +40,8 @@ Since 0.2.9, normalization explicitly rejects malformed UTF-8 (such as truncated
 instead of continuing with damaged text. Encoding errors are not ordinary numeric parsing failures:
 they also stop with `strict = FALSE`, without returning a usable partial result.
 Import or convert data using its actual encoding first; valid UTF-8 and Latin-1 handling is unchanged.
+Since 0.2.13, failures identify the originating `x` or `na` argument and first
+original position, not a deduplicated/fallback position (for example, position 3).
 
 - Windows: install [Rtools](https://cran.r-project.org/bin/windows/Rtools/) matching your R version.
 - macOS: use Xcode Command Line Tools and a C compiler compatible with R; see the [official R installation guide](https://cran.r-project.org/doc/manuals/r-release/R-admin.html#macOS).
@@ -268,6 +270,31 @@ parse_cn_number(c("2万", "abc"), strict = TRUE)
 
 Custom missing values, such as the supported default `"暂无"`, are not parsing failures in either mode.
 
+### Preserve diagnostics when filtering or sorting
+
+Since 0.2.13, `cn_subset()` explicitly filters, reorders or repeats selected rows
+without changing the numeric-vector/data-frame return types:
+
+```r
+parsed <- suppressWarnings(parse_cn_number(c("bad", "2万", "wrong", "1万")))
+rows <- c(3L, 2L, 1L, 3L)
+selected <- cn_subset(parsed, rows)
+cn_problems(selected)$index
+#> [1] 1 3 4
+cn_problems(selected)$value
+#> [1] "wrong" "bad" "wrong"
+clean <- cn_subset(parsed, !is.na(parsed))
+sorted <- cn_subset(parsed, order(parsed, na.last = TRUE))
+```
+
+Indices refer to positions in the current result. Keep `rows` and use
+`rows[cn_problems(selected)$index]` to recover original identifiers. Repeated
+selections repeat problems. Logical selections must be full-length; integer-valued
+numeric indices support zero/negative base-R selection, but not missing,
+fractional or out-of-range indices. Ordinary `[]`, mutation and binding still do
+not track diagnostics. Use this helper first; it cannot recover lost/stale
+attributes. See the [executable diagnostic workflow and evidence](docs/diagnostic-workflow.md).
+
 ## Common failure reasons
 
 The `reason` returned by `cn_problems()` can be used directly to locate these problems:
@@ -308,8 +335,8 @@ reports underflow. Fractional spacing is unsupported: both `.1 234` and
 are rejected; `3-5%` and `3万-5亿` remain valid. More than eight candidate
 range separators are rejected to bound malformed-input resource use.
 
-Call `cn_problems()` before filtering, sorting or binding results: base R
-transformations can drop the attribute or retain stale original input indices.
+Use `cn_subset()` to filter/sort, or extract `cn_problems()` before ordinary
+`[]`, mutation or binding, which can drop the attribute or retain stale indices.
 Missing markers match text, not numerical equality; qualified quantities still
 match the whole cell. Matrix/array flattening is unchanged; pass the target column
 explicitly. Accounting-parenthesis suffix propagation and whole-batch errors on

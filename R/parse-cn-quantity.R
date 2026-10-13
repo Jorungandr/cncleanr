@@ -43,6 +43,7 @@ parse_cn_quantity <- function(
   ),
   strict = FALSE
 ) {
+  cn_with_encoding_context(x, na, {
   validate_cn_parse_arguments(x, na, strict)
 
   if (is.numeric(x)) {
@@ -65,7 +66,7 @@ parse_cn_quantity <- function(
   characters <- normalize_cn_number_characters(x)
   invalid_spacing <- has_invalid_cn_digit_spacing(characters, characters_normalized = TRUE)
   cleaned <- normalize_cn_number_text(characters)
-  normalized_na <- normalize_cn_number_text(na)
+  normalized_na <- normalize_cn_number_text(na, argument = "na")
   is_missing <- is.na(cleaned) | cleaned %in% normalized_na
   qualifier <- rep("exact", length(cleaned))
   qualifier[is_missing] <- NA_character_
@@ -165,6 +166,7 @@ parse_cn_quantity <- function(
                          reason = reason[input_map[failed]], stringsAsFactors = FALSE)
   output <- data.frame(value = value[input_map], qualifier = qualifier[input_map])
   apply_cn_problems(output, problems, strict)
+  })
 }
 
 validate_cn_parse_arguments <- function(x, na, strict) {

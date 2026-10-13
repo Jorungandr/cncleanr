@@ -16,8 +16,8 @@ A data frame with columns \code{index}, \code{value}, and \code{reason}.
 Returns parsing failures attached to an object produced by a cncleanr
 parser. Successful results return an empty data frame with the same stable
 schema.
-Extract problems before subsetting, sorting or binding the result. Base R
-transformations may drop this attribute or retain stale original indices.
+Use \code{\link[=cn_subset]{cn_subset()}} to select or reorder rows with their diagnostics. Other
+base R transformations may drop the attribute or retain stale indices.
 }
 \examples{
 result <- suppressWarnings(parse_cn_number(c("bad", "2\u4e07")))

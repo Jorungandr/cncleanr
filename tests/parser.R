@@ -95,3 +95,11 @@ stopifnot(is.na(conflict$lower), identical(cn_problems(conflict)$reason,
 named_factor <- factor('1\u4e07')
 names(named_factor) <- 'row'
 stopifnot(identical(names(parse_cn_number(named_factor)), 'row'))
+
+selected <- cn_subset(suppressWarnings(parse_cn_number(c('bad', '2', 'wrong'))), c(3, 2, 1, 3))
+stopifnot(identical(cn_problems(selected)$index, c(1L, 3L, 4L)),
+          identical(cn_problems(selected)$value, c('wrong', 'bad', 'wrong')))
+damaged <- rawToChar(as.raw(c(0xef, 0xbc)))
+Encoding(damaged) <- 'UTF-8'
+message <- tryCatch(parse_cn_number(c('2', '2', damaged)), error = conditionMessage)
+stopifnot(grepl('Input `x` at position 3', message, fixed = TRUE))

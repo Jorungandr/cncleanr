@@ -117,3 +117,8 @@ CI currently validates R release/devel/oldrel-1 on Linux and R release on Window
 and macOS. Older R versions and every locale/architecture are not certified;
 valid UTF-8/Latin-1 regressions are not universal encoding support. No arbitrary
 minimum R version is claimed without testing it.
+
+Diagnostic selection is explicit: use `cn_subset()` on untouched parser/helper
+results. Do not add S3 result classes or claim ordinary `[]`/mutation preserves
+problem alignment. Encoding location tests must include original positions after
+fallback/deduplication and distinguish input from missing-marker failures.
