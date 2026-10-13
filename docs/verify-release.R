@@ -24,8 +24,12 @@ verify <- function() {
   required <- c('NAMESPACE', 'LICENSE', 'README.md', 'NEWS.md',
     list.files(c('R', 'src', 'man', 'tests', 'inst'), recursive = TRUE, full.names = TRUE))
   required <- required[!grepl('[.](o|dll|so)$|/symbols[.]rds$', required)]
-  stopifnot(all(file.exists(file.path(root, required))),
-    identical(unname(tools::md5sum(required)), unname(tools::md5sum(file.path(root, required)))))
+  stopifnot(all(file.exists(file.path(root, required))))
+  # Git may check text out as CRLF while the source archive contains LF.
+  different <- unname(tools::md5sum(required)) != unname(tools::md5sum(file.path(root, required)))
+  for (file in required[different])
+    stopifnot(identical(readLines(file, warn = FALSE, encoding = 'UTF-8'),
+      readLines(file.path(root, file), warn = FALSE, encoding = 'UTF-8')))
 }
 verify()
 library(cncleanr, lib.loc = lib)
