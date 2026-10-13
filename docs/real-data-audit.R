@@ -1,7 +1,7 @@
 # Run: python docs/real-data-audit.py
 #      Rscript --vanilla docs/real-data-audit.R
-# Source package functions directly: no installed devtools/testthat required.
-for (file in list.files('R', pattern = '[.]R$', full.names = TRUE)) source(file)
+# Optional first argument: library containing this checkout's installed package.
+source('docs/audit-setup.R')
 root <- 'outputs/real-data-audit'
 cases <- read.delim(file.path(root, 'spans.tsv'), quote = '"',
                    fileEncoding = 'UTF-8', stringsAsFactors = FALSE)
@@ -17,7 +17,11 @@ close <- !is.na(result$value) & !is.na(expected) &
 cases$outcome <- ifelse(is.na(result$value), 'rejected',
                        ifelse(close & result$qualifier == cases$qualifier,
                               'correct', 'wrong_acceptance'))
-write.table(cases, file.path(root, 'results.tsv'), sep = '\t',
+stopifnot(!anyNA(cases$outcome),
+          all(cases$outcome[cases$status == 'valid'] == 'correct'),
+          all(cases$outcome[cases$status == 'invalid'] == 'rejected'),
+          setequal(failed, which(cases$status == 'invalid')))
+write.table(cases, file.path(root, paste0('results-', version, '.tsv')), sep = '\t',
             row.names = FALSE, fileEncoding = 'UTF-8')
 print(table(cases$status, cases$outcome))
 print(table(cases$unit, cases$outcome))
@@ -55,6 +59,7 @@ range_correct <- eligible & accepted & same(ranges$lower, lower) &
 cat('Range eligible:', sum(eligible), '; correct:', sum(range_correct, na.rm=TRUE),
     '; rejected:', sum(eligible & !accepted),
     '; wrong acceptances:', sum(accepted & !range_correct, na.rm=TRUE), '\n')
+stopifnot(all(range_correct[eligible]), !any(accepted & !eligible))
 # Hand-reviewed source spans, literal expected numbers: no extraction regex.
 manual <- data.frame(
   input = c('6.38%', '210935262.33元', '785,646,432.47元',

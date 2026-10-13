@@ -1,3 +1,20 @@
+# cncleanr 0.2.12
+
+* Rejects ranges mixing percentage and non-percentage endpoints while retaining
+  shared suffixes and compatible magnitude units. Corrects grouped-endpoint
+  diagnostics without changing existing reason spellings.
+* Preserves named factor and named empty-vector results. Rejects fractional
+  digit grouping consistently with or without a leading zero.
+* Rescues representable extreme numbers by applying their decimal scale before
+  boundary conversion. Nonzero values that finally round to zero now report
+  `nonzero value underflows the double range` rather than silently becoming zero.
+  Ordinary conversions and numeric pass-through are unchanged.
+* Bounds range candidate expansion for malformed separator floods. Adds
+  independent known-answer regressions alongside native/R differential checks.
+* Current data audits require the checkout's installed version; adds snapshot
+  hash and release archive verification, bilingual usage limits, portable local
+  R launcher discovery and HTML validation tooling in Linux CI.
+
 # cncleanr 0.2.11
 
 * Preserves original range endpoint missing markers before shared-unit

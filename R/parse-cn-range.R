@@ -71,7 +71,7 @@ parse_cn_range <- function(
   original <- x
   characters <- normalize_cn_number_characters(x)
   invalid_spacing <- has_invalid_cn_digit_spacing(characters, characters_normalized = TRUE)
-  normalized <- normalize_cn_number_text(characters, characters_normalized = TRUE)
+  normalized <- normalize_cn_number_text(characters)
   normalized_na <- normalize_cn_number_text(na)
   is_missing <- is.na(normalized) | normalized %in% normalized_na
   invalid_spacing <- invalid_spacing & !is_missing
@@ -136,6 +136,9 @@ parse_cn_range <- function(
   if (length(spaced)) {
     ranges <- find_cn_range_endpoints_batch(characters[spaced], normalized_na,
                                            normalize_suffix = TRUE)
+    endpoint_reason <- ranges$reason
+    specific <- !is.na(endpoint_reason) & endpoint_reason != "value is not a supported range or bound"
+    problem_reason[spaced[specific]] <- endpoint_reason[specific]
     valid <- which(is.na(ranges$reason))
     reversed <- valid[ranges$values[valid, 1L] > ranges$values[valid, 2L]]
     problem_reason[spaced[reversed]] <- "range lower bound is greater than its upper bound"
@@ -162,8 +165,14 @@ find_cn_range_endpoints_batch <- function(text, na, normalize_suffix = FALSE) {
   values <- matrix(NA_real_, nrow = size, ncol = 2L)
   reason <- rep("one or both range endpoints are invalid", size)
   separator <- "[\u81f3\u5230~\uff5e\u2014\u2013-]"
+  # ponytail: valid grammar has at most five signs/separators; a cap of eight
+  # bounds substring expansion without imposing a cell-length restriction.
+  separator_count <- lengths(regmatches(text, gregexpr(separator, text, perl = TRUE)))
+  excessive <- separator_count > 8L
+  reason[excessive] <- "range contains too many separators"
+  text[excessive] <- ""
   first <- regexpr(separator, text, perl = TRUE)
-  reason[first < 0L] <- "value is not a supported range or bound"
+  reason[first < 0L & !excessive] <- "value is not a supported range or bound"
   right <- substring(text, pmax(first + 1L, 1L))
   single <- which(first > 1L & nzchar(right) & !grepl(separator, right, perl = TRUE))
   complex <- setdiff(which(first > 0L), single)
@@ -213,12 +222,24 @@ find_cn_range_endpoints_batch <- function(text, na, normalize_suffix = FALSE) {
 
   endpoint_text <- as.vector(rbind(candidate_left, candidate_right))
   parsed <- suppressWarnings(parse_cn_number(endpoint_text, na = na))
+  endpoint_problems <- cn_problems(parsed)
   invalid_endpoint <- rep(FALSE, length(parsed))
   invalid_endpoint[cn_problems(parsed)$index] <- TRUE
   invalid_endpoint[is.na(parsed)] <- TRUE
   candidate_valid <-
     !invalid_endpoint[seq.int(1L, length(parsed), by = 2L)] &
     !invalid_endpoint[seq.int(2L, length(parsed), by = 2L)]
+  percent_left <- grepl("%\\)?$", normalize_cn_number_text(candidate_left))
+  percent_right <- grepl("%\\)?$", normalize_cn_number_text(candidate_right))
+  incompatible <- candidate_valid & xor(percent_left, percent_right)
+  candidate_valid[incompatible] <- FALSE
+  reason[unique(candidate_source[incompatible])] <- "range endpoints use incompatible units"
+  grouping <- endpoint_problems$index[
+    endpoint_problems$reason == "digits use invalid whitespace grouping"]
+  if (length(grouping)) {
+    bad_candidates <- unique((grouping + 1L) %/% 2L)
+    reason[unique(candidate_source[bad_candidates])] <- "digits use invalid whitespace grouping"
+  }
   parsed <- matrix(as.numeric(parsed), ncol = 2L, byrow = TRUE)
 
   counts <- tabulate(candidate_source[candidate_valid], nbins = size)
@@ -236,7 +257,7 @@ propagate_cn_range_suffix <- function(left, right, normalize_suffix = FALSE, na 
     "(?:\u4eba\u6c11\u5e01|\u5757\u94b1|\u5143|\u5757)|%)$"
   )
   text <- c(left, right)
-  if (normalize_suffix) text <- normalize_cn_number_text(text, characters_normalized = TRUE)
+  if (normalize_suffix) text <- normalize_cn_number_text(text)
   missing <- text %in% na
   matches <- regexpr(suffix_pattern, text, perl = TRUE)
   suffixes <- rep("", length(text))

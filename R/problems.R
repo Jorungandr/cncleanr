@@ -3,6 +3,8 @@
 #' Returns parsing failures attached to an object produced by a cncleanr
 #' parser. Successful results return an empty data frame with the same stable
 #' schema.
+#' Extract problems before subsetting, sorting or binding the result. Base R
+#' transformations may drop this attribute or retain stale original indices.
 #'
 #' @param x An object returned by a cncleanr parsing function.
 #'

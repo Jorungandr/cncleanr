@@ -1,9 +1,5 @@
-# Optional first argument: library containing installed cncleanr >= 0.2.6.
-args <- commandArgs(trailingOnly = TRUE)
-.libPaths(c(if (length(args)) args[[1L]] else 'outputs/release-0.2.6/library', .libPaths()))
-library(cncleanr)
-version <- as.character(packageVersion('cncleanr'))
-stopifnot(packageVersion('cncleanr') >= package_version('0.2.6'))
+# Optional first argument: library containing this checkout's installed package.
+source('docs/audit-setup.R')
 root <- 'outputs/multi-source-audit'
 cases <- read.delim(file.path(root, 'cases.tsv'), quote = '"',
                    fileEncoding = 'UTF-8', stringsAsFactors = FALSE,

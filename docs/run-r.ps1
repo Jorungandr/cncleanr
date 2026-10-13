@@ -1,9 +1,14 @@
 param(
-    [string]$Executable = 'D:/R/R-4.6.1/bin/Rscript.exe',
+    [string]$Executable = '',
     [switch]$RawEnvironment,
     [string[]]$RArguments = @()
 )
 $ErrorActionPreference = 'Stop'
+if (!$Executable) {
+    $taskRscript = Get-Command Rscript.exe -ErrorAction SilentlyContinue
+    if (!$taskRscript) { throw 'Rscript.exe is not on PATH. Pass -Executable with its full path.' }
+    $Executable = $taskRscript.Source
+}
 $taskOriginalArchitecture = $env:PROCESSOR_ARCHITECTURE
 try {
     # cli 3.6.6 does not guard getenv() before strcmp() during Windows cleanup.

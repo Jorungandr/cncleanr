@@ -18,11 +18,11 @@ Install from [CRAN](https://CRAN.R-project.org/package=cncleanr) (verified as 0.
 install.packages("cncleanr")
 ```
 
-Alternatively, pin the GitHub release v0.2.11, which includes table-header units, combined approximation qualifiers, C acceleration, malformed UTF-8 protection and range endpoint grouping/missing-marker fixes:
+Alternatively, pin GitHub v0.2.12, which includes those features plus fixes for conflicting range units, extreme scaling, names and grouping diagnostics:
 
 ```r
 install.packages("pak")
-pak::pak("Jorungandr/cncleanr@v0.2.11")
+pak::pak("Jorungandr/cncleanr@v0.2.12")
 ```
 
 ### Development version and source installation
@@ -72,6 +72,9 @@ Whitespace removal now reuses this native scan. Spaces between digits are still 
 See the [performance closeout](docs/performance-final.md) for 100k/million-row measurements across all three parsers with complete diagnostics retained. Future maintenance prioritizes correctness, compatibility and real issues; no universal 0.1-second latency is promised.
 
 ## Enterprise revenue cleaning example
+
+See the [systematic hardening record](docs/systematic-hardening.md) and
+[snapshot reproduction and audit entry points](docs/data-audit-reproduction.md).
 
 Complete walkthrough: [real financial tables, mixed units, and failure tracing](docs/financial-table-example_EN.md).
 
@@ -295,6 +298,25 @@ environment variable only when missing, leaves the global environment unchanged,
 and preserves the actual exit code. See the [environment diagnosis](docs/environment-diagnosis.md).
 
 ## Scope
+
+Results use double precision, not arbitrary-precision integer or decimal money
+arithmetic; integers above `2^53` may round. Since 0.2.12, representable final
+values such as `1e309%` and `1e-330万亿` are rescued before intermediate
+overflow/underflow loses information. Nonzero text that finally rounds to zero
+reports underflow. Fractional spacing is unsupported: both `.1 234` and
+`0.1 234` are rejected. Percentage/non-percentage ranges such as `3%-5元`
+are rejected; `3-5%` and `3万-5亿` remain valid. More than eight candidate
+range separators are rejected to bound malformed-input resource use.
+
+Call `cn_problems()` before filtering, sorting or binding results: base R
+transformations can drop the attribute or retain stale original input indices.
+Missing markers match text, not numerical equality; qualified quantities still
+match the whole cell. Matrix/array flattening is unchanged; pass the target column
+explicitly. Accounting-parenthesis suffix propagation and whole-batch errors on
+malformed UTF-8 retain their existing policies.
+
+CI covers Linux R release/devel/oldrel-1 and Windows/macOS R release, not every
+older R version, locale or hardware architecture.
 
 `cncleanr` focuses on Arabic digits combined with Chinese data conventions, such as `3.2亿元`, `约5万`, and `3万-5万`. Fully written Chinese numerals such as “一万三千” are currently outside the package's core scope.
 

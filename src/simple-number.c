@@ -5,6 +5,7 @@
 #include <R_ext/Rdynload.h>
 #include <R_ext/Visibility.h>
 #include <string.h>
+#include <float.h>
 
 static int digit(unsigned char c) { return c >= '0' && c <= '9'; }
 
@@ -91,10 +92,21 @@ static double simple_number(const char *text, double header)
         if (percent || (explicit_unit && multiplier != header)) return NA_REAL;
         if (!explicit_unit) multiplier = header;
     }
+    /* Subnormal scaling and nonzero underflow need decimal exponent rescue
+       in the R fallback. Do not silently accept a rounded-to-zero body. */
+    if (value == 0) {
+        for (const char *q = number; q < end && *q != 'e' && *q != 'E'; ++q)
+            if (*q >= '1' && *q <= '9') return NA_REAL;
+    }
+    if (value != 0 && value < DBL_MIN && (multiplier != 1 || percent)) return NA_REAL;
     value *= multiplier;
     if (!R_FINITE(value)) return NA_REAL;
     if (negative) value = -value;
     if (percent) value /= 100;
+    if (value == 0) {
+        for (const char *q = number; q < end && *q != 'e' && *q != 'E'; ++q)
+            if (*q >= '1' && *q <= '9') return NA_REAL;
+    }
     return value;
 }
 

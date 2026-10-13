@@ -2,34 +2,34 @@
 
 ## Submission
 
-Draft for updating `cncleanr` from CRAN 0.2.5 to 0.2.7; not yet submitted.
+Draft for a future `cncleanr` 0.2.12 submission; NOT submitted or ready to upload.
+Recheck the current CRAN version and policies immediately before submission.
 
 The update adds explicit monetary table-header units to `parse_cn_number()`,
 thousand-yuan amounts, the shorthand greater-than qualifier, and support for
 one approximation prefix combined with an approximation suffix.
 The optional `unit` argument is appended, preserving existing positional calls.
-Tests and bilingual cleaning examples have been expanded; no dependencies added.
+The package now uses registered C numeric and normalization routines; source
+installation requires a C compiler (`NeedsCompilation: yes`). No runtime R
+dependencies were added. Subsequent changes reject malformed UTF-8, validate
+range grouping/missing markers, incompatible range dimensions and final
+underflow, and preserve names. Bilingual examples and regressions were expanded.
 
 ## Test environments
 
 - GitHub Actions: Ubuntu (R-devel, R-release, R-oldrel-1), Windows
   (R-release), and macOS (R-release)
 - Ubuntu R-release additionally builds and checks the PDF reference manual.
-- All five jobs passed for commit 49fff9bbc87aa79c8030acbbd1c7c78e00921857:
-  https://github.com/Jorungandr/cncleanr/actions/runs/37796592146
-- R-hub and win-builder results from 0.2.5 are historical, not checks of 0.2.7.
-  Fresh pre-submission checks remain to be completed before uploading.
+- Record the final archive's checks in `docs/systematic-hardening.md`.
+- Prior 0.2.5 win-builder and 0.2.9 native checks are historical only.
+- Fresh win-builder / incoming checks remain required before a CRAN upload.
 
 ## R CMD check results
 
-The five GitHub Actions jobs completed successfully; the R-devel log reports
-`Status: OK`. Do not reuse the historical new-submission NOTE for this update.
-Recheck the final source tarball and record its results before uploading.
-Local Windows R 4.6.1 check on 2026-10-09 used `--as-cran --no-manual`
-with remote incoming checks disabled. It reported 1 ERROR because the
-testthat subprocess exited unsuccessfully after reporting
-`FAIL 0 | WARN 0 | SKIP 0 | PASS 209`. This is not a clean local check;
-investigate or obtain fresh independent validation before submission.
+Replace this section with the exact final archive hash, commit, environments,
+check statuses and explanations before submission. Do not reuse the historical
+new-submission NOTE, old test counts or a previous archive's clean result.
+Local checks without manuals/incoming are not full CRAN pre-submission checks.
 
 ## Downstream dependencies
 

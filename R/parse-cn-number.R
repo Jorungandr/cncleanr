@@ -32,6 +32,9 @@
 #' @details Finite-range validation applies to parsed character and factor
 #'   input. With `unit = NULL`, existing numeric `Inf`, `-Inf`, and `NaN`
 #'   values are preserved.
+#' Results use double precision, not exact integer or decimal arithmetic.
+#' Nonzero character values rounded to zero after final unit conversion are
+#' reported as underflow; representable subnormal values are retained.
 #'
 #' @usage
 #' parse_cn_number(
@@ -60,6 +63,7 @@ parse_cn_number <- function(
   strict = FALSE,
   unit = NULL
 ) {
+  input_names <- names(x)
   if (!is.logical(strict) || length(strict) != 1L || is.na(strict)) {
     stop("`strict` must be a single TRUE or FALSE value.", call. = FALSE)
   }
@@ -84,7 +88,6 @@ parse_cn_number <- function(
       names(output) <- names(x)
       return(output)
     }
-    input_names <- names(x)
     missing <- is.na(x)
     x <- sprintf("%.17g", x)
     x[missing] <- NA_character_
@@ -92,15 +95,17 @@ parse_cn_number <- function(
   }
   if (is.factor(x)) {
     x <- as.character(x)
+    names(x) <- input_names
   }
   if (!is.character(x)) {
     stop("`x` must be a character, factor, or numeric vector.", call. = FALSE)
   }
   if (length(x) == 0L) {
-    return(numeric())
+    output <- numeric()
+    names(output) <- input_names
+    return(output)
   }
 
-  input_names <- names(x)
   fast <- .Call(C_simple_numbers, x,
                 if (is.null(header_multiplier)) NA_real_ else header_multiplier)
   normalized_na <- normalize_cn_number_text(na)
@@ -138,7 +143,7 @@ parse_cn_number <- function(
   }
   characters <- normalize_cn_number_characters(x)
   invalid_spacing <- has_invalid_cn_digit_spacing(characters, characters_normalized = TRUE)
-  normalized <- normalize_cn_number_text(characters, characters_normalized = TRUE)
+  normalized <- normalize_cn_number_text(characters)
   is_missing <- is.na(normalized) | normalized %in% normalized_na
 
   output <- fast
@@ -205,21 +210,32 @@ parse_cn_number <- function(
          "accounting parentheses cannot contain an explicit sign")
   reject(percent & explicit_unit,
          "percentages cannot also use currency or a magnitude suffix")
-  value <- suppressWarnings(as.double(gsub(",", "", fields[[4L]], fixed = TRUE)))
-  reject(!is.finite(value), "value is outside the finite double range")
+  number_text <- gsub(",", "", fields[[4L]], fixed = TRUE)
+  value <- suppressWarnings(as.double(number_text))
+  body_nonfinite <- !is.finite(value)
   multiplier <- c(1, 1e4, 1e8, 1e12, 1e3)[
     match(magnitude, c("", "\u4e07", "\u4ebf", "\u4e07\u4ebf", "\u5343"), nomatch = 1L)
   ]
+  header_conflict <- rep(FALSE, length(value))
   if (!is.null(header_multiplier)) {
-    reject(percent | (explicit_unit & multiplier != header_multiplier),
-           "explicit unit conflicts with the table-header unit")
+    header_conflict <- percent | (explicit_unit & multiplier != header_multiplier)
     multiplier[!explicit_unit] <- header_multiplier
   }
+  scale <- multiplier
+  scale[percent] <- .01
+  extreme <- !is.finite(value) | abs(value) < .Machine$double.xmin
   value <- value * multiplier
+  value[percent] <- value[percent] / 100
+  # ponytail: only boundary inputs need decimal exponent adjustment; ordinary
+  # values retain the established conversion and rounding path.
+  if (any(extreme)) value[extreme] <- convert_cn_scaled_boundary(number_text[extreme], scale[extreme])
+  reject(body_nonfinite & !is.finite(value), "value is outside the finite double range")
+  reject(header_conflict, "explicit unit conflicts with the table-header unit")
   reject(!is.finite(value), "value is outside the finite double range")
+  nonzero <- grepl("[1-9]", sub("[eE].*$", "", number_text))
+  reject(value == 0 & nonzero, "nonzero value underflows the double range")
   negative <- sign_before == "-" | sign_after == "-" | accounting
   value[negative] <- -value[negative]
-  value[percent] <- value[percent] / 100
   output[active[matched]] <- value[matched]
 
   failed_local <- which(!matched)
@@ -248,7 +264,24 @@ parse_cn_number <- function(
   output
 }
 
-normalize_cn_number_text <- function(x, characters_normalized = FALSE) {
+convert_cn_scaled_boundary <- function(text, scale) {
+  vapply(seq_along(text), function(i) {
+    parts <- strsplit(text[[i]], "[eE]", perl = TRUE)[[1L]]
+    digits <- gsub(".", "", parts[[1L]], fixed = TRUE)
+    first <- regexpr("[1-9]", digits)[[1L]]
+    if (first < 0L) return(0)
+    point <- regexpr(".", parts[[1L]], fixed = TRUE)[[1L]]
+    integer_digits <- if (point < 0L) nchar(parts[[1L]]) else point - 1L
+    exponent <- if (length(parts) == 2L) suppressWarnings(as.double(parts[[2L]])) else 0
+    exponent <- exponent + integer_digits - first + round(log10(scale[[i]]))
+    digits <- sub("0+$", "", substring(digits, first))
+    mantissa <- paste0(substring(digits, 1L, 1L), ".", substring(digits, 2L))
+    if (!is.finite(exponent)) return(if (exponent > 0) Inf else 0)
+    suppressWarnings(as.double(paste0(mantissa, "e", sprintf("%.0f", exponent))))
+  }, numeric(1))
+}
+
+normalize_cn_number_text <- function(x) {
   .Call(C_normalize_characters, enc2utf8(x), TRUE)
 }
 
@@ -267,7 +300,7 @@ has_invalid_cn_digit_spacing <- function(x, characters_normalized = FALSE) {
   rows <- which(has_digit_spacing)
   has_digit_spacing[rows] <- !grepl(
     paste0(
-      "^[^0-9]*+",
+      "^[^0-9.]*+",
       "[0-9]{1,3}+(?:", spacing, "++[0-9]{3})++",
       "(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?",
       "[^0-9]*$"

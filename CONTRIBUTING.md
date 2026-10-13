@@ -6,7 +6,7 @@ they are small, reproducible, and based on formats found in real Chinese data.
 ## Development setup
 
 You need a current R installation, Git, and the package development tools
-declared in `DESCRIPTION`. Building from source may also require Rtools on
+declared in `DESCRIPTION`. Building from source requires a C compiler: Rtools on
 Windows, the Xcode command-line tools on macOS, or the usual compiler toolchain
 on Linux. Clone the repository and install the development dependencies:
 
@@ -96,3 +96,24 @@ in `tests/testthat/test-native-stability.R` as part of the full test suite. Use
 the existing R-hub workflow with `config=clang-asan,clang-ubsan,valgrind` and
 inspect the actual check logs before publishing; normal platform checks alone
 are not memory-safety evidence. See `docs/native-stability.md` for this audit.
+
+Pair differential tests with independent literal expected values; agreement
+between native and R paths cannot detect a shared semantic bug. See
+`test-systematic-hardening.R` for units, extreme scaling and metadata cases.
+The corrected grouped-endpoint diagnostics in 0.2.12 are an intentional bug fix;
+existing reason spellings are retained, with new reasons for incompatible units,
+final nonzero underflow and excessive separators.
+
+Current data audits require an installed package matching this checkout's
+DESCRIPTION; see [snapshot reproduction](docs/data-audit-reproduction.md).
+Historical benchmark scripts are not current acceptance gates.
+
+Before publishing, run `docs/verify-release.R` on the exact checked archive and
+again on the downloaded public attachment. Record SHA-256, commit, CI and native
+tool run IDs in the release report; never treat old results as a fresh check.
+CRAN drafts must be refreshed against that archive and need separate approval.
+
+CI currently validates R release/devel/oldrel-1 on Linux and R release on Windows
+and macOS. Older R versions and every locale/architecture are not certified;
+valid UTF-8/Latin-1 regressions are not universal encoding support. No arbitrary
+minimum R version is claimed without testing it.

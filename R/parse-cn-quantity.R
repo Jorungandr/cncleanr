@@ -64,7 +64,7 @@ parse_cn_quantity <- function(
   original <- x
   characters <- normalize_cn_number_characters(x)
   invalid_spacing <- has_invalid_cn_digit_spacing(characters, characters_normalized = TRUE)
-  cleaned <- normalize_cn_number_text(characters, characters_normalized = TRUE)
+  cleaned <- normalize_cn_number_text(characters)
   normalized_na <- normalize_cn_number_text(na)
   is_missing <- is.na(cleaned) | cleaned %in% normalized_na
   qualifier <- rep("exact", length(cleaned))

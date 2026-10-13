@@ -1,4 +1,8 @@
 # Rscript docs/native-performance.R [candidate DLL] [unchanged R baseline library]
+# Historical benchmark: use the matching optimization commit documented in
+# native-optimization.md, not current sources. See data-audit-reproduction.md.
+if (package_version(read.dcf('DESCRIPTION')[1L, 'Version']) >= package_version('0.2.9'))
+  stop('Historical benchmark requires its matching source checkout; see docs/native-optimization.md.')
 args <- commandArgs(trailingOnly = TRUE)
 .libPaths(c(if (length(args) > 1L) args[[2L]] else
   'outputs/number-optimization/library', .libPaths()))

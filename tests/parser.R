@@ -82,3 +82,16 @@ stopifnot(
   identical(yu$value, c(50, 1e5, 5e5, 5e5)),
   identical(yu$qualifier, rep("greater_than", 4L))
 )
+
+# Independent known answers also run when suggested packages are unavailable.
+stopifnot(identical(parse_cn_number('1e309%'), 1e307),
+          identical(parse_cn_number('1e-330\u4e07\u4ebf'), 1e-318))
+underflow <- suppressWarnings(parse_cn_number('1e-999'))
+stopifnot(is.na(underflow), identical(cn_problems(underflow)$reason,
+                                    'nonzero value underflows the double range'))
+conflict <- suppressWarnings(parse_cn_range('3%-5\u5143'))
+stopifnot(is.na(conflict$lower), identical(cn_problems(conflict)$reason,
+                                         'range endpoints use incompatible units'))
+named_factor <- factor('1\u4e07')
+names(named_factor) <- 'row'
+stopifnot(identical(names(parse_cn_number(named_factor)), 'row'))

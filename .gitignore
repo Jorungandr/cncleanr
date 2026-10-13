@@ -9,3 +9,5 @@ docs/articles/
 /src/*.o
 /src/*.dll
 /src/*.so
+/outputs/
+/.vscode/

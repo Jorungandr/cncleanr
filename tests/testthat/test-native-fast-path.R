@@ -15,7 +15,7 @@ test_that('native character normalization matches the original R transformations
   expect_error(.Call(cncleanr:::C_normalize_characters, '1', NA), 'Invalid normalization')
   stripped <- gsub('[[:space:]\u3000\u00a0\u202f]+', '', reference(x), perl = TRUE)
   expect_identical(cncleanr:::normalize_cn_number_text(x), stripped)
-  expect_identical(cncleanr:::normalize_cn_number_text(reference(x), TRUE), stripped)
+  expect_identical(cncleanr:::normalize_cn_number_text(reference(x)), stripped)
   expect_error(cncleanr:::normalize_cn_number_characters('\ufffe'), 'noncharacter')
   bytes <- '\xff'
   Encoding(bytes) <- 'bytes'

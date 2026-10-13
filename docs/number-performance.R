@@ -1,4 +1,7 @@
 # Rscript docs/number-performance.R [unchanged baseline library]
+# Historical benchmark: source and DLL must match the recorded optimization.
+if (package_version(read.dcf('DESCRIPTION')[1L, 'Version']) >= package_version('0.2.9'))
+  stop('Historical benchmark requires its matching source checkout; see docs/number-optimization.md.')
 args <- commandArgs(trailingOnly = TRUE)
 .libPaths(c(if (length(args)) args[[1L]] else
   'outputs/quantity-optimization/library', .libPaths()))

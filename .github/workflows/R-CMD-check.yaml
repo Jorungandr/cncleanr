@@ -5,7 +5,8 @@ on:
     branches: [main]
   pull_request:
 
-permissions: read-all
+permissions:
+  contents: read
 
 jobs:
   R-CMD-check:
@@ -57,6 +58,10 @@ jobs:
 
       - uses: r-lib/actions/setup-tinytex@v2
         if: matrix.config.manual
+
+      - name: Install HTML validation tool
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y tidy
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:

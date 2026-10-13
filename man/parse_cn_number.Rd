@@ -53,6 +53,9 @@ only when they form valid three-digit grouping.
 Finite-range validation applies to parsed character and factor
 input. With \code{unit = NULL}, existing numeric \code{Inf}, \code{-Inf}, and \code{NaN}
 values are preserved.
+Results use double precision, not exact integer or decimal arithmetic.
+Nonzero character values rounded to zero after final unit conversion are
+reported as underflow; representable subnormal values are retained.
 }
 \examples{
 parse_cn_number(c("1.25\u4e07", "3\u4ebf\u5143", "12.5\%", "\u6682\u65e0"))
