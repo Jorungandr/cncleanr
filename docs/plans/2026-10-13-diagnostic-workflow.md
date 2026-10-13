@@ -31,3 +31,9 @@ partial result. Do not change C validation or reinterpret malformed bytes.
    checksum and isolated installation. Record evidence; no CRAN upload.
 
 Design approved by the user on 2026-10-13. Execute in this chat without subagents.
+
+## Completion
+
+All six tasks completed. GitHub v0.2.13, checked/downloaded archive hash,
+784-assertion local/platform/native checks, data regressions and isolated public
+installation are recorded in `docs/diagnostic-workflow.md`. No CRAN upload.

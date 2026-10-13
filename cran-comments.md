@@ -31,6 +31,12 @@ positions without changing result classes or ordinary diagnostic reasons.
 Use the exact 0.2.13 archive hash, commit and checks recorded in the diagnostic
 workflow report. The 0.2.12 checks in `docs/systematic-hardening.md` are historical,
 not validation of this update. Refresh this section immediately before upload.
+GitHub 0.2.13 source commit: `80f24e761615a44efc7fe20a848f53682fad192e`.
+Archive SHA-256: `5277308A76AF8E80AFDC6D4BAD1B5A26A1B009DF3E9F7750D987A846565E6752`.
+Local `--as-cran --no-manual` (incoming disabled) and all five platform CI checks
+passed, with 784 assertions each; Linux PDF/HTML manuals passed. ASAN, UBSAN
+and Valgrind passed on the same package-source commit. See the diagnostic report
+for actual run IDs and scope, not an assertion that CRAN pretests are complete.
 Fresh win-builder and incoming checks are still outstanding for CRAN submission.
 Rebuild/recheck and refresh this draft if the submitted archive changes.
 Do not reuse a historical new-submission NOTE or another archive's clean result.
