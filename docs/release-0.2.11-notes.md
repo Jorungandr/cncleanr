@@ -11,6 +11,9 @@
 这是文本标记匹配，不是数值等价判断：`na = "0"` 不自动匹配显式 `0万`。
 本次不继续提速、不增加语法、不提交 CRAN。附件为源码包，仍需 R 兼容的 C 工具链。
 
+本地正式源码包检查为 OK，五项平台 CI 均成功，每项 592 个断言通过。
+Linux release 只有缺少 HTML Tidy 的 NOTE，PDF 手册检查通过。
+
 ## English
 
 - Fixes shared suffixes resurrecting original missing endpoints: with `na = "0"`,
@@ -24,5 +27,9 @@
 Matching is textual, not numeric equivalence: `na = "0"` does not automatically
 match explicit `0万`. No new syntax, speed tuning or CRAN submission. The source
 attachment requires an R-compatible C toolchain.
+
+The exact archive passed local checking. All five platform CI jobs passed
+592 assertions each; Linux release had only the missing-HTML-Tidy NOTE and
+passed PDF manual generation.
 
 [Validation / 验收记录](https://github.com/Jorungandr/cncleanr/blob/main/docs/range-missing.md)

@@ -21,3 +21,7 @@ numeric parsing, original diagnostics and the public API. No C changes.
    notes, then download/hash-check/install the public asset and rerun regressions.
 5. Push excluded publication records without moving existing tags. No CRAN
    submission, new syntax, runtime dependency or performance tuning.
+
+Completed as GitHub v0.2.11. Exact-archive checks and five platform CI jobs
+passed 592 assertions; public download/hash/install verification and 53 focused
+regressions passed. Evidence: `docs/range-missing.md`.
