@@ -103,3 +103,12 @@ replace these text round-trip checks.
 
 Regression tests and all five platform CI jobs execute this same example rather
 than maintaining another workflow implementation inconsistent with the guide.
+
+## Validation (2026-10-15)
+
+Example checkpoint: `0574b41d7e4cf4a2f6772ff3de3949a76ee67e8e`.
+[All five CI checks](https://github.com/Jorungandr/cncleanr/actions/runs/38690442453)
+were OK with 795 assertions each; Linux PDF/HTML manuals passed. Local exact
+working-tree archive `--as-cran --no-manual` was OK, without incoming or local PDF
+checks. This example/test update changes no parser R/C code, version or existing
+release assets and is not a fresh CRAN pre-submission certification.

@@ -91,3 +91,11 @@ CSV 本身不保留 `problems`；`cn_problems()` 不能从读回的 CSV 自动�
 Excel 等软件自动打开文件还可能改变显示类型，不能替代这里的文本往返检查。
 
 回归测试直接运行同一个脚本，五平台 CI 也执行它；不是另写一套与文档不同的流程。
+
+## 验收记录（2026-10-15）
+
+示例验收提交：`0574b41d7e4cf4a2f6772ff3de3949a76ee67e8e`。
+[五平台 CI](https://github.com/Jorungandr/cncleanr/actions/runs/38690442453)
+均为 OK，各通过 795 个断言；Linux PDF／HTML 手册检查通过。
+本地对工作树源码包执行 `--as-cran --no-manual` 为 OK（不含远程 incoming 或本地 PDF）。
+这是示例／测试更新，没有修改 R/C 解析代码、版本或既有发布附件；不是新的 CRAN 验收。

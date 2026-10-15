@@ -28,3 +28,15 @@ same example; CI also runs it. No additional runtime dependencies or S3 classes.
 
 User approved this documentation/regression scope on 2026-10-15. Run sequentially
 in this chat, without subagents. Runtime R/C code and DESCRIPTION remain untouched.
+
+## Completion
+
+All tasks completed at example checkpoint `0574b41`. Local archive check OK,
+795 assertions; five-platform CI 38690442453 all OK, with PDF/HTML on Linux.
+The same example passed via an installed package and pkgload. In-memory fault
+probes detected deliberately broken batch/chained provenance and CSV ID typing.
+Local working-tree archive SHA-256:
+`79594A8C8E20FD3E838D9A43051974A788068C0F6265CA2F35909CB529EF7AFC`.
+This is NOT the published 0.2.13 archive; it remains local under
+`outputs/cleaning-workflows/artifacts/`. No tag/release/CRAN upload was created;
+published 0.2.13 asset digest remains `5277308a76af8e80afdc6d4bad1b5a26a1b009df3e9f7750d987a846565e6752`.
