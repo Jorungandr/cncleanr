@@ -2,6 +2,9 @@
 
 [中文](csv-cleaning.md)
 
+See [chunked/chained workflows](cleaning-workflows_EN.md) for batch merging,
+repeated selections and the shared executable example/regressions.
+
 Run the [complete example](csv-cleaning.R):
 
 ```powershell

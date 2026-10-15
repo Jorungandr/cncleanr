@@ -76,6 +76,7 @@ jobs:
           source("docs/batch-stability.R", encoding = "UTF-8")
           source("docs/csv-cleaning.R", encoding = "UTF-8")
           source("docs/diagnostic-workflow.R", encoding = "UTF-8")
+          source("inst/examples/chunked-cleaning.R", encoding = "UTF-8")
 
       - uses: r-lib/actions/check-r-package@v2
         with:

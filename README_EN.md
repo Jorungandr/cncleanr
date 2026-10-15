@@ -84,6 +84,9 @@ Open-data example: [separate missing values, error markers, and mixed text](docs
 
 CSV workflow: [preserve source text and identifiers, handle column units, and export problems](docs/csv-cleaning_EN.md).
 
+Advanced workflow: [batch merging, chained selection/sorting and CSV diagnostics](docs/cleaning-workflows_EN.md).
+These are new examples/tests on `main`, not a separate release or changed parsing behavior.
+
 The workflow below preserves the original text, parses the revenue column, and maps unparseable records back to their source companies:
 
 ```r

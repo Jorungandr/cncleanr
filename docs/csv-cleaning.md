@@ -2,6 +2,8 @@
 
 [English](csv-cleaning_EN.md)
 
+分批、连续筛选与重复取行见[进阶流程](cleaning-workflows.md)，包含共享可运行示例与回归检查。
+
 运行[完整示例](csv-cleaning.R)：
 
 ```powershell
