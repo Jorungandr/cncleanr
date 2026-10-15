@@ -6,6 +6,11 @@
 #include <R_ext/Visibility.h>
 #include <string.h>
 #include <float.h>
+#include <stdlib.h>
+#include <locale.h>
+#include <stdint.h>
+#include <math.h>
+#include <errno.h>
 
 static int digit(unsigned char c) { return c >= '0' && c <= '9'; }
 
@@ -65,6 +70,7 @@ static double simple_number(const char *text, double header)
         while (digit((unsigned char)*p)) ++p;
         if (p == exponent) return NA_REAL;
     }
+    if (p - number > 1100) return NA_REAL;
     char *end;
     double value = R_strtod(number, &end);
     if (end != p || !R_FINITE(value)) return NA_REAL;
@@ -198,9 +204,119 @@ static SEXP normalize_characters(SEXP text, SEXP strip)
     return result;
 }
 
+/* Compare a normalized positive decimal with an exact binary64 midpoint.
+   Midpoints have at most 768 significant decimal digits; 1,100 is ample. */
+static int compare_midpoint(const char *digits, size_t length, int exponent,
+                            double lower, double upper)
+{
+    uint64_t integer;
+    int power;
+    if (!R_FINITE(upper)) {
+        integer = UINT64_C(18014398509481983); /* 2^54 - 1 */
+        power = 970; /* overflow midpoint: 2^1024 - 2^970 */
+    } else {
+        int a = 0, b;
+        uint64_t left = lower == 0 ? 0 : (uint64_t) ldexp(frexp(lower, &a), 53);
+        uint64_t right = (uint64_t) ldexp(frexp(upper, &b), 53);
+        if (lower == 0) a = b;
+        int common = a < b ? a : b;
+        integer = (left << (a - common)) + (right << (b - common));
+        power = common - 54;
+    }
+    while (!(integer & 1)) { integer >>= 1; ++power; }
+    unsigned char decimal[1100]; /* least significant digit first */
+    size_t used = 0;
+    do { decimal[used++] = integer % 10; integer /= 10; } while (integer);
+    int scale = power < 0 ? power : 0;
+    int multiplier = power < 0 ? 5 : 2;
+    int times = power < 0 ? -power : power;
+    for (int i = 0; i < times; ++i) {
+        int carry = 0;
+        for (size_t j = 0; j < used; ++j) {
+            int product = decimal[j] * multiplier + carry;
+            decimal[j] = product % 10;
+            carry = product / 10;
+        }
+        if (carry) {
+            if (used == sizeof(decimal)) Rf_error("Decimal midpoint capacity exceeded.");
+            decimal[used++] = carry;
+        }
+    }
+    int boundary_exponent = (int) used + scale - 1;
+    if (exponent != boundary_exponent) return(exponent < boundary_exponent ? -1 : 1);
+    size_t count = length > used ? length : used;
+    for (size_t i = 0; i < count; ++i) {
+        int actual = i < length ? digits[i] - '0' : 0;
+        int boundary = i < used ? decimal[used - 1 - i] : 0;
+        if (actual != boundary) return(actual < boundary ? -1 : 1);
+    }
+    return 0;
+}
+
+/* Standard conversion supplies a nearby candidate, not the rounding oracle:
+   some C runtimes discard distant sticky tails. Exact midpoint comparisons
+   correct it, only for the bounded long-significand fallback. */
+static SEXP decimal_boundary(SEXP text)
+{
+    if (TYPEOF(text) != STRSXP || XLENGTH(text) != 1 || STRING_ELT(text, 0) == NA_STRING)
+        Rf_error("Invalid decimal boundary argument.");
+    const char *input = CHAR(STRING_ELT(text, 0));
+    size_t length = strlen(input);
+    if (length > 1200) Rf_error("Decimal boundary input is not bounded.");
+    char digits[1200];
+    size_t used = 0;
+    if (length < 4 || input[0] < '1' || input[0] > '9' || input[1] != '.')
+        Rf_error("Invalid canonical decimal syntax.");
+    digits[used++] = input[0];
+    const char *p = input + 2;
+    while (digit((unsigned char)*p)) digits[used++] = *p++;
+    if (*p != 'e') Rf_error("Missing canonical decimal exponent.");
+    char *end;
+    const char *exponent_start = p + 1;
+    if (*exponent_start == '+' || *exponent_start == '-') ++exponent_start;
+    if (!digit((unsigned char)*exponent_start)) Rf_error("Invalid canonical decimal exponent.");
+    errno = 0;
+    long parsed_exponent = strtol(p + 1, &end, 10);
+    if (*end || errno == ERANGE || parsed_exponent < -325 || parsed_exponent > 309)
+        Rf_error("Invalid canonical decimal exponent.");
+    int exponent = (int) parsed_exponent;
+    const char *point = localeconv()->decimal_point;
+    size_t point_length = strlen(point);
+    char *localized = (char *) R_alloc(length + point_length + 1, 1);
+    char *out = localized;
+    for (const char *p = input; *p; ++p) {
+        if (*p == '.') { memcpy(out, point, point_length); out += point_length; }
+        else if (digit((unsigned char)*p) || *p == 'e' || *p == '+' || *p == '-') *out++ = *p;
+        else Rf_error("Invalid canonical decimal character.");
+    }
+    *out = '\0';
+    double value = strtod(localized, &end);
+    if (end == localized || *end) Rf_error("Invalid canonical decimal syntax.");
+    if (ISNAN(value) || value < 0) Rf_error("Invalid decimal conversion candidate.");
+    for (int attempt = 0; attempt < 8; ++attempt) {
+        uint64_t bits;
+        memcpy(&bits, &value, sizeof(bits));
+        int odd = bits & 1;
+        if (value > 0) {
+            double previous = nextafter(value, 0);
+            int comparison = compare_midpoint(digits, used, exponent, previous, value);
+            if (comparison < 0 || (comparison == 0 && odd)) { value = previous; continue; }
+        }
+        if (R_FINITE(value)) {
+            double next = nextafter(value, R_PosInf);
+            int comparison = compare_midpoint(digits, used, exponent, value, next);
+            if (comparison > 0 || (comparison == 0 && odd)) { value = next; continue; }
+        }
+        return Rf_ScalarReal(value);
+    }
+    Rf_error("Decimal conversion candidate is outside the rounding neighborhood.");
+    return R_NilValue;
+}
+
 static const R_CallMethodDef methods[] = {
     {"simple_numbers", (DL_FUNC) &simple_numbers, 2},
     {"normalize_characters", (DL_FUNC) &normalize_characters, 2},
+    {"decimal_boundary", (DL_FUNC) &decimal_boundary, 1},
     {NULL, NULL, 0}
 };
 

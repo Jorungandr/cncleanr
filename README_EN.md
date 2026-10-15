@@ -18,11 +18,11 @@ Install from [CRAN](https://CRAN.R-project.org/package=cncleanr) (verified as 0.
 install.packages("cncleanr")
 ```
 
-Alternatively, pin GitHub v0.2.13, which includes those fixes plus explicit diagnostic-preserving selection/reordering and encoding-error locations:
+Alternatively, pin GitHub v0.2.14, which includes the long-decimal conversion fix, explicit diagnostic-preserving selection/reordering and encoding-error locations:
 
 ```r
 install.packages("pak")
-pak::pak("Jorungandr/cncleanr@v0.2.13")
+pak::pak("Jorungandr/cncleanr@v0.2.14")
 ```
 
 ### Development version and source installation
@@ -73,6 +73,11 @@ Whitespace removal now reuses this native scan. Spaces between digits are still 
 
 See the [performance closeout](docs/performance-final.md) for 100k/million-row measurements across all three parsers with complete diagnostics retained. Future maintenance prioritizes correctness, compatibility and real issues; no universal 0.1-second latency is promised.
 
+0.2.14 rescues very long significands (for example, 5,000 digits with a compensating
+exponent) while retaining tail direction at rounding boundaries. The repair runs
+only in the long, extreme-value fallback; ordinary fast paths are unchanged.
+See the [repair and performance validation](docs/long-decimal.md).
+
 ## Enterprise revenue cleaning example
 
 See the [systematic hardening record](docs/systematic-hardening.md) and
@@ -85,7 +90,7 @@ Open-data example: [separate missing values, error markers, and mixed text](docs
 CSV workflow: [preserve source text and identifiers, handle column units, and export problems](docs/csv-cleaning_EN.md).
 
 Advanced workflow: [batch merging, chained selection/sorting and CSV diagnostics](docs/cleaning-workflows_EN.md).
-These are new examples/tests on `main`, not a separate release or changed parsing behavior.
+These examples/tests ship with 0.2.14, without changing existing batch-merging or diagnostic-preservation rules.
 
 The workflow below preserves the original text, parses the revenue column, and maps unparseable records back to their source companies:
 

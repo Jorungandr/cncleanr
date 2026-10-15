@@ -1,4 +1,5 @@
-# Test-only reference: recursive calls and range endpoints must also bypass C.
+# Test-only reference: recursive calls and endpoints bypass the C fast paths.
+# Long-decimal rounding is shared, with independent midpoint gold tests elsewhere.
 native_r_reference <- function() {
   namespace <- asNamespace('cncleanr')
   reference <- new.env(parent = namespace)
@@ -11,6 +12,7 @@ native_r_reference <- function() {
   }
   reference$.Call <- function(symbol, x, argument) {
     if (identical(symbol, cncleanr:::C_simple_numbers)) return(rep(NA_real_, length(x)))
+    if (identical(symbol, cncleanr:::C_decimal_boundary)) return(base::.Call(symbol, x))
     stopifnot(identical(symbol, cncleanr:::C_normalize_characters))
     normalized <- chartr(
       '\uff0d\uff10\uff11\uff12\uff13\uff14\uff15\uff16\uff17\uff18\uff19\uff0e\uff0c\uff05\uff0b\uff08\uff09\uffe5\uff1c\uff1e\uff1d\uff25\uff45',

@@ -1,3 +1,16 @@
+# cncleanr 0.2.14
+
+* Rescues representable very long decimal significands in the shared extreme
+  conversion fallback. A bounded decimal prefix and sticky tail retain rounding
+  direction; exact binary64 midpoint comparisons correct platform conversion
+  candidates, including subnormal and overflow boundaries.
+* Ordinary conversion semantics are unchanged; the native parser only adds a
+  constant-time length guard to defer long bodies. No new public
+  arguments or runtime dependencies are introduced. Adds independent rounding
+  regressions and a same-process old/new performance comparison.
+* Includes the documented chunked-cleaning example and workflow regressions
+  previously added on main after 0.2.13.
+
 # cncleanr 0.2.13
 
 * Adds `cn_subset()` for explicit filtering/reordering of parser results, including

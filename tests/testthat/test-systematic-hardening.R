@@ -81,3 +81,96 @@ test_that('boundary conversion has independent scale and zero gold values', {
     expect_error(parser(c('1e-999', '3万'), strict = TRUE), 'Failed to parse')
   }
 })
+
+test_that('long significands retain their scale and all parser entry points', {
+  x <- paste0(strrep('1', 5000), 'e-4999')
+  expected <- 10 / 9
+  expect_identical(parse_cn_number(x, strict = TRUE), expected)
+  expect_identical(parse_cn_number(paste0('(', x, ')'), strict = TRUE), -expected)
+  expect_equal(parse_cn_number(x, unit = '万', strict = TRUE), expected * 1e4)
+  expect_equal(parse_cn_number(paste0(x, '%'), strict = TRUE), expected / 100)
+  expect_identical(parse_cn_quantity(paste0('约', x), strict = TRUE)$value, expected)
+  range <- parse_cn_range(paste0(x, '-2'), strict = TRUE)
+  expect_identical(range$lower, expected)
+  expect_identical(range$upper, 2)
+  expect_identical(parse_cn_number(factor(x), strict = TRUE), expected)
+  batch <- suppressWarnings(parse_cn_number(rep(c(x, 'bad'), 600)))
+  expect_identical(as.numeric(batch[seq.int(1, 1200, 2)]), rep(expected, 600))
+  expect_identical(cn_problems(batch)$index, seq.int(2L, 1200L, 2L))
+})
+
+test_that('discarded long tails preserve ties and their rounding direction', {
+  midpoint <- '1.00000000000000011102230246251565404236316680908203125'
+  below <- paste0(substr(midpoint, 1, nchar(midpoint) - 1L), '4', strrep('9', 5000))
+  tie <- paste0(midpoint, strrep('0', 5000))
+  above <- paste0(tie, '1')
+  expect_identical(parse_cn_number(c(below, tie, above), strict = TRUE),
+                   c(1, 1, 1 + 2^-52))
+  odd_midpoint <- '1.00000000000000033306690738754696212708950042724609375'
+  expect_identical(parse_cn_number(paste0(odd_midpoint, strrep('0', 5000)), strict = TRUE),
+                   1 + 2^-51)
+})
+
+test_that('long tails preserve the subnormal rounding boundary', {
+  # Independent decimal integer arithmetic: 5^1075 * 10^-1075 = 2^-1075.
+  digits <- 1L
+  for (i in seq_len(1075L)) {
+    carry <- 0L
+    for (j in seq_along(digits)) {
+      product <- digits[j] * 5L + carry
+      digits[j] <- product %% 10L
+      carry <- product %/% 10L
+    }
+    if (carry) digits <- c(digits, carry)
+  }
+  midpoint <- paste(rev(digits), collapse = '')
+  tie <- paste0(midpoint, strrep('0', 5000), 'e-6075')
+  above <- paste0(midpoint, strrep('0', 5000), '1e-6076')
+  below <- paste0(substr(midpoint, 1, nchar(midpoint) - 1L),
+                  as.integer(substr(midpoint, nchar(midpoint), nchar(midpoint))) - 1L,
+                  strrep('9', 5000), 'e-6075')
+  result <- suppressWarnings(parse_cn_number(c(below, tie, above)))
+  expect_true(all(is.na(result[1:2])))
+  expect_identical(as.numeric(result[3]), 2^-1074)
+  expect_identical(cn_problems(result)$index, 1:2)
+  expect_identical(cn_problems(result)$reason,
+                   rep('nonzero value underflows the double range', 2))
+})
+
+test_that('long tails preserve overflow boundaries and explicit failure indices', {
+  digits <- as.integer(strsplit('18014398509481983', '', fixed = TRUE)[[1L]])
+  digits <- rev(digits)
+  for (i in seq_len(970L)) {
+    carry <- 0L
+    for (j in seq_along(digits)) {
+      product <- digits[j] * 2L + carry
+      digits[j] <- product %% 10L
+      carry <- product %/% 10L
+    }
+    if (carry) digits <- c(digits, carry)
+  }
+  midpoint <- paste(rev(digits), collapse = '')
+  tie <- paste0(midpoint, '.', strrep('0', 5000))
+  below <- paste0(substr(midpoint, 1, nchar(midpoint) - 1L),
+                  as.integer(substr(midpoint, nchar(midpoint), nchar(midpoint))) - 1L,
+                  '.', strrep('9', 5000))
+  result <- suppressWarnings(parse_cn_number(c(below, tie, paste0(tie, '1'))))
+  expect_identical(as.numeric(result[1]), .Machine$double.xmax)
+  expect_true(all(is.na(result[2:3])))
+  expect_identical(cn_problems(result)$index, 2:3)
+  expect_identical(cn_problems(result)$reason,
+                   rep('value is outside the finite double range', 2))
+  expect_identical(parse_cn_number(paste0(strrep('0', 5000), '1'), strict = TRUE), 1)
+  expect_identical(parse_cn_number(paste0('0.', strrep('0', 5000), '1e5001'), strict = TRUE), 1)
+  expect_identical(parse_cn_number(paste0('1e-', strrep('0', 5000), '0'), strict = TRUE), 1)
+  expect_identical(parse_cn_number(paste0('1e-', strrep('0', 5000), '3'), strict = TRUE), .001)
+})
+
+test_that('private bounded conversion validates its input', {
+  convert <- function(x) .Call(cncleanr:::C_decimal_boundary, x)
+  expect_identical(convert('1.e0'), 1)
+  for (x in list(1, character(), NA_character_, c('1.e0', '2.e0'),
+                 strrep('1', 1201), '-1.e0', '1.0', '1..0e0', '1.e',
+                 '1.e999999999999999999999', '1.e310', '1.e-326', '1.e0x'))
+    expect_error(convert(x))
+})

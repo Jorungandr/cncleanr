@@ -224,7 +224,7 @@ parse_cn_number <- function(
   }
   scale <- multiplier
   scale[percent] <- .01
-  extreme <- !is.finite(value) | abs(value) < .Machine$double.xmin
+  extreme <- !is.finite(value) | abs(value) < .Machine$double.xmin | nchar(number_text) > 1100L
   value <- value * multiplier
   value[percent] <- value[percent] / 100
   # ponytail: only boundary inputs need decimal exponent adjustment; ordinary
@@ -274,12 +274,30 @@ convert_cn_scaled_boundary <- function(text, scale) {
     if (first < 0L) return(0)
     point <- regexpr(".", parts[[1L]], fixed = TRUE)[[1L]]
     integer_digits <- if (point < 0L) nchar(parts[[1L]]) else point - 1L
-    exponent <- if (length(parts) == 2L) suppressWarnings(as.double(parts[[2L]])) else 0
+    exponent_text <- if (length(parts) == 2L) parts[[2L]] else "0"
+    if (nchar(exponent_text) > 1100L) {
+      exponent_text <- sub("^([+-]?)0+", "\\1", exponent_text)
+      if (exponent_text %in% c("", "+", "-")) exponent_text <- "0"
+    }
+    exponent <- suppressWarnings(as.double(exponent_text))
     exponent <- exponent + integer_digits - first + round(log10(scale[[i]]))
     digits <- sub("0+$", "", substring(digits, first))
+    # Every binary64 rounding midpoint has fewer than 1,100 significant decimal
+    # digits. Preserve that prefix and a sticky tail, not just 17 rounded digits.
+    # ponytail: bound only extreme fallback conversion; the native fast path stays.
+    if (nchar(digits) > 1100L) {
+      sticky <- grepl("[1-9]", substring(digits, 1101L))
+      digits <- paste0(substr(digits, 1L, 1100L), if (sticky) "1" else "")
+    }
     mantissa <- paste0(substring(digits, 1L, 1L), ".", substring(digits, 2L))
     if (!is.finite(exponent)) return(if (exponent > 0) Inf else 0)
-    suppressWarnings(as.double(paste0(mantissa, "e", sprintf("%.0f", exponent))))
+    canonical <- paste0(mantissa, "e", sprintf("%.0f", exponent))
+    if (nchar(parts[[1L]]) > 1100L) {
+      if (exponent > 309) return(Inf)
+      if (exponent < -325) return(0)
+      return(.Call(C_decimal_boundary, canonical))
+    }
+    suppressWarnings(as.double(canonical))
   }, numeric(1))
 }
 
