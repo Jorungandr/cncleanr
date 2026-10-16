@@ -2,15 +2,15 @@
 
 [English](cleaning-workflows_EN.md) | [完整可运行示例](../inst/examples/chunked-cleaning.R)
 
-这是 GitHub `main` 新增的示例与回归检查，不是新的解析功能或包版本。
-原有 v0.2.13 标签和源码附件不变。示例只使用 0.2.13 已有的 API；
-旧发布包不包含这个新文件，可以在仓库根目录直接运行它：
+此示例和回归检查随 GitHub v0.2.14 提供，不改变工作流的既有解析规则。
+原有 v0.2.13 标签和源码附件不变。示例只使用 0.2.13 已有的 API，但该旧发布包
+不包含这个文件；可以在仓库根目录直接运行它：
 
 ```sh
 Rscript inst/examples/chunked-cleaning.R
 ```
 
-或在安装当前 checkout 后运行：
+或在安装 v0.2.14（或更新的 checkout）后运行：
 
 ```r
 source(system.file("examples", "chunked-cleaning.R", package = "cncleanr"),

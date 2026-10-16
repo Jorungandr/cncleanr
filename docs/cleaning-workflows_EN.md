@@ -2,16 +2,16 @@
 
 [中文](cleaning-workflows.md) | [Complete executable example](../inst/examples/chunked-cleaning.R)
 
-This adds examples/regressions on GitHub `main`, not parser behavior or a new
-package version. Existing v0.2.13 tags/assets remain unchanged. The script uses
-only APIs already available in 0.2.13. Its file is not in the older release;
+These examples/regressions ship with GitHub v0.2.14, without changing existing
+workflow parsing rules. Existing v0.2.13 tags/assets remain unchanged. The script
+uses only APIs already available in 0.2.13. Its file is not in that older release;
 run it from the checkout root:
 
 ```sh
 Rscript inst/examples/chunked-cleaning.R
 ```
 
-After installing the current checkout, alternatively run:
+After installing v0.2.14 (or a newer checkout), alternatively run:
 
 ```r
 source(system.file("examples", "chunked-cleaning.R", package = "cncleanr"),

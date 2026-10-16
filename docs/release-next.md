@@ -1,5 +1,9 @@
 # 下一版发布准备 / Next-release preparation
 
+0.2.14 已完成 GitHub 发布，超长数值修复与性能验证见[验收记录](long-decimal.md)。
+GitHub 0.2.14 is published; its long-decimal repair and performance evidence are
+recorded there. No CRAN update was submitted.
+
 0.2.13 已完成 GitHub 发布，诊断更新与最新验收见[诊断工作流记录](diagnostic-workflow.md)。
 GitHub 0.2.13 is published; its diagnostic/check evidence is recorded there. Older sections
 below retain their historical publication evidence.
