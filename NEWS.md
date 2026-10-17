@@ -1,3 +1,12 @@
+# cncleanr 0.2.18
+
+* All parsers validate numeric S3 conversion results: a plain double vector
+  of the original length is required. Wrong storage types, dimensions, retained
+  classes and changed lengths now error rather than silently corrupting rows
+  or returning nonnumeric values. Numeric SPSS preparation uses the same guard.
+* Valid conversion methods still run once and retain their warnings; ordinary
+  input has no additional element-wise scan. No C or dependency changes.
+
 # cncleanr 0.2.17
 
 * All three parsers respect SPSS user-defined missing values/ranges before

@@ -12,6 +12,8 @@
 #' @param x A character, factor, or numeric vector. Numeric input is converted
 #'   to double and otherwise passed through unchanged, including `Inf`, `-Inf`,
 #'   and `NaN`.
+#'   Conversion methods must return a plain double vector of the original length,
+#'   without a class or dimensions; malformed results cause an error.
 #'   SPSS user-defined missing metadata is respected. Objects with class `units`
 #'   are rejected: convert units explicitly, then call `units::drop_units()`.
 #'
@@ -48,7 +50,7 @@ parse_cn_range <- function(
   x <- prepare_cn_parse_input(x)
 
   if (is.numeric(x)) {
-    value <- as.double(x)
+    value <- cn_numeric_values(x)
     present <- !is.na(value)
     return(data.frame(
       lower = value,

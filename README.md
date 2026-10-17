@@ -18,11 +18,11 @@
 install.packages("cncleanr")
 ```
 
-也可以从 GitHub 安装版本 v0.2.17，包含 SPSS 缺失值、带单位输入及既有诊断修复：
+也可以从 GitHub 安装版本 v0.2.18，包含数值转换校验、SPSS 缺失值及既有诊断修复：
 
 ```r
 install.packages("pak")
-pak::pak("Jorungandr/cncleanr@v0.2.17")
+pak::pak("Jorungandr/cncleanr@v0.2.18")
 ```
 
 ### 开发版本与源码安装
@@ -169,6 +169,9 @@ parse_cn_number(c("123.5", "1.5千元", "暂无"), unit = "千元")
 人数或比率可能有自己的单位，不能整表统一乘以金额倍率。
 
 ## 导入类型与单位安全
+
+从 0.2.18 起，数值转换方法必须返回与输入等长、无类别和维度的 double 向量，
+否则明确报错，避免行数变化或字符串被误当数值。合法方法的警告仍正常传出。
 
 从 0.2.17 起，三个解析接口都尊重 `haven_labelled_spss` 的 `na_values`／
 `na_range`：例如定义为缺失的 97、99 不会再变成真实数值，字符型特殊缺失也不再

@@ -12,6 +12,8 @@
 #' @param x A character, factor, or numeric vector. Numeric input is converted
 #'   to double and otherwise passed through unchanged, including `Inf`, `-Inf`,
 #'   and `NaN`.
+#'   Conversion methods must return a plain double vector of the original length,
+#'   without a class or dimensions; malformed results cause an error.
 #'   SPSS user-defined missing metadata is respected. Objects with class `units`
 #'   are rejected: convert units explicitly, then call `units::drop_units()`.
 #'
@@ -50,7 +52,7 @@ parse_cn_quantity <- function(
   x <- prepare_cn_parse_input(x)
 
   if (is.numeric(x)) {
-    value <- as.double(x)
+    value <- cn_numeric_values(x)
     qualifier <- rep("exact", length(value))
     qualifier[is.na(value)] <- NA_character_
     return(data.frame(value = value, qualifier = qualifier))
@@ -198,7 +200,7 @@ prepare_cn_parse_input <- function(x) {
       length(missing_range) != 2L || anyNA(missing_range) || missing_range[1L] > missing_range[2L]))
     stop("SPSS `na_range` must contain two ordered non-missing numeric bounds.", call. = FALSE)
   input_names <- names(x)
-  x <- if (is.character(x)) as.character(x) else as.double(x)
+  x <- if (is.character(x)) as.character(x) else cn_numeric_values(x)
   missing <- x %in% missing_values
   if (!is.null(missing_range))
     missing <- missing | (x >= missing_range[1L] & x <= missing_range[2L])
@@ -206,4 +208,12 @@ prepare_cn_parse_input <- function(x) {
   x[!is.na(x) & missing] <- NA
   names(x) <- input_names
   x
+}
+
+cn_numeric_values <- function(x) {
+  value <- as.double(x)
+  if (!is.double(value) || is.object(value) || !is.null(dim(value)) ||
+      length(value) != length(x))
+    stop("`x` must convert to a plain double vector of the same length.", call. = FALSE)
+  value
 }

@@ -11,6 +11,8 @@
 #'   including `Inf`, `-Inf`, and `NaN`.
 #'   Numeric input uses `as.double()` (including applicable S3 methods) before
 #'   header-unit scaling and missing-value detection.
+#'   Conversion methods must return a plain double vector of the original length,
+#'   without a class or dimensions; malformed results cause an error.
 #'   SPSS user-defined missing metadata is respected. Objects with class `units`
 #'   are rejected: convert units explicitly, then call `units::drop_units()`.
 #' @param na A character vector containing values that should be interpreted as
@@ -89,7 +91,7 @@ parse_cn_number <- function(
   header_multiplier <- if (is.null(unit)) NULL else unname(header_multipliers[[unit]])
   x <- prepare_cn_parse_input(x)
   if (is.numeric(x)) {
-    output <- as.double(x)
+    output <- cn_numeric_values(x)
     if (is.null(unit)) {
       names(output) <- input_names
       return(output)

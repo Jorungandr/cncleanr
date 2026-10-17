@@ -17,6 +17,8 @@ parse_cn_range(
 \item{x}{A character, factor, or numeric vector. Numeric input is converted
 to double and otherwise passed through unchanged, including \code{Inf}, \code{-Inf},
 and \code{NaN}.
+Conversion methods must return a plain double vector of the original length,
+without a class or dimensions; malformed results cause an error.
 SPSS user-defined missing metadata is respected. Objects with class \code{units}
 are rejected: convert units explicitly, then call \code{units::drop_units()}.}
 

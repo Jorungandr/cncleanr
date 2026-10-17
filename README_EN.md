@@ -18,11 +18,11 @@ Install from [CRAN](https://CRAN.R-project.org/package=cncleanr) (verified as 0.
 install.packages("cncleanr")
 ```
 
-Alternatively, pin GitHub v0.2.17, which includes SPSS missing-value and unit-safety fixes alongside earlier diagnostic improvements:
+Alternatively, pin GitHub v0.2.18, which validates numeric conversions and includes the SPSS missing-value and earlier diagnostic fixes:
 
 ```r
 install.packages("pak")
-pak::pak("Jorungandr/cncleanr@v0.2.17")
+pak::pak("Jorungandr/cncleanr@v0.2.18")
 ```
 
 ### Development version and source installation
@@ -177,6 +177,10 @@ headcounts, or ratios in the same table may have their own units and must not
 receive a blanket monetary multiplier.
 
 ## Imported types and unit safety
+
+Since 0.2.18, numeric conversion methods must return a double vector of the
+original length, without a class or dimensions. Malformed results error rather
+than changing row counts or returning text as numbers. Method warnings propagate.
 
 Since 0.2.17, all three parsers respect `haven_labelled_spss` `na_values` and
 `na_range`. User-defined missing codes such as 97/99 no longer become actual
