@@ -26,3 +26,18 @@ user requested one complete GitHub workflow. CRAN is excluded.
 5. Publish only the checked archive at a fixed tag; publicly download, compare
    SHA-256, install in an isolated library and repeat tests/verifier. Record limits
    and results; do not claim exhaustive absence of all future software bugs.
+
+## Completion
+
+Source d709e07412be75f852cfca67a0e1614aab36091c passed local exact-archive and
+all five CI jobs (39023007179), 924 assertions each. Repeated full regression,
+2,454 consistency comparisons, 28 actual bit64 checks and 600 further randomized
+selector comparisons passed, as did all retained-data audits and snapshot hashes.
+Plain-selector timing medians were unchanged in the measured sample. No further
+reproduced defect remained in that scope; haven/units were not successfully
+installed and are not certified.
+
+GitHub v0.2.16 published at its fixed annotated tag. The public unauthenticated
+download hash matched; isolated install, source/version, full regression and
+generated/bit64 audits passed again. No runtime dependencies or C changes and no
+CRAN submission. See docs/system-audit.md for detailed evidence and limits.

@@ -1,5 +1,9 @@
 # 下一版发布准备 / Next-release preparation
 
+0.2.16 已完成 GitHub 发布，系统审计与数值下标修复见[验收记录](system-audit.md)。
+GitHub 0.2.16 is published; the system audit and numeric-selector evidence are
+recorded there. No CRAN update was submitted.
+
 0.2.15 已完成 GitHub 发布，数值对象与表头换算一致性修复见[验收记录](numeric-conversion.md)。
 GitHub 0.2.15 is published; numeric-conversion validation is recorded there.
 No CRAN update was submitted.
