@@ -1,5 +1,9 @@
 # 下一版发布准备 / Next-release preparation
 
+0.2.15 已完成 GitHub 发布，数值对象与表头换算一致性修复见[验收记录](numeric-conversion.md)。
+GitHub 0.2.15 is published; numeric-conversion validation is recorded there.
+No CRAN update was submitted.
+
 0.2.14 已完成 GitHub 发布，超长数值修复与性能验证见[验收记录](long-decimal.md)。
 GitHub 0.2.14 is published; its long-decimal repair and performance evidence are
 recorded there. No CRAN update was submitted.

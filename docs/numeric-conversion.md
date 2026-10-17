@@ -43,3 +43,53 @@ doubles and character cells with a header. It uses the same C routines, warm-up,
 seven alternating paired samples and three calls per sample. This is a narrow
 regression check, not a new speed-optimization campaign or universal latency
 guarantee. Final results are recorded after verification; no CRAN submission.
+
+## 本地验证 / Local verification (2026-10-17)
+
+Checked source: `993fb773fac1f82df3b270fd1db13bacee03404b`.
+Windows 11 x64, R 4.6.1 and existing UCRT GCC 15.2. Focused tests failed with
+0.2.14 and passed after the repair. The exact clean-commit archive passed the
+source/version verifier. Cross-domain retained-data auditing passed with no new
+wrong acceptances; this reuses the recorded datasets, not newly collected data.
+
+Seven-sample paired timing medians for 100,000 rows with `unit = '万'`:
+
+| Ordinary input | 0.2.14 (seconds) | New (seconds) |
+| --- | ---: | ---: |
+| Integer | 0.140 | 0.140 |
+| Double | 0.120 | 0.117 |
+| Character control | 0.010 | 0.010 |
+
+Complete values/names/problem attributes matched. No regression was observed in
+these samples; small differences do not establish a speedup. Character processing
+and C source files are unchanged. This release does not rerun or claim new
+ASAN/UBSAN/Valgrind evidence; the previous C-change release's records remain
+historical. Current package-level platform checks are recorded after completion.
+
+## 检查与发布 / Checks and publication
+
+- Both local exact-archive checks completed with **Status: OK**, 858 assertions,
+  zero test failures/warnings/skips. The first attempt waited for a CRAN index
+  request, then completed despite that download failure. A separate run used
+  `options(repos = character())` to avoid the network lookup; installed dependency
+  checks, installation, examples and all tests still ran. Neither local run
+  checked the PDF manual, remote incoming or a complete remote dependency-cycle
+  graph. No local files or package checks were patched to mask errors.
+- [Five-platform CI 39021796845](https://github.com/Jorungandr/cncleanr/actions/runs/39021796845)
+  checked the same source commit: all Status OK, 858 assertions each, zero test
+  failures/warnings/skips. Linux release PDF/HTML manual checks were OK.
+- [GitHub v0.2.15](https://github.com/Jorungandr/cncleanr/releases/tag/v0.2.15)
+  points to the checked source using annotated tag object
+  `7e120ddce75f6ee756818a2d826c1abbeecffcd5`. Previous tags/assets were unchanged.
+  The checked/uploaded archive is 50,946 bytes with SHA-256:
+
+```text
+66D9B7ED057880520C7FCA1C3412E58E37894617BFE06687E4450B546929023A
+```
+
+GitHub's asset digest matches. An unauthenticated download through the public
+GitHub asset API matched the same SHA-256, then installed in the isolated
+`outputs/numeric-conversion/public-library/`. The source/version verifier,
+complete 858-assertion suite and dependency-free base regression all passed.
+Follow-up validation records change excluded docs only, not the fixed tag or
+archive. This release was not submitted to CRAN.

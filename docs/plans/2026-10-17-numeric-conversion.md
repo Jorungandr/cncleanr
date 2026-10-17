@@ -32,3 +32,14 @@ object whose storage and converted value differ; no external package is needed.
 5. Tag the verified source, publish the exact checked archive, download it
    publicly without authentication, compare SHA-256, install and rerun tests.
    Record evidence in docs; do not submit CRAN or modify existing release assets.
+
+## Completed
+
+- Source: `993fb773fac1f82df3b270fd1db13bacee03404b`; only the numeric entry branch
+  changed, with no C changes or new dependencies. Added 25 assertions, total 858.
+- Both local exact-archive checks and all five platform jobs (39021796845) passed;
+  the local repository-index timeout and offline rerun limits are recorded in
+  `docs/numeric-conversion.md`, along with ordinary-input timing medians.
+- Published v0.2.15 at the fixed annotated tag. The public unauthenticated asset
+  download matched the checked SHA-256 and passed isolated install, source/version,
+  all 858 assertions and dependency-free regression. No CRAN submission.
