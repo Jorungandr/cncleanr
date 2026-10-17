@@ -42,3 +42,26 @@ cells; original columns retain the source markers.
 CSV does not store column types. Excel may still display identifiers as numbers
 when opening a file automatically; use text import with an explicit identifier type.
 This example handles UTF-8 CSV, not automatic GBK detection, Excel files or business semantics.
+
+## CSV is not a lossless backup of an R object
+
+The round-trip assertions cover this example, not bit-for-bit preservation of
+arbitrary doubles. Ordinary `write.csv()` can round trailing significant digits
+(for example, `1 + 2^-52` can be written as `1`) and lose the sign of negative zero.
+With `na=''`, both `NA` and `NaN` become empty cells and cannot be distinguished
+from that column alone; a source empty string also needs a separate missing-status
+field. Text `Inf`/`-Inf` is not missing, and an open infinite range bound must not
+be confused with an inclusive numeric infinite point.
+
+For CSV interchange retain source text, IDs, status, qualifiers/inclusivity flags
+and a separate review table, not just numeric columns. To preserve the current
+R object, including problem attributes, NaN and negative zero, use:
+
+```r
+saveRDS(parsed, "parsed.rds")  # First ensure this path will not overwrite needed data.
+restored <- readRDS("parsed.rds")
+stopifnot(identical(restored, parsed))
+```
+
+Read only RDS files you saved or obtained from trusted sources. RDS is not a
+general cross-application replacement for CSV.

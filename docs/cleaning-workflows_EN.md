@@ -101,8 +101,17 @@ identifier/missing-marker conversion. CSV cannot serialize `problems`, and
 applications may further change display types; opening a file in Excel does not
 replace these text round-trip checks.
 
+These assertions cover the example's values only. Ordinary CSV can lose trailing
+double digits, negative zero and the NA/NaN distinction. Use RDS for lossless R
+object storage; see [CSV limits](csv-cleaning_EN.md#csv-is-not-a-lossless-backup-of-an-r-object).
+Retain inclusivity flags for textual infinite bounds, not just `lower`/`upper`.
+
 Regression tests and all five platform CI jobs execute this same example rather
 than maintaining another workflow implementation inconsistent with the guide.
+Additional regressions cover reordered/repeated source rows, irregular/empty
+batches, quantities/ranges and RDS preservation of boundary doubles, NaN,
+negative zero and diagnostics. Direct cross-parser numeric comparisons apply
+only to shared exact-input syntax; qualifier/range semantics intentionally differ.
 
 ## Validation (2026-10-15)
 
