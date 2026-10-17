@@ -22,3 +22,10 @@ branches and numeric SPSS preparation; existing ordinary conversions remain.
 
 Execution is in the existing authorized checkout, without subagents. This
 continues the user's requested single-session workflow, not a new session.
+
+## Completion
+
+Source commit `83fb6069d2c5b0cba078eb44d6340d3f4125485d` published as v0.2.18.
+Local source check and all five CI jobs passed 1,181 assertions. Regression timing,
+real third-party and data audits, public download/install evidence and limitations
+are recorded in [numeric-contract.md](../numeric-contract.md). No CRAN submission.

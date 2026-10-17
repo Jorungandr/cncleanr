@@ -1,5 +1,9 @@
 # 下一版发布准备 / Next-release preparation
 
+0.2.18 已完成 GitHub 发布，异常数值转换的统一校验见[验收记录](numeric-contract.md)。
+GitHub 0.2.18 is published; numeric-conversion contract validation is recorded
+there. No CRAN update was submitted.
+
 0.2.17 已完成 GitHub 发布，SPSS 缺失定义与单位输入安全修复见[验收记录](import-types.md)。
 GitHub 0.2.17 is published; imported-type validation and compatibility changes
 are recorded there. No CRAN update was submitted.
