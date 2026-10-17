@@ -9,6 +9,8 @@
 #' @param x A character, factor, or numeric vector. When `unit = NULL`, numeric
 #'   input is converted to double and otherwise passed through unchanged,
 #'   including `Inf`, `-Inf`, and `NaN`.
+#'   Numeric input uses `as.double()` (including applicable S3 methods) before
+#'   header-unit scaling and missing-value detection.
 #' @param na A character vector containing values that should be interpreted as
 #'   missing. Matching happens after whitespace and full-width normalization.
 #' @param strict A single logical value. If `FALSE`, invalid values become
@@ -84,13 +86,13 @@ parse_cn_number <- function(
   }
   header_multiplier <- if (is.null(unit)) NULL else unname(header_multipliers[[unit]])
   if (is.numeric(x)) {
+    output <- as.double(x)
     if (is.null(unit)) {
-      output <- as.double(x)
-      names(output) <- names(x)
+      names(output) <- input_names
       return(output)
     }
-    missing <- is.na(x)
-    x <- sprintf("%.17g", x)
+    missing <- is.na(output)
+    x <- sprintf("%.17g", output)
     x[missing] <- NA_character_
     names(x) <- input_names
   }

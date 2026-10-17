@@ -18,11 +18,11 @@ Install from [CRAN](https://CRAN.R-project.org/package=cncleanr) (verified as 0.
 install.packages("cncleanr")
 ```
 
-Alternatively, pin GitHub v0.2.14, which includes the long-decimal conversion fix, explicit diagnostic-preserving selection/reordering and encoding-error locations:
+Alternatively, pin GitHub v0.2.15, which includes consistent numeric-object conversion, the long-decimal fix and diagnostic improvements:
 
 ```r
 install.packages("pak")
-pak::pak("Jorungandr/cncleanr@v0.2.14")
+pak::pak("Jorungandr/cncleanr@v0.2.15")
 ```
 
 ### Development version and source installation
@@ -169,6 +169,9 @@ Omitting `unit` preserves existing behavior. With `unit`, numeric input is also
 scaled, `NA`/`NaN` remain missing, and `Inf`, `-Inf`, or conversion overflow are
 reported as problems. This argument is only available in `parse_cn_number()`;
 it does not read or infer table headers.
+Since 0.2.15, numeric input also respects applicable `as.double()` S3 methods
+before header scaling and missing detection, retaining original names. See
+[conversion consistency validation](docs/numeric-conversion.md).
 Apply header units only to relevant monetary rows or columns. EPS (yuan/share),
 headcounts, or ratios in the same table may have their own units and must not
 receive a blanket monetary multiplier.

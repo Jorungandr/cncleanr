@@ -1,3 +1,13 @@
+# cncleanr 0.2.15
+
+* Converts numeric input with `as.double()` once before header-unit scaling and
+  missing-value detection. Numeric S3 conversion methods are now respected with
+  a header just as they already were without a header and in quantity/range
+  parsing. Original names and established nonfinite-value policies are retained.
+* Adds dependency-free S3 regressions for converted values/missingness, all header
+  units, single conversion, names, negative zero and strict diagnostics. No new
+  API, runtime dependency or C change.
+
 # cncleanr 0.2.14
 
 * Rescues representable very long decimal significands in the shared extreme

@@ -17,7 +17,9 @@ parse_cn_number(
 \arguments{
 \item{x}{A character, factor, or numeric vector. When \code{unit = NULL}, numeric
 input is converted to double and otherwise passed through unchanged,
-including \code{Inf}, \code{-Inf}, and \code{NaN}.}
+including \code{Inf}, \code{-Inf}, and \code{NaN}.
+Numeric input uses \code{as.double()} (including applicable S3 methods) before
+header-unit scaling and missing-value detection.}
 
 \item{na}{A character vector containing values that should be interpreted as
 missing. Matching happens after whitespace and full-width normalization.}
