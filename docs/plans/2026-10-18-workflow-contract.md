@@ -28,3 +28,12 @@ Tasks:
 Alternative: introduce a batch/serialization API. Rejected: existing explicit
 source mapping and base R serialization suffice; no measured need for a new API.
 Execution stays in the authorized checkout, without delegated agents.
+
+## Completion
+
+Steps 1–5 completed without parser changes. Source checkpoint
+`274e48369b9550407e1a98016e38795da6feb5fc` passed local clean archive check and
+all five CI jobs with 1,301 assertions. Literal README audits ran in CI and
+locally with real units; coverage/serialization limits and evidence are in
+[workflow-contract.md](../workflow-contract.md). Existing v0.2.18 release
+remains unchanged; no new version or CRAN upload.

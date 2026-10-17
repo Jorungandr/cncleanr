@@ -113,7 +113,14 @@ batches, quantities/ranges and RDS preservation of boundary doubles, NaN,
 negative zero and diagnostics. Direct cross-parser numeric comparisons apply
 only to shared exact-input syntax; qualifier/range semantics intentionally differ.
 
-## Validation (2026-10-15)
+## Latest validation (2026-10-18)
+
+Expanded workflow-boundary regressions and literal bilingual README execution
+passed; see [consistency evidence](workflow-contract.md). Each of five platform
+checks passed 1,301 assertions. This is not a new release: the existing v0.2.18
+asset remains unchanged and still contains its 1,181-assertion suite.
+
+## Historical validation (2026-10-15)
 
 Example checkpoint: `0574b41d7e4cf4a2f6772ff3de3949a76ee67e8e`.
 [All five CI checks](https://github.com/Jorungandr/cncleanr/actions/runs/38690442453)
