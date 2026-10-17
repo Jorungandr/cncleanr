@@ -34,6 +34,7 @@ cn_problems <- function(x) {
 #'   base R rules), or a logical vector of exactly the input length/row count.
 #'   Missing, nonfinite, fractional and out-of-range indices are rejected.
 #'   Defaults to all rows. Use `integer()` to select no rows.
+#'   Classed numeric indices use `as.double()` once before validation.
 #' @return The selected numeric vector or data frame, without a new class.
 #'   Problem indices refer to the selected result, not the original input.
 #' @details Call this before other transformations. It cannot recover problems
@@ -53,9 +54,17 @@ cn_subset <- function(x, rows) {
     stop("`x` must be an unmodified cncleanr numeric or data-frame result.", call. = FALSE)
   size <- if (frame) nrow(x) else length(x)
   if (missing(rows)) rows <- seq_len(size)
-  if (!is.null(dim(rows)) || anyNA(rows) ||
+  if (!is.null(dim(rows)) ||
       (!is.numeric(rows) && !is.logical(rows)))
     stop("`rows` must contain numeric indices or a full-length logical selection.", call. = FALSE)
+  if (is.numeric(rows) && is.object(rows)) {
+    original_size <- length(rows)
+    rows <- as.double(rows)
+    if (!is.double(rows) || is.object(rows) || !is.null(dim(rows)) || length(rows) != original_size)
+      stop("`rows` must convert to a plain double vector of the same length.", call. = FALSE)
+  }
+  if (anyNA(rows))
+    stop("`rows` must not contain missing indices.", call. = FALSE)
   if ((is.logical(rows) && length(rows) != size) ||
       (is.numeric(rows) && any(!is.finite(rows) | rows != trunc(rows) | abs(rows) > size)))
     stop("`rows` must be full-length logicals or finite integer indices within the input.", call. = FALSE)

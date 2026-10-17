@@ -12,7 +12,8 @@ cn_subset(x, rows)
 \item{rows}{Integer-valued numeric indices (positive, zero, or negative using
 base R rules), or a logical vector of exactly the input length/row count.
 Missing, nonfinite, fractional and out-of-range indices are rejected.
-Defaults to all rows. Use \code{integer()} to select no rows.}
+Defaults to all rows. Use \code{integer()} to select no rows.
+Classed numeric indices use \code{as.double()} once before validation.}
 }
 \value{
 The selected numeric vector or data frame, without a new class.

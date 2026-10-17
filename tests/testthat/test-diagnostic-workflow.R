@@ -77,3 +77,35 @@ test_that('ordinary diagnostics and valid encodings remain unchanged', {
     expect_identical(cn_subset(expected, integer()), parser(character()))
   }
 })
+
+test_that('classed numeric selectors convert once before validation and indexing', (function() {
+  table <- get('.__S3MethodsTable__.', asNamespace('base'))
+  method <- 'as.double.cncleanr_test_index'
+  stopifnot(!exists(method, table, inherits = FALSE))
+  on.exit(rm(list = method, envir = table))
+  calls <- 0L
+  converted <- c(3, 2, 1, 3)
+  registerS3method('as.double', 'cncleanr_test_index', function(x, ...) {
+    calls <<- calls + 1L
+    converted
+  }, envir = asNamespace('base'))
+  for (parser in list(parse_cn_number, parse_cn_quantity, parse_cn_range)) {
+    x <- suppressWarnings(parser(c('bad', '2', 'wrong')))
+    for (selection in list(c(3, 2, 1, 3), -1, c(0, -2), numeric(), c(1, 1))) {
+      converted <- selection
+      rows <- structure(rep(0, length(selection)), class = 'cncleanr_test_index')
+      calls <- 0L
+      expect_identical(cn_subset(x, rows), cn_subset(x, selection))
+      expect_identical(calls, 1L)
+    }
+    for (selection in list(NA_real_, NaN, Inf, -Inf, .5, 4, -4)) {
+      converted <- selection
+      expect_error(cn_subset(x, structure(0, class = 'cncleanr_test_index')), 'rows')
+    }
+    for (selection in list(c(1, 2), '1', list(1), matrix(1),
+                           structure(1, class = 'unconverted'))) {
+      converted <- selection
+      expect_error(cn_subset(x, structure(0, class = 'cncleanr_test_index')), 'rows')
+    }
+  }
+})())

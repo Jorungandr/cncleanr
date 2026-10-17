@@ -18,11 +18,11 @@
 install.packages("cncleanr")
 ```
 
-也可以从 GitHub 安装版本 v0.2.15，包含数值对象换算一致性、超长数值转换及诊断修复：
+也可以从 GitHub 安装版本 v0.2.16，包含数值下标筛选、数值对象换算及诊断修复：
 
 ```r
 install.packages("pak")
-pak::pak("Jorungandr/cncleanr@v0.2.15")
+pak::pak("Jorungandr/cncleanr@v0.2.16")
 ```
 
 ### 开发版本与源码安装
@@ -286,6 +286,8 @@ sorted <- cn_subset(parsed, order(parsed, na.last = TRUE))
 
 问题行号始终对应当前结果的位置；如需原始编号，保留 `rows` 并通过
 `rows[cn_problems(selected)$index]` 映射回原输入。重复取行会重复对应的问题记录。
+从 0.2.16 起，带类的数值下标先用 `as.double()` 转换一次再校验和筛选，
+包括 integer64 下标；原始编号请随实际选择同步维护。见[系统检查记录](docs/system-audit.md)。
 逻辑筛选必须与输入等长；数值索引支持整数、零和负索引，不接受缺失、非整数或越界值。
 普通 `[]`、修改、合并结果仍不自动维护诊断；请先使用此函数，它不能修复已经丢失或过期的属性。
 可运行示例和验证记录见[诊断工作流](docs/diagnostic-workflow.md)。

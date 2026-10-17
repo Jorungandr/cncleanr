@@ -1,3 +1,13 @@
+# cncleanr 0.2.16
+
+* Converts classed numeric `cn_subset()` indices once with `as.double()` before
+  validation and indexing. Fixes silent empty selections, manufactured rows and
+  lost diagnostics for storage-encoded numeric indices such as integer64.
+* Rejects malformed conversion results and invalid converted indices. Ordinary
+  integer/double/logical selections and parser algorithms are unchanged.
+* Adds dependency-free S3 regressions and a reproducible system audit with optional
+  bit64 checks; no new runtime or test dependency and no C changes.
+
 # cncleanr 0.2.15
 
 * Converts numeric input with `as.double()` once before header-unit scaling and

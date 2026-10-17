@@ -18,11 +18,11 @@ Install from [CRAN](https://CRAN.R-project.org/package=cncleanr) (verified as 0.
 install.packages("cncleanr")
 ```
 
-Alternatively, pin GitHub v0.2.15, which includes consistent numeric-object conversion, the long-decimal fix and diagnostic improvements:
+Alternatively, pin GitHub v0.2.16, which includes numeric-selector and numeric-object conversion fixes plus diagnostic improvements:
 
 ```r
 install.packages("pak")
-pak::pak("Jorungandr/cncleanr@v0.2.15")
+pak::pak("Jorungandr/cncleanr@v0.2.16")
 ```
 
 ### Development version and source installation
@@ -301,6 +301,9 @@ sorted <- cn_subset(parsed, order(parsed, na.last = TRUE))
 Indices refer to positions in the current result. Keep `rows` and use
 `rows[cn_problems(selected)$index]` to recover original identifiers. Repeated
 selections repeat problems. Logical selections must be full-length; integer-valued
+numeric S3 selectors use `as.double()` once before validation and indexing since
+0.2.16, including integer64. Preserve source identifiers alongside the actual
+selection; see the [system audit](docs/system-audit.md). Integer-valued
 numeric indices support zero/negative base-R selection, but not missing,
 fractional or out-of-range indices. Ordinary `[]`, mutation and binding still do
 not track diagnostics. Use this helper first; it cannot recover lost/stale
