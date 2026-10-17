@@ -18,11 +18,11 @@ Install from [CRAN](https://CRAN.R-project.org/package=cncleanr) (verified as 0.
 install.packages("cncleanr")
 ```
 
-Alternatively, pin GitHub v0.2.16, which includes numeric-selector and numeric-object conversion fixes plus diagnostic improvements:
+Alternatively, pin GitHub v0.2.17, which includes SPSS missing-value and unit-safety fixes alongside earlier diagnostic improvements:
 
 ```r
 install.packages("pak")
-pak::pak("Jorungandr/cncleanr@v0.2.16")
+pak::pak("Jorungandr/cncleanr@v0.2.17")
 ```
 
 ### Development version and source installation
@@ -175,6 +175,31 @@ before header scaling and missing detection, retaining original names. See
 Apply header units only to relevant monetary rows or columns. EPS (yuan/share),
 headcounts, or ratios in the same table may have their own units and must not
 receive a blanket monetary multiplier.
+
+## Imported types and unit safety
+
+Since 0.2.17, all three parsers respect `haven_labelled_spss` `na_values` and
+`na_range`. User-defined missing codes such as 97/99 no longer become actual
+values, and character missing codes no longer become parse failures. Ordinary
+labels retain their underlying codes, not label text. Existing NA/NaN/tagged-NA
+payloads are preserved without a header; header scaling keeps its established
+missing-value output rules.
+
+Direct `units` objects now error, including empty or dimensionless units, rather
+than silently losing their meaning. Choose and convert units first, then remove
+them explicitly:
+
+```r
+x <- units::set_units(c(1000, 2000), "m")
+x <- units::set_units(x, "km")
+parse_cn_number(units::drop_units(x))
+#> [1] 1 2
+```
+
+This is not automatic unit recognition or monetary conversion. These third-party
+packages are not runtime dependencies. Integer64-to-double precision warnings
+still propagate; large integers and decimal money are not guaranteed exact.
+See [imported-type validation](docs/import-types.md) for scope and reproduction.
 
 ## Qualified quantities
 

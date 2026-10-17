@@ -19,7 +19,9 @@ parse_cn_number(
 input is converted to double and otherwise passed through unchanged,
 including \code{Inf}, \code{-Inf}, and \code{NaN}.
 Numeric input uses \code{as.double()} (including applicable S3 methods) before
-header-unit scaling and missing-value detection.}
+header-unit scaling and missing-value detection.
+SPSS user-defined missing metadata is respected. Objects with class \code{units}
+are rejected: convert units explicitly, then call \code{units::drop_units()}.}
 
 \item{na}{A character vector containing values that should be interpreted as
 missing. Matching happens after whitespace and full-width normalization.}

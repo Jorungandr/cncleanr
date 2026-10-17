@@ -12,6 +12,8 @@
 #' @param x A character, factor, or numeric vector. Numeric input is converted
 #'   to double and otherwise passed through unchanged, including `Inf`, `-Inf`,
 #'   and `NaN`.
+#'   SPSS user-defined missing metadata is respected. Objects with class `units`
+#'   are rejected: convert units explicitly, then call `units::drop_units()`.
 #'
 #' @return A data frame with double column `value` and character column
 #'   `qualifier`. Qualifiers are `exact`, `approx`, `greater_than`, `at_least`,
@@ -45,6 +47,7 @@ parse_cn_quantity <- function(
 ) {
   cn_with_encoding_context(x, na, {
   validate_cn_parse_arguments(x, na, strict)
+  x <- prepare_cn_parse_input(x)
 
   if (is.numeric(x)) {
     value <- as.double(x)
@@ -180,4 +183,27 @@ validate_cn_parse_arguments <- function(x, na, strict) {
     stop("`x` must be a character, factor, or numeric vector.", call. = FALSE)
   }
   invisible(NULL)
+}
+
+# Interpret SPSS missing metadata without requiring haven's namespace to be loaded.
+prepare_cn_parse_input <- function(x) {
+  if (inherits(x, "units"))
+    stop("`x` has units; convert to the intended unit and explicitly call units::drop_units() first.", call. = FALSE)
+  if (!inherits(x, "haven_labelled_spss")) return(x)
+  if (!is.numeric(x) && !is.character(x))
+    stop("SPSS input must contain numeric or character values.", call. = FALSE)
+  missing_values <- attr(x, "na_values", exact = TRUE)
+  missing_range <- attr(x, "na_range", exact = TRUE)
+  if (!is.null(missing_range) && (!is.numeric(x) || !is.numeric(missing_range) ||
+      length(missing_range) != 2L || anyNA(missing_range) || missing_range[1L] > missing_range[2L]))
+    stop("SPSS `na_range` must contain two ordered non-missing numeric bounds.", call. = FALSE)
+  input_names <- names(x)
+  x <- if (is.character(x)) as.character(x) else as.double(x)
+  missing <- x %in% missing_values
+  if (!is.null(missing_range))
+    missing <- missing | (x >= missing_range[1L] & x <= missing_range[2L])
+  # Keep pre-existing NaN/tagged-NA payloads; replace only finite/sentinel values.
+  x[!is.na(x) & missing] <- NA
+  names(x) <- input_names
+  x
 }

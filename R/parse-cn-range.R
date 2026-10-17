@@ -12,6 +12,8 @@
 #' @param x A character, factor, or numeric vector. Numeric input is converted
 #'   to double and otherwise passed through unchanged, including `Inf`, `-Inf`,
 #'   and `NaN`.
+#'   SPSS user-defined missing metadata is respected. Objects with class `units`
+#'   are rejected: convert units explicitly, then call `units::drop_units()`.
 #'
 #' @return A data frame with columns `lower`, `upper`, `lower_inclusive`, and
 #'   `upper_inclusive`. Numeric input becomes an inclusive point range,
@@ -43,6 +45,7 @@ parse_cn_range <- function(
 ) {
   cn_with_encoding_context(x, na, {
   validate_cn_parse_arguments(x, na, strict)
+  x <- prepare_cn_parse_input(x)
 
   if (is.numeric(x)) {
     value <- as.double(x)

@@ -16,7 +16,9 @@ parse_cn_range(
 \arguments{
 \item{x}{A character, factor, or numeric vector. Numeric input is converted
 to double and otherwise passed through unchanged, including \code{Inf}, \code{-Inf},
-and \code{NaN}.}
+and \code{NaN}.
+SPSS user-defined missing metadata is respected. Objects with class \code{units}
+are rejected: convert units explicitly, then call \code{units::drop_units()}.}
 
 \item{na}{A character vector containing values that should be interpreted as
 missing. Matching happens after whitespace and full-width normalization.}

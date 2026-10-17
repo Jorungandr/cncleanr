@@ -1,3 +1,14 @@
+# cncleanr 0.2.17
+
+* All three parsers respect SPSS user-defined missing values/ranges before
+  numeric or character parsing, retaining ordinary NA/NaN/tagged-NA payloads
+  without header scaling. Metadata handling does not require haven to be loaded.
+* Direct `units` input now errors with an explicit conversion/drop-units remedy,
+  including empty or dimensionless units, rather than silently losing meaning.
+  This is an intentional compatibility change; choose units explicitly first.
+* Adds metadata and units regressions, a real haven/units/bit64 audit and bilingual
+  guidance. No new dependencies, public arguments or C changes.
+
 # cncleanr 0.2.16
 
 * Converts classed numeric `cn_subset()` indices once with `as.double()` before

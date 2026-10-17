@@ -11,6 +11,8 @@
 #'   including `Inf`, `-Inf`, and `NaN`.
 #'   Numeric input uses `as.double()` (including applicable S3 methods) before
 #'   header-unit scaling and missing-value detection.
+#'   SPSS user-defined missing metadata is respected. Objects with class `units`
+#'   are rejected: convert units explicitly, then call `units::drop_units()`.
 #' @param na A character vector containing values that should be interpreted as
 #'   missing. Matching happens after whitespace and full-width normalization.
 #' @param strict A single logical value. If `FALSE`, invalid values become
@@ -85,6 +87,7 @@ parse_cn_number <- function(
     stop("`unit` must be NULL or a single supported Chinese header unit.", call. = FALSE)
   }
   header_multiplier <- if (is.null(unit)) NULL else unname(header_multipliers[[unit]])
+  x <- prepare_cn_parse_input(x)
   if (is.numeric(x)) {
     output <- as.double(x)
     if (is.null(unit)) {
