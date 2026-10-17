@@ -1,5 +1,9 @@
 # 下一版发布准备 / Next-release preparation
 
+0.2.17 已完成 GitHub 发布，SPSS 缺失定义与单位输入安全修复见[验收记录](import-types.md)。
+GitHub 0.2.17 is published; imported-type validation and compatibility changes
+are recorded there. No CRAN update was submitted.
+
 0.2.16 已完成 GitHub 发布，系统审计与数值下标修复见[验收记录](system-audit.md)。
 GitHub 0.2.16 is published; the system audit and numeric-selector evidence are
 recorded there. No CRAN update was submitted.

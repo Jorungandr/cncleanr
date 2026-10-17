@@ -35,3 +35,11 @@ authorized the design and the complete normal GitHub workflow, but not CRAN.
    claim when C is unchanged.
 5. Publish the checked archive at a fixed tag; public unauthenticated download,
    hash, isolated install and full recheck. Record actual evidence and limits.
+
+## Completion
+
+Steps 1–5 completed. Source commit: `1f5271cacb92c4a7261a5931a77e480c17d55c11`.
+GitHub v0.2.17 is public; local check and all five CI jobs passed 1,008 assertions.
+Real optional-package audits, public-download hash/install verification and
+regression timing are recorded in [import-types.md](../import-types.md).
+No runtime dependencies or C changes; no CRAN submission.
