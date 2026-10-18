@@ -66,3 +66,43 @@ including the new summary API. Literal README execution, all 77 real imported-ty
 2,454 generated consistency and 28 optional bit64 checks passed again against
 the public installation. The full testthat suite and `tests/parser.R` also passed
 again against that independent public installation. No CRAN submission.
+
+## Incremental example on main (after v0.2.19)
+
+The new checkout example accumulates only four double totals and a named numeric
+reason-frequency vector between batches. Its local `summarize_batches()` is
+example code, not another exported function. It preserves cross-batch
+first-occurrence order and counts repeated source occurrences repeatedly.
+The example still holds synthetic source text and its other workflow branches
+retain tables: this is not a claim of constant-memory end-to-end file streaming.
+State grows with distinct reasons and temporary parsing work with batch size.
+Double integer counts are exact only through 2^53. Export individual problems
+before releasing a batch if source-row review is required.
+
+Source checkpoint: `b5bdfc88cb2743268defb4a5f43a612dfb899206`. New regressions
+first failed against the earlier installed example, then passed after the update.
+The same example validates all three parsers against whole-input summaries for
+mixed, empty, missing-only, failed-only, reordered/repeated and numeric-nonfinite
+cases, including a no-batch case. Whole-input passes are validation oracles, not
+production accumulator work. Literal counts, stable empty schemas, reason totals
+and first-occurrence order contribute 54 new testthat assertions.
+
+Local clean committed archive check: `Status: OK`, 1,442 assertions, zero
+failures/warnings/skips. The local check limitations above still apply. Checked
+installation and checkout/archive verification passed. Real imported-type audit
+(77), generated consistency (2,454), optional bit64 (28), and both README
+editions with actual units (11 executed blocks each, three installation blocks
+excluded) passed again. No parser, C, dependency, API or package-version changes.
+No new benchmark, sanitizer run or collected real data is claimed.
+
+The existing v0.2.19 tag and published asset retain their original contents and
+1,388-assertion suite; the new accumulator is in main only until a future release.
+No CRAN submission.
+
+[CI run 39092573242](https://github.com/Jorungandr/cncleanr/actions/runs/39092573242)
+passed all five platforms (Ubuntu devel/release/oldrel-1, Windows release,
+macOS release). Each job log reports `Status: OK` and 1,442 passing assertions,
+zero failed/warned/skipped tests. Ubuntu release passed PDF and HTML manuals.
+CI executes the same updated example; its README audit excludes installation
+commands and explicitly reports unavailable optional units examples, as above.
+The fixed v0.2.19 tag SHA and asset size/digest were rechecked unchanged.

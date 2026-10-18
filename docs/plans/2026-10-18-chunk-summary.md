@@ -23,3 +23,12 @@ reason-frequency vector between batches. Preserve first occurrence order with
 Alternatives: retain all batch summaries then bind (memory grows with batches),
 or introduce another public merge API (not needed). Use existing base R tools.
 Execution stays in the authorized checkout, without delegated agents.
+
+## Completion
+
+Steps 1–4 completed at source checkpoint
+`b5bdfc88cb2743268defb4a5f43a612dfb899206`. Local clean archive check and all
+five CI jobs passed 1,442 assertions, including 54 new workflow assertions.
+Real optional-type/system audits and literal README checks passed. Evidence is
+in [summary-validation.md](../summary-validation.md). Existing v0.2.19 tag and
+asset remain unchanged; no new release or CRAN submission.

@@ -4,7 +4,8 @@
 
 The original cleaning example ships since GitHub v0.2.14. The current checkout
 adds incremental summaries using the existing 0.2.19 `cn_summary()` API, without
-changing parsing rules. The fixed v0.2.19 tag/asset still contains the earlier
+changing parsing rules. Install package 0.2.19 or later before running it.
+The fixed v0.2.19 tag/asset still contains the earlier
 example, not this new accumulator. Run from a checkout containing this change:
 
 ```sh
@@ -149,7 +150,15 @@ batches, quantities/ranges and RDS preservation of boundary doubles, NaN,
 negative zero and diagnostics. Direct cross-parser numeric comparisons apply
 only to shared exact-input syntax; qualifier/range semantics intentionally differ.
 
-## Latest validation (2026-10-18)
+## Incremental summary validation (2026-10-18)
+
+The current checkout's accumulator passed [all five platform checks](https://github.com/Jorungandr/cncleanr/actions/runs/39092573242),
+with 1,442 assertions each and Linux PDF/HTML checks passing. See
+[summary validation](summary-validation.md#incremental-example-on-main-after-v0219)
+for scope and limits. This is not a new release; the fixed v0.2.19 asset does
+not contain this example update.
+
+## Historical consistency validation (2026-10-18)
 
 Expanded workflow-boundary regressions and literal bilingual README execution
 passed; see [consistency evidence](workflow-contract.md). Each of five platform

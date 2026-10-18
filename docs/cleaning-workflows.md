@@ -3,7 +3,8 @@
 [English](cleaning-workflows_EN.md) | [完整可运行示例](../inst/examples/chunked-cleaning.R)
 
 原始清洗示例从 GitHub v0.2.14 起提供。当前仓库新增分批汇总，使用 0.2.19
-已有的 `cn_summary()`，不改变解析规则。现有 v0.2.19 标签／附件仍包含旧示例，
+已有的 `cn_summary()`，不改变解析规则；运行前需安装 0.2.19 或更新的包。
+现有 v0.2.19 标签／附件仍包含旧示例，
 不含此次新增的累计流程；请在含本轮改动的 checkout 根目录运行：
 
 ```sh
@@ -127,7 +128,14 @@ Excel 等软件自动打开文件还可能改变显示类型，不能替代这�
 保存 double 边界值、NaN、负零和诊断属性。三接口只在共同支持的精确输入上
 直接对比数值；限定词和范围的不同返回语义不是接口不一致。
 
-## 最新验收（2026-10-18）
+## 分批汇总验收（2026-10-18）
+
+当前仓库的累计汇总示例已通过[五平台检查](https://github.com/Jorungandr/cncleanr/actions/runs/39092573242)，
+各通过 1442 项断言，Linux PDF／HTML 检查通过；新增部分的范围与限制见
+[汇总验收记录](summary-validation.md#incremental-example-on-main-after-v0219)。
+这不是新版发布，固定 v0.2.19 附件不包含此次示例更新。
+
+## 历史一致性验收（2026-10-18）
 
 新增工作流边界测试与双语 README 原文执行检查，完整验收见
 [一致性记录](workflow-contract.md)。五平台包检查各通过 1301 项断言；
