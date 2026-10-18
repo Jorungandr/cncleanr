@@ -1,5 +1,9 @@
 # 下一版发布准备 / Next-release preparation
 
+0.2.19 已完成 GitHub 发布，新增 `cn_summary()`，见[诊断汇总验收](summary-validation.md)。
+GitHub 0.2.19 is published; diagnostic summary validation is recorded there.
+No CRAN update was submitted.
+
 0.2.18 已完成 GitHub 发布，异常数值转换的统一校验见[验收记录](numeric-contract.md)。
 GitHub 0.2.18 is published; numeric-conversion contract validation is recorded
 there. No CRAN update was submitted.
