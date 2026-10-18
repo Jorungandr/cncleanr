@@ -6,6 +6,21 @@ test_that('the runnable workflow preserves source provenance across all parsers'
     expect_identical(result[[kind]]$review$source_row, c(2L, 5L))
     expect_identical(result[[kind]]$selected_review$id, c('0005', '0002', '0005'))
     expect_identical(which(result[[kind]]$status == 'missing'), c(3L, 7L))
+    summaries <- result[[kind]]$summaries
+    expect_identical(names(summaries),c('mixed','empty','missing','failed','repeated','numeric'))
+    gold <- list(c(8,4,2,2),c(0,0,0,0),c(3,0,3,0),
+                 c(3,0,0,3),c(5,1,1,3),c(5,3,2,0))
+    for (i in seq_along(gold)) {
+      counts <- summaries[[i]]$counts
+      expect_identical(unname(unlist(counts)),gold[[i]])
+      expect_identical(sum(summaries[[i]]$reasons$count),counts$failed)
+    }
+    expect_identical(summaries$mixed$reasons$count,c(1,1))
+    expect_identical(summaries$failed$reasons$count,3)
+    expect_identical(summaries$repeated$reasons$count,c(2,1))
+    expect_identical(summaries$repeated$reasons$reason,rev(summaries$mixed$reasons$reason))
+    expect_identical(summaries$empty$reasons,
+      data.frame(reason=character(),count=numeric()))
   }
 })
 

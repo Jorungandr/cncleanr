@@ -2,15 +2,15 @@
 
 [English](cleaning-workflows_EN.md) | [完整可运行示例](../inst/examples/chunked-cleaning.R)
 
-此示例和回归检查随 GitHub v0.2.14 提供，不改变工作流的既有解析规则。
-原有 v0.2.13 标签和源码附件不变。示例只使用 0.2.13 已有的 API，但该旧发布包
-不包含这个文件；可以在仓库根目录直接运行它：
+原始清洗示例从 GitHub v0.2.14 起提供。当前仓库新增分批汇总，使用 0.2.19
+已有的 `cn_summary()`，不改变解析规则。现有 v0.2.19 标签／附件仍包含旧示例，
+不含此次新增的累计流程；请在含本轮改动的 checkout 根目录运行：
 
 ```sh
 Rscript inst/examples/chunked-cleaning.R
 ```
 
-或在安装 v0.2.14（或更新的 checkout）后运行：
+或安装包含本轮改动的 GitHub `main` 后运行安装包内的更新示例：
 
 ```r
 source(system.file("examples", "chunked-cleaning.R", package = "cncleanr"),
@@ -43,6 +43,34 @@ review <- data.frame(
 然后分别合并普通数值／数据表与问题表。完整脚本还检查空批次与无错误批次，
 并逐列对比整列解析的结果。整列对照仅用于验收；生产分批清洗不必重复解析整列。
 对于已经合并的普通表，使用显式源 ID／问题表关联，不要重新依赖诊断属性。
+
+## 只保留分批汇总，不保留各批解析结果
+
+完整脚本中的局部 `summarize_batches()` 是示例代码，不是新增包接口。它在每批
+解析后立即调用 `cn_summary()`，只累加四项计数和按原因命名的频数，不保存
+各批解析对象或逐行问题表。用 `setdiff()` 加入新原因，保留跨批首次出现顺序。
+
+运行脚本后可查看示例返回值：
+
+```r
+result <- source("inst/examples/chunked-cleaning.R", encoding = "UTF-8")$value
+result$number$summaries$mixed$counts
+#>   total parsed missing failed
+#> 1     8      4       2      2
+result$number$summaries$mixed$reasons
+```
+
+数量、区间分别位于 `result$quantity`、`result$range`。空批次不增加计数；正常缺失
+不算失败。同一源行出现在多个批次时按出现次数计数，不做去重。若生产任务要求每条
+源记录只统计一次，需先保证批次不重叠；跨批的顺序也决定原因的首次出现顺序。
+
+累计计数用 double 避免普通整数相加溢出；超过 2^53 后不能保证逐整数精确。
+额外状态随不同失败原因数增长，解析临时内存随当前批次增长，不承诺固定内存。
+本演示原文仍在内存中；实际文件分块需自行每次读入下一批。无需强制调用 `gc()`。
+
+仅需汇总时不必保留逐行明细；若还需排查原文错误，应在释放当前批次前把问题表
+另行写出，不能从累计频数恢复原始行号。脚本中的整批对照及多个场景只用于验收，
+生产代码不应为了汇总再重复解析整表。脚本其他清洗／CSV 分支仍保留普通结果表。
 
 ## 2. 先区分“缺失”和“解析失败”，再删除 NA
 

@@ -2,16 +2,17 @@
 
 [中文](cleaning-workflows.md) | [Complete executable example](../inst/examples/chunked-cleaning.R)
 
-These examples/regressions ship with GitHub v0.2.14, without changing existing
-workflow parsing rules. Existing v0.2.13 tags/assets remain unchanged. The script
-uses only APIs already available in 0.2.13. Its file is not in that older release;
-run it from the checkout root:
+The original cleaning example ships since GitHub v0.2.14. The current checkout
+adds incremental summaries using the existing 0.2.19 `cn_summary()` API, without
+changing parsing rules. The fixed v0.2.19 tag/asset still contains the earlier
+example, not this new accumulator. Run from a checkout containing this change:
 
 ```sh
 Rscript inst/examples/chunked-cleaning.R
 ```
 
-After installing v0.2.14 (or a newer checkout), alternatively run:
+After installing GitHub `main` containing this change, alternatively run the
+updated installed example:
 
 ```r
 source(system.file("examples", "chunked-cleaning.R", package = "cncleanr"),
@@ -47,6 +48,41 @@ includes empty and problem-free batches and compares every value column with
 whole-input parsing. That whole-input pass is a validation oracle, not required
 extra production work. After binding ordinary tables, associate diagnostics
 using explicit source IDs/review tables, not residual attributes.
+
+## Keep only incremental summaries, not every parsed batch
+
+The script's local `summarize_batches()` is example code, not a new package API.
+It calls `cn_summary()` immediately after parsing each batch and keeps only four
+totals and a named reason-frequency vector, not parsed batch objects or per-row
+problems. `setdiff()` adds new reasons in cross-batch first-occurrence order.
+
+Inspect the executable example's returned results:
+
+```r
+result <- source("inst/examples/chunked-cleaning.R", encoding = "UTF-8")$value
+result$number$summaries$mixed$counts
+#>   total parsed missing failed
+#> 1     8      4       2      2
+result$number$summaries$mixed$reasons
+```
+
+Quantity/range summaries live under `result$quantity`/`result$range`. Empty
+batches add nothing; ordinary missing values are not failures. A source row in
+multiple batches counts repeatedly, without deduplication. If each source record
+must count once, ensure batches do not overlap. Batch order determines reason
+first-occurrence order too.
+
+Double accumulators avoid ordinary integer-addition overflow, but do not
+guarantee exact integer counts beyond 2^53. Additional state grows with distinct
+failure reasons; temporary parsing memory grows with the current batch. This is
+not a constant-memory guarantee. The demonstration still holds source text in
+memory; read the next chunk yourself for real file streaming. No forced `gc()`.
+
+Summary-only work need not keep per-row records. If review is required, export
+the current batch's problems before releasing it; original row positions cannot
+be recovered from frequencies. Whole-input comparisons and multiple scenarios
+are validation only, not extra production parses. The script's other cleaning/CSV
+branches still retain ordinary result tables.
 
 ## 2. Separate missing inputs from failures before dropping NAs
 

@@ -90,6 +90,9 @@ Open-data example: [separate missing values, error markers, and mixed text](docs
 CSV workflow: [preserve source text and identifiers, handle column units, and export problems](docs/csv-cleaning_EN.md).
 
 Advanced workflow: [batch merging, chained selection/sorting and CSV diagnostics](docs/cleaning-workflows_EN.md).
+Repository `main` also provides an [incremental summary example](docs/cleaning-workflows_EN.md#keep-only-incremental-summaries-not-every-parsed-batch)
+using `cn_summary()` without retaining parsed batches; this addition is not in
+the fixed v0.2.19 asset yet.
 CSV is an interchange format, not a bit-for-bit double round-trip or an R
 attribute backup; use RDS for lossless R storage as described in the CSV guide.
 Repository CI also executes literal R examples from both READMEs, excluding

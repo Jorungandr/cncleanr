@@ -9,6 +9,22 @@
     text = c('3\u4e07', 'bad,"\nline', '\u6682\u65e0', '2\u4e07',
              '1 2', '1\u4e07', '-', '4\u4e07'), stringsAsFactors = FALSE)
   batches <- list(1:3, integer(), 4:6, 7:8)
+  # Example-local accumulator, not a package API. Keep no parsed batch objects
+  # or individual problem records. Totals use doubles to avoid integer overflow.
+  summarize_batches <- function(parser, text, batches) {
+    totals <- c(total = 0, parsed = 0, missing = 0, failed = 0)
+    reasons <- setNames(numeric(), character())
+    for (rows in batches) {
+      report <- cn_summary(suppressWarnings(parser(text[rows])))
+      totals <- totals + unlist(report$counts, use.names = FALSE)
+      added <- setdiff(report$reasons$reason, names(reasons))
+      reasons[added] <- 0
+      keys <- report$reasons$reason
+      reasons[keys] <- reasons[keys] + report$reasons$count
+    }
+    list(counts = as.data.frame(as.list(totals)),
+         reasons = data.frame(reason = names(reasons), count = unname(reasons)))
+  }
   results <- list()
   for (kind in c('number', 'quantity', 'range')) {
     parser <- get(paste0('parse_cn_', kind), asNamespace('cncleanr'))
@@ -29,6 +45,24 @@
     review <- do.call(rbind, lapply(chunks, `[[`, 'problems'))
     rownames(combined) <- rownames(review) <- NULL
     whole <- suppressWarnings(parser(raw$text))
+    scenarios <- list(
+      mixed = list(text = raw$text, batches = batches),
+      empty = list(text = character(), batches = list(integer(), integer())),
+      missing = list(text = c('\u6682\u65e0', NA, '-'), batches = list(integer(), 1L, 2:3)),
+      failed = list(text = c('bad', 'wrong', 'bad'), batches = list(1L, integer(), 2:3)),
+      repeated = list(text = raw$text, batches = list(c(5L, 2L), integer(), c(1L, 5L, 3L))),
+      numeric = list(text = c(Inf, -Inf, NaN, NA_real_, 0), batches = list(1:2, integer(), 3:5)))
+    summaries <- lapply(scenarios, function(case) {
+      summary <- summarize_batches(parser, case$text, case$batches)
+      # Whole-input comparison is a test oracle only, not production work.
+      rows <- unlist(case$batches, use.names = FALSE)
+      expected <- cn_summary(suppressWarnings(parser(case$text[rows])))
+      expected$counts[] <- lapply(expected$counts, as.double)
+      expected$reasons$count <- as.double(expected$reasons$count)
+      stopifnot(identical(summary, expected))
+      summary
+    })
+    stopifnot(identical(summarize_batches(parser, character(), list()), summaries$empty))
     original_problems <- cn_problems(whole)
     value_columns <- if (is.data.frame(whole)) names(whole) else 'value'
     for (column in value_columns) {
@@ -107,7 +141,7 @@
           identical(as.integer(back$source_row), expected$source_row))
       }
     }
-    results[[kind]] <- list(status = status, review = review,
+    results[[kind]] <- list(status = status, review = review, summaries = summaries,
                             selected_review = selected_review, source_rows = source_rows)
   }
   results
