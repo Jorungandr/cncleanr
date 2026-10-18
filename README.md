@@ -18,11 +18,11 @@
 install.packages("cncleanr")
 ```
 
-也可以从 GitHub 安装版本 v0.2.18，包含数值转换校验、SPSS 缺失值及既有诊断修复：
+也可以从 GitHub 安装版本 v0.2.19，包含诊断汇总、数值转换校验及既有修复：
 
 ```r
 install.packages("pak")
-pak::pak("Jorungandr/cncleanr@v0.2.18")
+pak::pak("Jorungandr/cncleanr@v0.2.19")
 ```
 
 ### 开发版本与源码安装
@@ -286,6 +286,28 @@ cn_problems(result)
 #> 1     2  约3万 value does not match the supported number syntax
 #> 2     3   abc value does not match the supported number syntax
 ```
+
+### 汇总清洗质量
+
+从 GitHub 0.2.19 起，`cn_summary()` 返回普通列表中的两张表，不重新解析原文：
+
+```r
+parsed <- suppressWarnings(parse_cn_number(c("3万", "bad", "暂无", NA)))
+report <- cn_summary(parsed)
+report$counts
+#>   total parsed missing failed
+#> 1     4      1       2      1
+report$reasons
+#>                                                reason count
+#> 1 value does not match the supported number syntax     1
+```
+
+`counts` 的成功、缺失、失败之和等于总条数；`reasons` 按失败原因首次出现顺序计数。
+数量和区间结果也可直接传入，成功数量包括有效限定词和开放边界；数值型 `Inf`／
+`-Inf` 算成功，`NA`／`NaN` 没有失败诊断时算缺失。重复筛选的行会重复计数。
+请在普通筛选、修改、合并或 CSV 导出前汇总，或传入 `cn_subset()` 的结果。
+明显损坏的诊断会报错，但已丢失的诊断不能自动恢复，也无法保证识别任意修改。
+只有显式调用汇总函数才扫描结果，不增加原解析函数的处理耗时。
 
 普通模式会把失败位置返回为 `NA`，保留其他可用结果，同时发出警告。清洗流程如果要求“任意一行失败就停止”，可以设置 `strict = TRUE`：
 

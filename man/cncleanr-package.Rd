@@ -9,6 +9,8 @@
 \code{cncleanr} parses compact numeric values commonly found in Chinese tables
 and spreadsheets. It favors explicit rules and visible parse failures over
 guessing.
+Use \code{\link[=cn_summary]{cn_summary()}} for outcome counts and failure-reason frequencies, and
+\code{\link[=cn_subset]{cn_subset()}} for diagnostic-aware selection.
 }
 \seealso{
 Useful links:

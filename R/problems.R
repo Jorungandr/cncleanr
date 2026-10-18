@@ -47,11 +47,8 @@ cn_problems <- function(x) {
 #' cn_subset(result, !is.na(result))
 #' @export
 cn_subset <- function(x, rows) {
+  problems <- cn_result_problems(x)
   frame <- is.data.frame(x)
-  if ((!frame && (!is.numeric(x) || !is.null(dim(x)))) ||
-      (frame && !identical(names(x), c("value", "qualifier")) &&
-       !identical(names(x), c("lower", "upper", "lower_inclusive", "upper_inclusive"))))
-    stop("`x` must be an unmodified cncleanr numeric or data-frame result.", call. = FALSE)
   size <- if (frame) nrow(x) else length(x)
   if (missing(rows)) rows <- seq_len(size)
   if (!is.null(dim(rows)) ||
@@ -71,11 +68,6 @@ cn_subset <- function(x, rows) {
   selected <- seq_len(size)[rows]
   output <- if (frame) x[selected, , drop = FALSE] else x[selected]
   attr(output, "problems") <- NULL
-  problems <- cn_problems(x)
-  if (!is.data.frame(problems) || !identical(names(problems), c("index", "value", "reason")) ||
-      !is.numeric(problems$index) || anyNA(problems$index) || anyDuplicated(problems$index) ||
-      any(problems$index < 1 | problems$index > size | problems$index != trunc(problems$index)))
-    stop("`x` has invalid or stale problems; use the original parser result.", call. = FALSE)
   mapping <- match(selected, problems$index)
   retained <- which(!is.na(mapping))
   if (length(retained)) {
@@ -85,6 +77,21 @@ cn_subset <- function(x, rows) {
     attr(output, "problems") <- problems
   }
   output
+}
+
+cn_result_problems <- function(x) {
+  frame <- is.data.frame(x)
+  if ((!frame && (!is.numeric(x) || !is.null(dim(x)))) ||
+      (frame && !identical(names(x), c("value", "qualifier")) &&
+       !identical(names(x), c("lower", "upper", "lower_inclusive", "upper_inclusive"))))
+    stop("`x` must be an unmodified cncleanr numeric or data-frame result.", call. = FALSE)
+  size <- if (frame) nrow(x) else length(x)
+  problems <- cn_problems(x)
+  if (!is.data.frame(problems) || !identical(names(problems), c("index", "value", "reason")) ||
+      !is.numeric(problems$index) || anyNA(problems$index) || anyDuplicated(problems$index) ||
+      any(problems$index < 1 | problems$index > size | problems$index != trunc(problems$index)))
+    stop("`x` has invalid or stale problems; use the original parser result.", call. = FALSE)
+  problems
 }
 
 # Mark native encoding failures, keeping ordinary errors unchanged.

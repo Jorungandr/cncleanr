@@ -2,6 +2,7 @@
 
 export(cn_problems)
 export(cn_subset)
+export(cn_summary)
 export(parse_cn_number)
 export(parse_cn_quantity)
 export(parse_cn_range)

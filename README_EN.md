@@ -18,11 +18,11 @@ Install from [CRAN](https://CRAN.R-project.org/package=cncleanr) (verified as 0.
 install.packages("cncleanr")
 ```
 
-Alternatively, pin GitHub v0.2.18, which validates numeric conversions and includes the SPSS missing-value and earlier diagnostic fixes:
+Alternatively, pin GitHub v0.2.19, which adds diagnostic summaries alongside numeric-conversion validation and earlier fixes:
 
 ```r
 install.packages("pak")
-pak::pak("Jorungandr/cncleanr@v0.2.18")
+pak::pak("Jorungandr/cncleanr@v0.2.19")
 ```
 
 ### Development version and source installation
@@ -306,6 +306,31 @@ cn_problems(result)
 #> 1     2  约3万 value does not match the supported number syntax
 #> 2     3   abc value does not match the supported number syntax
 ```
+
+### Summarize cleaning quality
+
+Since GitHub 0.2.19, `cn_summary()` returns two ordinary tables in a list without
+reparsing the original text:
+
+```r
+parsed <- suppressWarnings(parse_cn_number(c("3万", "bad", "暂无", NA)))
+report <- cn_summary(parsed)
+report$counts
+#>   total parsed missing failed
+#> 1     4      1       2      1
+report$reasons
+#>                                                reason count
+#> 1 value does not match the supported number syntax     1
+```
+
+Parsed, missing and failed counts sum to the total; `reasons` counts failures in
+first-occurrence order. Quantity/range results are supported, including valid
+qualifiers and open bounds. Numeric `Inf`/`-Inf` count as parsed; NA/NaN count as
+missing unless diagnosed as failures. Repeated selections count repeatedly.
+Summarize before ordinary subsetting, mutation, binding or CSV export, or pass
+a `cn_subset()` result. Obvious malformed diagnostics error, but lost diagnostics
+cannot be recovered and arbitrary modifications cannot always be detected.
+Only an explicit summary call scans results; parsers do no additional work.
 
 Ordinary mode returns `NA` at failed positions, preserves the other usable results, and emits a warning. If a cleaning workflow must stop as soon as any row fails, set `strict = TRUE`:
 

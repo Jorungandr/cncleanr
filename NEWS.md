@@ -1,3 +1,15 @@
+# cncleanr 0.2.19
+
+* Adds `cn_summary()` for reusable counts of parsed, missing and failed rows,
+  plus failure-reason frequencies. Supports all three parser results and
+  `cn_subset()`, including duplicated selections, without reparsing input.
+* Empty results retain stable schemas; NA/NaN are missing unless diagnosed as
+  failures, while valid numeric infinities/open bounds count as parsed.
+  Obvious stale/malformed diagnostics are rejected; arbitrary transformations
+  can still lose diagnostic provenance. No new dependencies or C/parser changes.
+* Includes the expanded workflow/RDS regressions and literal bilingual README
+  audit added to main after 0.2.18; previous release assets are unchanged.
+
 # cncleanr 0.2.18
 
 * All parsers validate numeric S3 conversion results: a plain double vector
