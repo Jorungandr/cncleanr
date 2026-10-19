@@ -18,11 +18,11 @@ Install from [CRAN](https://CRAN.R-project.org/package=cncleanr) (verified as 0.
 install.packages("cncleanr")
 ```
 
-Alternatively, pin GitHub v0.2.20, which adds explicit compound quantities alongside diagnostic summaries and earlier fixes:
+Alternatively, pin GitHub v0.2.21, with hundred-yuan support, explicit compound quantities and diagnostic summaries:
 
 ```r
 install.packages("pak")
-pak::pak("Jorungandr/cncleanr@v0.2.20")
+pak::pak("Jorungandr/cncleanr@v0.2.21")
 ```
 
 ### Development version and source installation
