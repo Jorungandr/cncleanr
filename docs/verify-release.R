@@ -42,6 +42,9 @@ stopifnot(as.character(packageVersion('cncleanr', lib.loc = lib)) == expected,
           parse_cn_range('3-5万')$upper == 50000,
           nrow(cn_problems(suppressWarnings(parse_cn_range('3%-5元')))) == 1L)
 selected <- cn_subset(suppressWarnings(parse_cn_number(c('bad', '2'))), c(2, 1, 1))
+stopifnot(identical(parse_cn_number('1亿2000万'),120000000),
+  parse_cn_quantity('约1亿2000万')$qualifier == 'approx',
+  parse_cn_range('1亿2000万-2亿')$upper == 200000000)
 stopifnot(identical(cn_problems(selected)$index, 2:3))
 stopifnot(identical(cn_summary(selected)$counts,
   data.frame(total=3L,parsed=1L,missing=0L,failed=2L)),

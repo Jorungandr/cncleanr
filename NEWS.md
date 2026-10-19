@@ -1,3 +1,16 @@
+# cncleanr 0.2.20
+
+* Supports explicit compound magnitudes such as `1亿2000万`, qualified quantities
+  and ranges with fully specified endpoints. Two or three `万亿`/`亿`/`万` terms
+  must have distinct descending magnitudes. Decimal coefficients, grouped
+  commas, whole-value signs/currency/accounting parentheses are supported.
+* Rejects implicit tails, repeated/reversed magnitudes, compound percentages,
+  per-term scientific notation and compound/header-unit combinations. A range
+  with a compound endpoint cannot infer the opposite endpoint's trailing unit.
+  Existing ordinary single-term syntax remains unchanged.
+* Reuses the number parser for component conversion; C code and dependencies
+  are unchanged. Includes incremental-summary examples/tests added after 0.2.19.
+
 # cncleanr 0.2.19
 
 * Adds `cn_summary()` for reusable counts of parsed, missing and failed rows,

@@ -4,14 +4,14 @@
 
 原始清洗示例从 GitHub v0.2.14 起提供。当前仓库新增分批汇总，使用 0.2.19
 已有的 `cn_summary()`，不改变解析规则；运行前需安装 0.2.19 或更新的包。
-现有 v0.2.19 标签／附件仍包含旧示例，
-不含此次新增的累计流程；请在含本轮改动的 checkout 根目录运行：
+v0.2.20 起已包含新增累计流程，固定 v0.2.19 标签／附件仍保留旧示例。
+请在含累计流程的 checkout 根目录运行：
 
 ```sh
 Rscript inst/examples/chunked-cleaning.R
 ```
 
-或安装包含本轮改动的 GitHub `main` 后运行安装包内的更新示例：
+或安装 GitHub v0.2.20（或更新的 `main`）后运行安装包内的更新示例：
 
 ```r
 source(system.file("examples", "chunked-cleaning.R", package = "cncleanr"),

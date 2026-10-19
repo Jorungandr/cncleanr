@@ -63,6 +63,18 @@ Results use double precision, not exact integer or decimal arithmetic.
 Nonzero character values rounded to zero after final unit conversion are
 reported as underflow; representable subnormal values are retained.
 }
+\section{Compound magnitudes}{
+
+Two or three explicitly suffixed terms may combine \verb{\\u4e07\\u4ebf},
+\verb{\\u4ebf} and \verb{\\u4e07} in strictly descending, distinct order, for example
+\code{"1\\u4ebf2000\\u4e07"}. Coefficients are unsigned decimals, optionally with
+grouped commas; signs and currency markers apply to the whole value only.
+Implicit tails, internal currency markers, per-term scientific notation,
+interdigit whitespace grouping, percentages and all header-unit combinations
+are rejected for compounds. Components and their sum must be finite. Results
+use ordinary double arithmetic, not exact decimal addition.
+}
+
 \examples{
 parse_cn_number(c("1.25\u4e07", "3\u4ebf\u5143", "12.5\%", "\u6682\u65e0"))
 parse_cn_number(c("\uff11\uff12\uff0e\uff15\uff05", "(2.5\u4e07)"))

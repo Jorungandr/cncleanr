@@ -52,6 +52,8 @@ native_random_corpus <- function() {
     sample(bodies, 500, TRUE), sample(c('', '\u4e07', '%'), 500, TRUE))
   x <- c(formatted, noise, ranges, NA, '', 'R', 'RM', 'C', 'CN', '(', '+', '-',
     ' \uff11\uff12\uff0e\uff15\uff05 ', '\u7ea615%\u5de6\u53f3', '3-5\u4e07',
+    '1\u4ebf2000\u4e07', '\u7ea61\u4ebf2000\u4e07', '1\u4ebf2000\u4e07-2\u4ebf',
+    '1-2\u4ebf3000\u4e07', '1\u4e072\u4ebf',
     strrep('9', 10000), paste0('1', strrep('0', 10000), 'e-10000'),
     paste0('3\u4e07', strrep('\U0001f600', 10000)), strrep('-', 32))
   setNames(x, paste0('row', seq_along(x)))

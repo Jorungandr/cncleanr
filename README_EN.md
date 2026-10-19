@@ -18,11 +18,11 @@ Install from [CRAN](https://CRAN.R-project.org/package=cncleanr) (verified as 0.
 install.packages("cncleanr")
 ```
 
-Alternatively, pin GitHub v0.2.19, which adds diagnostic summaries alongside numeric-conversion validation and earlier fixes:
+Alternatively, pin GitHub v0.2.20, which adds explicit compound quantities alongside diagnostic summaries and earlier fixes:
 
 ```r
 install.packages("pak")
-pak::pak("Jorungandr/cncleanr@v0.2.19")
+pak::pak("Jorungandr/cncleanr@v0.2.20")
 ```
 
 ### Development version and source installation
@@ -91,8 +91,8 @@ CSV workflow: [preserve source text and identifiers, handle column units, and ex
 
 Advanced workflow: [batch merging, chained selection/sorting and CSV diagnostics](docs/cleaning-workflows_EN.md).
 Repository `main` also provides an [incremental summary example](docs/cleaning-workflows_EN.md#keep-only-incremental-summaries-not-every-parsed-batch)
-using `cn_summary()` without retaining parsed batches; this addition is not in
-the fixed v0.2.19 asset yet.
+using `cn_summary()` without retaining parsed batches. The accumulator ships
+since v0.2.20; older fixed assets remain unchanged.
 CSV is an interchange format, not a bit-for-bit double round-trip or an R
 attribute backup; use RDS for lossless R storage as described in the CSV guide.
 Repository CI also executes literal R examples from both READMEs, excluding
@@ -159,6 +159,31 @@ Common supported forms include:
 - configurable missing-value markers.
 
 Whitespace between digits is accepted only when it forms valid three-digit grouping: `1 234` becomes `1234`, while `1 2` and `12 34` are reported instead of being silently concatenated.
+
+### Explicit compound quantities
+
+Since GitHub 0.2.20, two or three explicitly suffixed terms can combine
+`万亿`/`亿`/`万` in strictly descending, distinct order. Each coefficient may be
+an unsigned decimal with valid comma grouping. Signs, currency markers and
+accounting parentheses apply to the entire expression:
+
+```r
+parse_cn_number(c("1亿2000万", "1万亿2亿3万", "-￥1亿2000万元"))
+# Values: 120000000; 1000200030000; -120000000
+parse_cn_quantity("约1亿2000万")$value
+#> [1] 1.2e+08
+parse_cn_range("1亿2000万-2亿")$upper
+#> [1] 2e+08
+```
+
+Implicit tails such as `3万5`/`3万5000元`, reversed/repeated magnitudes, internal
+currency markers, per-term scientific notation, interdigit whitespace grouping
+and percentages are outside this compound grammar. Existing single-term grouped
+and scientific forms remain supported. Every `unit=` header conflicts with
+compounds. Ranges containing a compound endpoint require explicit trailing units
+at both ends: `1-2亿3000万` never guesses that the left endpoint means 10,000.
+Components and their sum must be finite; double addition is not exact decimal
+money arithmetic.
 
 ## Table-header units
 
@@ -415,7 +440,7 @@ Use `cn_subset()` to filter/sort, or extract `cn_problems()` before ordinary
 `[]`, mutation or binding, which can drop the attribute or retain stale indices.
 Missing markers match text, not numerical equality; qualified quantities still
 match the whole cell. Matrix/array flattening is unchanged; pass the target column
-explicitly. Accounting-parenthesis suffix propagation and whole-batch errors on
+explicitly. Existing single-term accounting-parenthesis suffix propagation and whole-batch errors on
 malformed UTF-8 retain their existing policies.
 
 CI covers Linux R release/devel/oldrel-1 and Windows/macOS R release, not every

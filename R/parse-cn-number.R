@@ -42,6 +42,16 @@
 #' Nonzero character values rounded to zero after final unit conversion are
 #' reported as underflow; representable subnormal values are retained.
 #'
+#' @section Compound magnitudes:
+#' Two or three explicitly suffixed terms may combine `\u4e07\u4ebf`,
+#' `\u4ebf` and `\u4e07` in strictly descending, distinct order, for example
+#' `"1\u4ebf2000\u4e07"`. Coefficients are unsigned decimals, optionally with
+#' grouped commas; signs and currency markers apply to the whole value only.
+#' Implicit tails, internal currency markers, per-term scientific notation,
+#' interdigit whitespace grouping, percentages and all header-unit combinations
+#' are rejected for compounds. Components and their sum must be finite. Results
+#' use ordinary double arithmetic, not exact decimal addition.
+#'
 #' @usage
 #' parse_cn_number(
 #'   x,
@@ -190,6 +200,10 @@ parse_cn_number <- function(
   matches <- regexpr(pattern, work, perl = TRUE)
   matched <- matches > 0L
   syntax_failed <- active[!matched]
+  compound <- parse_cn_compound(work[!matched], accounting[!matched], header_multiplier)
+  output[syntax_failed] <- compound$value
+  compound_failed <- !is.na(compound$reason)
+  syntax_failed <- syntax_failed[compound_failed]
   active <- active[matched]
   work <- work[matched]
   accounting <- accounting[matched]
@@ -250,7 +264,7 @@ parse_cn_number <- function(
   failed <- c(spacing_failed, syntax_failed, active[failed_local])
   if (length(failed) > 0L) {
     failure_reasons <- c(rep("digits use invalid whitespace grouping", length(spacing_failed)),
-                        rep("value does not match the supported number syntax", length(syntax_failed)),
+                        compound$reason[compound_failed],
                         reasons[failed_local])
     failure_order <- order(failed)
     failed <- failed[failure_order]

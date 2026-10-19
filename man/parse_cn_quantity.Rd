@@ -45,6 +45,10 @@ One approximation prefix combined with an approximation suffix is accepted,
 for example \code{"\\u7ea615\%\\u5de6\\u53f3"}. Repeated prefixes or suffixes and
 mixed inequality qualifiers are rejected.
 }
+\details{
+Explicit compound magnitudes use the same grammar as
+\code{\link[=parse_cn_number]{parse_cn_number()}}, retaining the whole-value qualifier.
+}
 \examples{
 parse_cn_quantity(c(
   "\u7ea63\u4e07", "\u5927\u4e8e2\u4ebf", "10\u4e07+", "50\u4f59", "50\u4f59\u4e07\u5143"

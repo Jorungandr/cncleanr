@@ -5,14 +5,14 @@
 The original cleaning example ships since GitHub v0.2.14. The current checkout
 adds incremental summaries using the existing 0.2.19 `cn_summary()` API, without
 changing parsing rules. Install package 0.2.19 or later before running it.
-The fixed v0.2.19 tag/asset still contains the earlier
-example, not this new accumulator. Run from a checkout containing this change:
+The accumulator ships since v0.2.20; the fixed v0.2.19 tag/asset still contains
+the earlier example. Run from a checkout containing this change:
 
 ```sh
 Rscript inst/examples/chunked-cleaning.R
 ```
 
-After installing GitHub `main` containing this change, alternatively run the
+After installing GitHub v0.2.20 (or newer `main`), alternatively run the
 updated installed example:
 
 ```r

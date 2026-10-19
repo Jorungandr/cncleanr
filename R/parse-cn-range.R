@@ -22,6 +22,9 @@
 #'   including numeric `Inf` and `-Inf`; `NA` and `NaN` have missing
 #'   inclusivity. Infinite bounds created from textual inequalities represent
 #'   open-ended bounds and are distinct from numeric point inputs.
+#' @details Explicit compound endpoints use the grammar in [parse_cn_number()].
+#'   When either endpoint is compound, the opposite endpoint must specify its
+#'   own trailing unit; no scale is inferred from the compound's final term.
 #'
 #' @usage
 #' parse_cn_range(
@@ -275,8 +278,22 @@ propagate_cn_range_suffix <- function(left, right, normalize_suffix = FALSE, na 
   right_suffix <- suffixes[length(left) + seq_along(right)]
   add_left <- !nzchar(left_suffix) & nzchar(right_suffix)
   add_right <- nzchar(left_suffix) & !nzchar(right_suffix)
+  # Never infer a bare endpoint's scale from the small final term of a compound.
+  compound <- grepl("(?:\u4e07\u4ebf|\u4ebf|\u4e07)[0-9.]", text, perl = TRUE)
+  ambiguous <- rep(FALSE, length(left))
+  if (any(compound)) {
+    explicit <- nzchar(suffixes) | grepl(paste0(
+      substr(suffix_pattern, 1L, nchar(suffix_pattern) - 1L), "\\)$"), text, perl = TRUE)
+    explicit_left <- explicit[seq_along(left)]
+    explicit_right <- explicit[length(left) + seq_along(right)]
+    add_left <- add_left & !explicit_left
+    add_right <- add_right & !explicit_right
+    ambiguous <- (compound[seq_along(left)] & !explicit_right) |
+      (compound[length(left) + seq_along(right)] & !explicit_left)
+  }
   left[add_left] <- paste0(left[add_left], right_suffix[add_left])
   right[add_right] <- paste0(right[add_right], left_suffix[add_right])
+  left[ambiguous] <- right[ambiguous] <- NA_character_
   # Appending a shared unit must not resurrect an original missing endpoint.
   left[missing[seq_along(left)]] <- NA_character_
   right[missing[length(left) + seq_along(right)]] <- NA_character_

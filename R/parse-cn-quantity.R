@@ -22,6 +22,8 @@
 #'   `less_than`, and `at_most`. Numeric finite and infinite values have the
 #'   qualifier `exact`; `NA` and `NaN` have a missing qualifier. Numeric values,
 #'   including `Inf`, `-Inf`, and `NaN`, are preserved in `value`.
+#' @details Explicit compound magnitudes use the same grammar as
+#'   [parse_cn_number()], retaining the whole-value qualifier.
 #'
 #' @usage
 #' parse_cn_quantity(
