@@ -200,7 +200,7 @@ GitHub 0.2.21 adds hundred-yuan support using the thousand-yuan rules:
 
 ```r
 parse_cn_number("3百元")                 # 300
-parse_cn_number(c("3", "3百元"), unit = "百元") # 300 300, scaled only once
+parse_cn_number(c("3", "3百元"), unit = "百元") # 300 300
 parse_cn_quantity("约3百元")$value       # 300
 parse_cn_range("3-5百元")$upper          # 500
 ```
