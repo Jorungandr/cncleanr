@@ -18,11 +18,12 @@ Install from [CRAN](https://CRAN.R-project.org/package=cncleanr) (verified as 0.
 install.packages("cncleanr")
 ```
 
-Alternatively, pin GitHub v0.2.21, with hundred-yuan support, explicit compound quantities and diagnostic summaries:
+Alternatively, pin GitHub v0.2.20, with explicit compound quantities and diagnostic summaries.
+Hundred-yuan support is currently on `main`; use the development installation below until 0.2.21 is released:
 
 ```r
 install.packages("pak")
-pak::pak("Jorungandr/cncleanr@v0.2.21")
+pak::pak("Jorungandr/cncleanr@v0.2.20")
 ```
 
 ### Development version and source installation
@@ -196,7 +197,7 @@ parse_cn_number(c("123.5", "1.5千元", "暂无"), unit = "千元")
 
 Supported units are `元`, `百元`, `千元`, `万`, `万元`, `亿`, `亿元`, `万亿`, and `万亿元`.
 
-GitHub 0.2.21 adds hundred-yuan support using the thousand-yuan rules:
+The development version (planned 0.2.21) adds hundred-yuan support using the thousand-yuan rules:
 
 ```r
 parse_cn_number("3百元")                 # 300
