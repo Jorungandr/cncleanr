@@ -20,9 +20,9 @@
 #' @param strict A single logical value. If `FALSE`, invalid values become
 #'   `NA_real_`, a warning is emitted, and a data frame is stored in the
 #'   `problems` attribute. If `TRUE`, invalid values cause an error.
-#' @param unit A single optional table-header unit: yuan, thousand yuan,
+#' @param unit A single optional table-header unit: yuan, hundred yuan, thousand yuan,
 #'   ten thousand, hundred million, or trillion, optionally in yuan. Use the
-#'   spellings `"\u5143"`, `"\u5343\u5143"`, `"\u4e07"`,
+#'   spellings `"\u5143"`, `"\u767e\u5143"`, `"\u5343\u5143"`, `"\u4e07"`,
 #'   `"\u4e07\u5143"`, `"\u4ebf"`, `"\u4ebf\u5143"`,
 #'   `"\u4e07\u4ebf"`, or `"\u4e07\u4ebf\u5143"`.
 #'   Bare values inherit this unit;
@@ -88,7 +88,7 @@ parse_cn_number <- function(
     stop("`na` must be a character vector.", call. = FALSE)
   }
   header_multipliers <- c(
-    "\u5143" = 1, "\u5343\u5143" = 1e3,
+    "\u5143" = 1, "\u767e\u5143" = 1e2, "\u5343\u5143" = 1e3,
     "\u4e07" = 1e4, "\u4e07\u5143" = 1e4,
     "\u4ebf" = 1e8, "\u4ebf\u5143" = 1e8,
     "\u4e07\u4ebf" = 1e12, "\u4e07\u4ebf\u5143" = 1e12
@@ -193,7 +193,7 @@ parse_cn_number <- function(
     "(\u00a5|\u4eba\u6c11\u5e01|(?i:RMB|CNY))?",
     "([+-]?)",
     "((?:(?:[0-9]{1,3}(?:,[0-9]{3})+|[0-9]+)(?:\\.[0-9]+)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)?)",
-    "(\u4e07\u4ebf|\u4e07|\u4ebf|\u5343(?=\u5143))?",
+    "(\u4e07\u4ebf|\u4e07|\u4ebf|[\u767e\u5343](?=\u5143))?",
     "(\u4eba\u6c11\u5e01|\u5757\u94b1|\u5143|\u5757)?",
     "(%)?$"
   )
@@ -235,8 +235,8 @@ parse_cn_number <- function(
   number_text <- gsub(",", "", fields[[4L]], fixed = TRUE)
   value <- suppressWarnings(as.double(number_text))
   body_nonfinite <- !is.finite(value)
-  multiplier <- c(1, 1e4, 1e8, 1e12, 1e3)[
-    match(magnitude, c("", "\u4e07", "\u4ebf", "\u4e07\u4ebf", "\u5343"), nomatch = 1L)
+  multiplier <- c(1, 1e4, 1e8, 1e12, 1e3, 1e2)[
+    match(magnitude, c("", "\u4e07", "\u4ebf", "\u4e07\u4ebf", "\u5343", "\u767e"), nomatch = 1L)
   ]
   header_conflict <- rep(FALSE, length(value))
   if (!is.null(header_multiplier)) {

@@ -114,7 +114,7 @@ parse_cn_quantity <- function(
   suffix_length[active[hits]] <- attr(suffix_match, "match.length")[hits]
   infix_pattern <- paste0(
     "^(.+)\u4f59(",
-    "(?:\u4e07\u4ebf|\u4e07|\u4ebf)(?:\u4eba\u6c11\u5e01|\u5757\u94b1|\u5143|\u5757)?|\u5343\u5143|",
+    "(?:\u4e07\u4ebf|\u4e07|\u4ebf)(?:\u4eba\u6c11\u5e01|\u5757\u94b1|\u5143|\u5757)?|[\u767e\u5343]\u5143|",
     "(?:\u4eba\u6c11\u5e01|\u5757\u94b1|\u5143|\u5757)",
     ")$"
   )

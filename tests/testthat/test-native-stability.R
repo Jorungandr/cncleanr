@@ -75,7 +75,7 @@ test_that('fixed-seed native and R paths agree on complete parser outcomes', {
     expect_identical(native_outcome(actual, x, na = c('', 'bad', '\uff11', '3-5\u4e07')),
                      native_outcome(expected, x, na = c('', 'bad', '\uff11', '3-5\u4e07')), info = name)
   }
-  for (unit in c('\u5143', '\u5343\u5143', '\u4e07', '\u4e07\u5143',
+  for (unit in c('\u5143', '\u767e\u5143', '\u5343\u5143', '\u4e07', '\u4e07\u5143',
                  '\u4ebf', '\u4ebf\u5143', '\u4e07\u4ebf', '\u4e07\u4ebf\u5143')) {
     expect_identical(native_outcome(parse_cn_number, x, unit = unit),
                      native_outcome(reference$parse_cn_number, x, unit = unit), info = unit)

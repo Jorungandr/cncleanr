@@ -194,7 +194,18 @@ parse_cn_number(c("123.5", "1.5千元", "暂无"), unit = "千元")
 #> [1] 123500   1500     NA
 ```
 
-Supported units are `元`, `千元`, `万`, `万元`, `亿`, `亿元`, `万亿`, and `万亿元`.
+Supported units are `元`, `百元`, `千元`, `万`, `万元`, `亿`, `亿元`, `万亿`, and `万亿元`.
+
+GitHub 0.2.21 adds hundred-yuan support using the thousand-yuan rules:
+
+```r
+parse_cn_number("3百元")                 # 300
+parse_cn_number(c("3", "3百元"), unit = "百元") # 300 300, scaled only once
+parse_cn_quantity("约3百元")$value       # 300
+parse_cn_range("3-5百元")$upper          # 500
+```
+
+Only the complete monetary unit `百元` is supported, not bare `百` or `百块`.
 Bare values inherit the header unit. Explicit units with the same multiplier
 are converted only once (`万` and `万元` have the same multiplier). Different
 explicit multipliers and percentages are reported as problems, not overridden.

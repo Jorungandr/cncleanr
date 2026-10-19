@@ -46,7 +46,7 @@ test_that('malformed and ambiguous compound expressions are never guessed', {
   for (text in c('1-2亿3000万','1亿2000万-2','1亿2000万-2%',
                  '2亿3000万-1亿2000万'))
     expect_error(parse_cn_range(text,strict=TRUE))
-  for (unit in c('元','千元','万','万元','亿','亿元','万亿','万亿元'))
+  for (unit in c('元','百元','千元','万','万元','亿','亿元','万亿','万亿元'))
     expect_error(parse_cn_number('1亿2000万',unit=unit,strict=TRUE),'table-header')
 })
 

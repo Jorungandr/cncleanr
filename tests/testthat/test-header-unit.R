@@ -13,7 +13,7 @@ test_that("header units scale only bare values", {
                c(1500, 1234000, 2))
   expect_equal(parse_cn_number(c("保密", "2"), na = "保密", unit = "千元"),
                c(NA_real_, 2000))
-  for (unit in c("元", "千元", "万", "万元", "亿", "亿元", "万亿", "万亿元")) {
+  for (unit in c("元", "百元", "千元", "万", "万元", "亿", "亿元", "万亿", "万亿元")) {
     expect_true(is.finite(parse_cn_number("2", unit = unit)))
   }
 })
@@ -68,7 +68,7 @@ test_that('numeric conversion precedes header scaling and missing detection', (f
   expect_identical(parse_cn_range(x)$lower, unname(expected))
   empty <- structure(setNames(numeric(), character()), class = 'cncleanr_test_numeric')
   expect_identical(parse_cn_number(empty, unit = '千元'), setNames(numeric(), character()))
-  for (unit in c('元', '千元', '万', '万元', '亿', '亿元', '万亿', '万亿元')) {
+  for (unit in c('元', '百元', '千元', '万', '万元', '亿', '亿元', '万亿', '万亿元')) {
     expect_identical(parse_cn_number(x, unit = unit),
                      parse_cn_number(expected, unit = unit))
   }

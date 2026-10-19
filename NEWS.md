@@ -1,3 +1,11 @@
+# cncleanr 0.2.21
+
+* Supports hundred-yuan amounts (`百元`) in numbers, qualified quantities,
+  shared-suffix ranges and explicit table-header units. Matching header and
+  cell units are scaled once; conflicting units remain errors.
+* Adds the existing monetary suffix rule to both R and C paths, without new
+  dependencies or changes to public function names. Bare `百` is not supported.
+
 # cncleanr 0.2.20
 
 * Supports explicit compound magnitudes such as `1亿2000万`, qualified quantities

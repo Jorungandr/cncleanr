@@ -32,13 +32,13 @@ test_that('native accepted cells agree with the complete R fallback', {
     prefix = c('', '-', '+', '(', 'RMB', '-RMB+'),
     body = c('0', '.25', '.', '1.', '1e-999', '1e309', '1e308',
              '1,234', '1 2', '１２', '0x12', 'bad'),
-    suffix = c('', '万', '亿元', '千元', '万亿', '%', '万%', ')', '元元'),
+    suffix = c('', '万', '亿元', '百元', '千元', '万亿', '%', '万%', ')', '元元'),
     stringsAsFactors = FALSE)
   x <- c(do.call(paste0, grid), NA_character_)
   # Disable native calls in the reference so acceleration cannot hide a false match.
-  for (header in c(NA_real_, 1, 1e3, 1e4, 1e8, 1e12)) {
+  for (header in c(NA_real_, 1, 1e2, 1e3, 1e4, 1e8, 1e12)) {
     unit <- if (is.na(header)) NULL else
-      c('元', '千元', '万', '亿', '万亿')[match(header, c(1, 1e3, 1e4, 1e8, 1e12))]
+      c('元', '百元', '千元', '万', '亿', '万亿')[match(header, c(1, 1e2, 1e3, 1e4, 1e8, 1e12))]
     reference <- suppressWarnings(r_parser(x, unit = unit))
     native <- .Call(cncleanr:::C_simple_numbers, x, header)
     handled <- which(!is.na(native))

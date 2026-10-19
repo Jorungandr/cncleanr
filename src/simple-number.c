@@ -84,6 +84,8 @@ static double simple_number(const char *text, double header)
         multiplier = 1e8; p += 3; explicit_unit = 1;
     } else if (strncmp(p, "\xe5\x8d\x83\xe5\x85\x83", 6) == 0) {
         multiplier = 1e3; p += 3; explicit_unit = 1;
+    } else if (strncmp(p, "\xe7\x99\xbe\xe5\x85\x83", 6) == 0) {
+        multiplier = 1e2; p += 3; explicit_unit = 1;
     }
     if (strncmp(p, "\xe5\x85\x83", 3) == 0) { p += 3; explicit_unit = 1; }
     int percent = *p == '%';

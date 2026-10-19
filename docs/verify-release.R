@@ -35,6 +35,9 @@ verify <- function() {
 }
 verify()
 library(cncleanr, lib.loc = lib)
+stopifnot(identical(parse_cn_number(c('3', '3百元'), unit='百元'), c(300,300)),
+          parse_cn_quantity('50余百元')$value == 5000,
+          parse_cn_range('3-5百元')$upper == 500)
 stopifnot(as.character(packageVersion('cncleanr', lib.loc = lib)) == expected,
           identical(parse_cn_number(c('3万', '１２．５％')), c(30000, .125)),
           identical(parse_cn_number('1e-330万亿'), 1e-318),

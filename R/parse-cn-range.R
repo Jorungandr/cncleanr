@@ -94,7 +94,7 @@ parse_cn_range <- function(
     unique_output <- output[seq_along(unique_text), , drop = FALSE]
     unique_reason <- rep(NA_character_, length(unique_text))
     obvious_range <- grepl(paste0(
-      "^[0-9]+(?:\\.[0-9]+)?(?:(?:\u4e07\u4ebf|\u4e07|\u4ebf)(?:\u5143)?|\u5343\u5143|\u5143|%)?",
+      "^[0-9]+(?:\\.[0-9]+)?(?:(?:\u4e07\u4ebf|\u4e07|\u4ebf)(?:\u5143)?|[\u767e\u5343]\u5143|\u5143|%)?",
       "[\u81f3\u5230~\uff5e\u2014\u2013-][0-9]"), unique_text, perl = TRUE)
     quantity_rows <- which(!obvious_range)
     quantity <- suppressWarnings(parse_cn_quantity(unique_text[quantity_rows], na = normalized_na))
@@ -263,7 +263,7 @@ find_cn_range_endpoints_batch <- function(text, na, normalize_suffix = FALSE) {
 
 propagate_cn_range_suffix <- function(left, right, normalize_suffix = FALSE, na = character()) {
   suffix_pattern <- paste0(
-    "((?:\u4e07\u4ebf|\u4e07|\u4ebf)(?:\u4eba\u6c11\u5e01|\u5757\u94b1|\u5143|\u5757)?|\u5343\u5143|",
+    "((?:\u4e07\u4ebf|\u4e07|\u4ebf)(?:\u4eba\u6c11\u5e01|\u5757\u94b1|\u5143|\u5757)?|[\u767e\u5343]\u5143|",
     "(?:\u4eba\u6c11\u5e01|\u5757\u94b1|\u5143|\u5757)|%)$"
   )
   text <- c(left, right)

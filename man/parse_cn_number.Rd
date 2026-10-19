@@ -32,9 +32,9 @@ missing. Matching happens after whitespace and full-width normalization.}
 \code{NA_real_}, a warning is emitted, and a data frame is stored in the
 \code{problems} attribute. If \code{TRUE}, invalid values cause an error.}
 
-\item{unit}{A single optional table-header unit: yuan, thousand yuan,
+\item{unit}{A single optional table-header unit: yuan, hundred yuan, thousand yuan,
 ten thousand, hundred million, or trillion, optionally in yuan. Use the
-spellings \code{"\\u5143"}, \code{"\\u5343\\u5143"}, \code{"\\u4e07"},
+spellings \code{"\\u5143"}, \code{"\\u767e\\u5143"}, \code{"\\u5343\\u5143"}, \code{"\\u4e07"},
 \code{"\\u4e07\\u5143"}, \code{"\\u4ebf"}, \code{"\\u4ebf\\u5143"},
 \code{"\\u4e07\\u4ebf"}, or \code{"\\u4e07\\u4ebf\\u5143"}.
 Bare values inherit this unit;
