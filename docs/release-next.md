@@ -1,5 +1,9 @@
 # 下一版发布准备 / Next-release preparation
 
+0.2.20 已完成 GitHub 发布，复合数量语法及验收见[复合数量记录](compound-validation.md)。
+GitHub 0.2.20 is published; explicit compound-magnitude validation is recorded
+there. No CRAN update was submitted.
+
 0.2.19 已完成 GitHub 发布，新增 `cn_summary()`，见[诊断汇总验收](summary-validation.md)。
 GitHub 0.2.19 is published; diagnostic summary validation is recorded there.
 No CRAN update was submitted.
