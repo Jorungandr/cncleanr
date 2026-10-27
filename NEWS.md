@@ -1,3 +1,14 @@
+# cncleanr 0.2.23
+
+* Improves range failure reasons without changing parsed values or accepted
+  grammar. Specific scalar errors (header conflicts, overflow, underflow and
+  conflicting qualifiers) are no longer lost to a generic range fallback.
+* Uniquely split failed ranges report left/right endpoint causes from existing
+  number diagnostics. Missing endpoints, ambiguous splits, digit grouping and
+  structural errors retain conservative priority. No additional row parsing,
+  public arguments, native changes or dependencies. Consumers matching exact
+  `reason` strings or summary groups should account for more specific messages.
+
 # cncleanr 0.2.22
 
 * Adds trailing `unit = NULL` to `parse_cn_quantity()` and `parse_cn_range()`.

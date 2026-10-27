@@ -35,6 +35,10 @@ verify <- function() {
 }
 verify()
 library(cncleanr, lib.loc = lib)
+stopifnot(grepl('table-header',cn_problems(suppressWarnings(
+  parse_cn_range('3%',unit='百元')))$reason),
+  grepl('^right range endpoint:',cn_problems(suppressWarnings(
+  parse_cn_range('3万-abc')))$reason))
 stopifnot(parse_cn_quantity('约3',unit='百元')$value == 300,
           parse_cn_range('3-5',unit='千元')$upper == 5000,
           parse_cn_range('3-5千元',unit='千元')$upper == 5000)

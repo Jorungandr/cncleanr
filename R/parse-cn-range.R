@@ -7,6 +7,9 @@
 #' Digit grouping is validated independently at each range endpoint, so
 #' `"1 234-2 345"` is accepted but `"1 23-2 345"` is not.
 #' Endpoint missing markers are checked before and after shared-unit propagation.
+#' Specific scalar failures retain their original reason. Uniquely split failed
+#' ranges identify left/right endpoint causes where available; ambiguous splits,
+#' missing endpoints and digit-grouping failures retain conservative diagnostics.
 #'
 #' @inheritParams parse_cn_number
 #' @param x A character, factor, or numeric vector. Numeric input is converted
@@ -107,7 +110,8 @@ parse_cn_range <- function(
       "[\u81f3\u5230~\uff5e\u2014\u2013-][0-9]"), unique_text, perl = TRUE)
     quantity_rows <- which(!obvious_range)
     quantity <- suppressWarnings(parse_cn_quantity(unique_text[quantity_rows], na = normalized_na, unit = unit))
-    local_failed <- cn_problems(quantity)$index
+    quantity_problems <- cn_problems(quantity)
+    local_failed <- quantity_problems$index
     quantity_failed <- sort(c(which(obvious_range), quantity_rows[local_failed]))
     local_ok <- setdiff(seq_along(quantity_rows), local_failed)
     quantity_ok <- quantity_rows[local_ok]
@@ -133,6 +137,13 @@ parse_cn_range <- function(
         normalized_na, unit = unit
       )
       unique_reason[quantity_failed] <- ranges$reason
+      # A failed scalar can resemble a range (e.g. the minus in 1e-330).
+      # Reuse its specific cause rather than replacing it with a generic fallback.
+      scalar_rows <- quantity_rows[local_failed]
+      restore <- which(unique_reason[scalar_rows] %in% c(
+        "value is not a supported range or bound", "one or both range endpoints are invalid") &
+        quantity_problems$reason != "value does not match the supported number syntax")
+      unique_reason[scalar_rows[restore]] <- quantity_problems$reason[restore]
       valid_range <- is.na(ranges$reason)
       reversed <- which(valid_range & ranges$values[, 1L] > ranges$values[, 2L])
       unique_reason[quantity_failed[reversed]] <- "range lower bound is greater than its upper bound"
@@ -243,11 +254,29 @@ find_cn_range_endpoints_batch <- function(text, na, normalize_suffix = FALSE, un
   parsed <- suppressWarnings(parse_cn_number(endpoint_text, na = na, unit = unit))
   endpoint_problems <- cn_problems(parsed)
   invalid_endpoint <- rep(FALSE, length(parsed))
-  invalid_endpoint[cn_problems(parsed)$index] <- TRUE
+  invalid_endpoint[endpoint_problems$index] <- TRUE
   invalid_endpoint[is.na(parsed)] <- TRUE
   candidate_valid <-
     !invalid_endpoint[seq.int(1L, length(parsed), by = 2L)] &
     !invalid_endpoint[seq.int(2L, length(parsed), by = 2L)]
+  if (nrow(endpoint_problems)) {
+    # Only failed, uniquely split candidates get labels; never guess from an
+    # exponent sign, multiple splits, or NA endpoints lacking a diagnosed cause.
+    unique_split <- tabulate(candidate_source, nbins = size)[candidate_source] == 1L &
+      !grepl("[eE]$", candidate_left)
+    detail <- rep(NA_character_, length(parsed))
+    detail[endpoint_problems$index] <- paste0(
+      ifelse(endpoint_problems$index %% 2L == 1L, "left", "right"),
+      " range endpoint: ", endpoint_problems$reason)
+    left_reason <- detail[seq.int(1L, length(parsed), by = 2L)]
+    right_reason <- detail[seq.int(2L, length(parsed), by = 2L)]
+    left_only <- which(unique_split & !is.na(left_reason) & is.na(right_reason))
+    right_only <- which(unique_split & is.na(left_reason) & !is.na(right_reason))
+    both <- which(unique_split & !is.na(left_reason) & !is.na(right_reason))
+    reason[candidate_source[left_only]] <- left_reason[left_only]
+    reason[candidate_source[right_only]] <- right_reason[right_only]
+    reason[candidate_source[both]] <- paste(left_reason[both], right_reason[both], sep = "; ")
+  }
   percent_left <- grepl("%\\)?$", normalize_cn_number_text(candidate_left))
   percent_right <- grepl("%\\)?$", normalize_cn_number_text(candidate_right))
   incompatible <- candidate_valid & xor(percent_left, percent_right)

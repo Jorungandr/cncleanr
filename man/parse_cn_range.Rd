@@ -59,6 +59,9 @@ scientific notation are distinguished from range separators.
 Digit grouping is validated independently at each range endpoint, so
 \code{"1 234-2 345"} is accepted but \code{"1 23-2 345"} is not.
 Endpoint missing markers are checked before and after shared-unit propagation.
+Specific scalar failures retain their original reason. Uniquely split failed
+ranges identify left/right endpoint causes where available; ambiguous splits,
+missing endpoints and digit-grouping failures retain conservative diagnostics.
 }
 \details{
 Explicit compound endpoints use the grammar in \code{\link[=parse_cn_number]{parse_cn_number()}}.

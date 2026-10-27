@@ -221,6 +221,13 @@ percentages conflict with header units. With `unit` supplied, numeric infinities
 and overflow become diagnosed failures, while missing values stay missing.
 Infinite open ends generated from textual bounds (such as the upper `Inf` in
 “大于3”) are unaffected.
+
+Since 0.2.23, range failures retain specific causes such as unit conflicts and
+overflow. Uniquely split candidates identify the `left range endpoint` or
+`right range endpoint`. Parsed values and the problem-table schema are unchanged,
+but `reason` strings and `cn_summary()` reason groups can become more specific;
+do not rely on previous generic reason text. Missing endpoints, multiple split
+candidates and digit-grouping failures retain conservative diagnostics.
 Bare values inherit the header unit. Explicit units with the same multiplier
 are converted only once (`万` and `万元` have the same multiplier). Different
 explicit multipliers and percentages are reported as problems, not overridden.

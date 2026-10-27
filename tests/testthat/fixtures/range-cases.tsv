@@ -7,4 +7,4 @@ input	lower	upper	lower_inclusive	upper_inclusive	status	reason
 50余万元	500000	Inf	FALSE	FALSE	ok
 暂无					missing
 5万-3万					invalid	range lower bound is greater than its upper bound
-3万-abc					invalid	one or both range endpoints are invalid
+3万-abc					invalid	right range endpoint: value does not match the supported number syntax
