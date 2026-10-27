@@ -10,13 +10,15 @@ parse_cn_range(
     "", "NA", "N/A", "\u6682\u65e0", "\u672a\u516c\u5e03",
     "\u2014", "\u2013", "-", "...", "\u2026"
   ),
-  strict = FALSE
+  strict = FALSE,
+  unit = NULL
 )
 }
 \arguments{
 \item{x}{A character, factor, or numeric vector. Numeric input is converted
-to double and otherwise passed through unchanged, including \code{Inf}, \code{-Inf},
-and \code{NaN}.
+to double and otherwise passed through unchanged when \code{unit = NULL},
+including \code{Inf}, \code{-Inf}, and \code{NaN}. Header-unit conversion follows
+\code{\link[=parse_cn_number]{parse_cn_number()}}.
 Conversion methods must return a plain double vector of the original length,
 without a class or dimensions; malformed results cause an error.
 SPSS user-defined missing metadata is respected. Objects with class \code{units}
@@ -28,13 +30,26 @@ missing. Matching happens after whitespace and full-width normalization.}
 \item{strict}{A single logical value. If \code{FALSE}, invalid values become
 \code{NA_real_}, a warning is emitted, and a data frame is stored in the
 \code{problems} attribute. If \code{TRUE}, invalid values cause an error.}
+
+\item{unit}{A single optional table-header unit: yuan, hundred yuan, thousand yuan,
+ten thousand, hundred million, or trillion, optionally in yuan. Use the
+spellings \code{"\\u5143"}, \code{"\\u767e\\u5143"}, \code{"\\u5343\\u5143"}, \code{"\\u4e07"},
+\code{"\\u4e07\\u5143"}, \code{"\\u4ebf"}, \code{"\\u4ebf\\u5143"},
+\code{"\\u4e07\\u4ebf"}, or \code{"\\u4e07\\u4ebf\\u5143"}.
+Bare values inherit this unit;
+explicit units must have the same multiplier and are not scaled twice.
+Percentages conflict with a header unit. With a header unit, numeric input
+follows character parsing: missing values remain missing, while infinities
+and overflow are reported as problems. Defaults to \code{NULL} (no header unit).}
 }
 \value{
 A data frame with columns \code{lower}, \code{upper}, \code{lower_inclusive}, and
 \code{upper_inclusive}. Numeric input becomes an inclusive point range,
-including numeric \code{Inf} and \code{-Inf}; \code{NA} and \code{NaN} have missing
+including numeric \code{Inf} and \code{-Inf} when \code{unit = NULL}; \code{NA} and \code{NaN} have missing
 inclusivity. Infinite bounds created from textual inequalities represent
-open-ended bounds and are distinct from numeric point inputs.
+open-ended bounds and are distinct from numeric point inputs. With a header
+unit, nonfinite or overflowing numeric inputs become diagnosed failures;
+infinite open ends created by textual inequalities are retained.
 }
 \description{
 Converts closed ranges such as \code{"3\\u4e07-5\\u4e07"} and open bounds such as

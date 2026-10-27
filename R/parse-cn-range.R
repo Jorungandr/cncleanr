@@ -10,8 +10,9 @@
 #'
 #' @inheritParams parse_cn_number
 #' @param x A character, factor, or numeric vector. Numeric input is converted
-#'   to double and otherwise passed through unchanged, including `Inf`, `-Inf`,
-#'   and `NaN`.
+#'   to double and otherwise passed through unchanged when `unit = NULL`,
+#'   including `Inf`, `-Inf`, and `NaN`. Header-unit conversion follows
+#'   [parse_cn_number()].
 #'   Conversion methods must return a plain double vector of the original length,
 #'   without a class or dimensions; malformed results cause an error.
 #'   SPSS user-defined missing metadata is respected. Objects with class `units`
@@ -19,9 +20,11 @@
 #'
 #' @return A data frame with columns `lower`, `upper`, `lower_inclusive`, and
 #'   `upper_inclusive`. Numeric input becomes an inclusive point range,
-#'   including numeric `Inf` and `-Inf`; `NA` and `NaN` have missing
+#'   including numeric `Inf` and `-Inf` when `unit = NULL`; `NA` and `NaN` have missing
 #'   inclusivity. Infinite bounds created from textual inequalities represent
-#'   open-ended bounds and are distinct from numeric point inputs.
+#'   open-ended bounds and are distinct from numeric point inputs. With a header
+#'   unit, nonfinite or overflowing numeric inputs become diagnosed failures;
+#'   infinite open ends created by textual inequalities are retained.
 #' @details Explicit compound endpoints use the grammar in [parse_cn_number()].
 #'   When either endpoint is compound, the opposite endpoint must specify its
 #'   own trailing unit; no scale is inferred from the compound's final term.
@@ -33,7 +36,8 @@
 #'     "", "NA", "N/A", "\u6682\u65e0", "\u672a\u516c\u5e03",
 #'     "\u2014", "\u2013", "-", "...", "\u2026"
 #'   ),
-#'   strict = FALSE
+#'   strict = FALSE,
+#'   unit = NULL
 #' )
 #'
 #' @examples
@@ -46,21 +50,26 @@ parse_cn_range <- function(
     "", "NA", "N/A", "\u6682\u65e0", "\u672a\u516c\u5e03",
     "\u2014", "\u2013", "-", "...", "\u2026"
   ),
-  strict = FALSE
+  strict = FALSE,
+  unit = NULL
 ) {
   cn_with_encoding_context(x, na, {
   validate_cn_parse_arguments(x, na, strict)
+  if (!is.null(unit)) cn_header_multiplier(unit)
   x <- prepare_cn_parse_input(x)
 
   if (is.numeric(x)) {
-    value <- cn_numeric_values(x)
+    value <- if (is.null(unit)) cn_numeric_values(x) else
+      suppressWarnings(parse_cn_number(x, na = na, unit = unit))
     present <- !is.na(value)
-    return(data.frame(
-      lower = value,
-      upper = value,
+    result <- data.frame(
+      lower = as.numeric(value),
+      upper = as.numeric(value),
       lower_inclusive = ifelse(present, TRUE, NA),
       upper_inclusive = ifelse(present, TRUE, NA)
-    ))
+    )
+    if (!is.null(unit)) return(apply_cn_problems(result, cn_problems(value), strict))
+    return(result)
   }
   if (is.factor(x)) {
     x <- as.character(x)
@@ -97,7 +106,7 @@ parse_cn_range <- function(
       "^[0-9]+(?:\\.[0-9]+)?(?:(?:\u4e07\u4ebf|\u4e07|\u4ebf)(?:\u5143)?|[\u767e\u5343]\u5143|\u5143|%)?",
       "[\u81f3\u5230~\uff5e\u2014\u2013-][0-9]"), unique_text, perl = TRUE)
     quantity_rows <- which(!obvious_range)
-    quantity <- suppressWarnings(parse_cn_quantity(unique_text[quantity_rows], na = normalized_na))
+    quantity <- suppressWarnings(parse_cn_quantity(unique_text[quantity_rows], na = normalized_na, unit = unit))
     local_failed <- cn_problems(quantity)$index
     quantity_failed <- sort(c(which(obvious_range), quantity_rows[local_failed]))
     local_ok <- setdiff(seq_along(quantity_rows), local_failed)
@@ -121,7 +130,7 @@ parse_cn_range <- function(
     if (length(quantity_failed) > 0L) {
       ranges <- find_cn_range_endpoints_batch(
         unique_text[quantity_failed],
-        normalized_na
+        normalized_na, unit = unit
       )
       unique_reason[quantity_failed] <- ranges$reason
       valid_range <- is.na(ranges$reason)
@@ -144,7 +153,7 @@ parse_cn_range <- function(
   spaced <- which(invalid_spacing)
   if (length(spaced)) {
     ranges <- find_cn_range_endpoints_batch(characters[spaced], normalized_na,
-                                           normalize_suffix = TRUE)
+                                           normalize_suffix = TRUE, unit = unit)
     endpoint_reason <- ranges$reason
     specific <- !is.na(endpoint_reason) & endpoint_reason != "value is not a supported range or bound"
     problem_reason[spaced[specific]] <- endpoint_reason[specific]
@@ -170,7 +179,7 @@ parse_cn_range <- function(
   })
 }
 
-find_cn_range_endpoints_batch <- function(text, na, normalize_suffix = FALSE) {
+find_cn_range_endpoints_batch <- function(text, na, normalize_suffix = FALSE, unit = NULL) {
   size <- length(text)
   values <- matrix(NA_real_, nrow = size, ncol = 2L)
   reason <- rep("one or both range endpoints are invalid", size)
@@ -231,7 +240,7 @@ find_cn_range_endpoints_batch <- function(text, na, normalize_suffix = FALSE) {
   candidate_right <- candidate_right[used]
 
   endpoint_text <- as.vector(rbind(candidate_left, candidate_right))
-  parsed <- suppressWarnings(parse_cn_number(endpoint_text, na = na))
+  parsed <- suppressWarnings(parse_cn_number(endpoint_text, na = na, unit = unit))
   endpoint_problems <- cn_problems(parsed)
   invalid_endpoint <- rep(FALSE, length(parsed))
   invalid_endpoint[cn_problems(parsed)$index] <- TRUE

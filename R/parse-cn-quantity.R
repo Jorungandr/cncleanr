@@ -10,8 +10,9 @@
 #'
 #' @inheritParams parse_cn_number
 #' @param x A character, factor, or numeric vector. Numeric input is converted
-#'   to double and otherwise passed through unchanged, including `Inf`, `-Inf`,
-#'   and `NaN`.
+#'   to double and otherwise passed through unchanged when `unit = NULL`,
+#'   including `Inf`, `-Inf`, and `NaN`. Header-unit conversion follows
+#'   [parse_cn_number()].
 #'   Conversion methods must return a plain double vector of the original length,
 #'   without a class or dimensions; malformed results cause an error.
 #'   SPSS user-defined missing metadata is respected. Objects with class `units`
@@ -21,7 +22,9 @@
 #'   `qualifier`. Qualifiers are `exact`, `approx`, `greater_than`, `at_least`,
 #'   `less_than`, and `at_most`. Numeric finite and infinite values have the
 #'   qualifier `exact`; `NA` and `NaN` have a missing qualifier. Numeric values,
-#'   including `Inf`, `-Inf`, and `NaN`, are preserved in `value`.
+#'   including `Inf`, `-Inf`, and `NaN`, are preserved in `value` when
+#'   `unit = NULL`. With a header unit, nonfinite or overflowing numeric values
+#'   become diagnosed failures, as in [parse_cn_number()].
 #' @details Explicit compound magnitudes use the same grammar as
 #'   [parse_cn_number()], retaining the whole-value qualifier.
 #'
@@ -32,7 +35,8 @@
 #'     "", "NA", "N/A", "\u6682\u65e0", "\u672a\u516c\u5e03",
 #'     "\u2014", "\u2013", "-", "...", "\u2026"
 #'   ),
-#'   strict = FALSE
+#'   strict = FALSE,
+#'   unit = NULL
 #' )
 #'
 #' @examples
@@ -47,17 +51,22 @@ parse_cn_quantity <- function(
     "", "NA", "N/A", "\u6682\u65e0", "\u672a\u516c\u5e03",
     "\u2014", "\u2013", "-", "...", "\u2026"
   ),
-  strict = FALSE
+  strict = FALSE,
+  unit = NULL
 ) {
   cn_with_encoding_context(x, na, {
   validate_cn_parse_arguments(x, na, strict)
+  if (!is.null(unit)) cn_header_multiplier(unit)
   x <- prepare_cn_parse_input(x)
 
   if (is.numeric(x)) {
-    value <- cn_numeric_values(x)
+    value <- if (is.null(unit)) cn_numeric_values(x) else
+      suppressWarnings(parse_cn_number(x, na = na, unit = unit))
     qualifier <- rep("exact", length(value))
     qualifier[is.na(value)] <- NA_character_
-    return(data.frame(value = value, qualifier = qualifier))
+    result <- data.frame(value = as.numeric(value), qualifier = qualifier)
+    if (!is.null(unit)) return(apply_cn_problems(result, cn_problems(value), strict))
+    return(result)
   }
   if (is.factor(x)) {
     x <- as.character(x)
@@ -137,7 +146,7 @@ parse_cn_quantity <- function(
 
   invalid_spacing <- invalid_spacing & !is_missing & !conflict
   cleaned[is_missing | conflict | invalid_spacing] <- NA_character_
-  parsed <- suppressWarnings(parse_cn_number(cleaned, na = character()))
+  parsed <- suppressWarnings(parse_cn_number(cleaned, na = character(), unit = unit))
   problems <- cn_problems(parsed)
   if (nrow(problems) > 0L) {
     problems$value <- original[problems$index]

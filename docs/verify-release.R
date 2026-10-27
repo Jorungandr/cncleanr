@@ -35,6 +35,9 @@ verify <- function() {
 }
 verify()
 library(cncleanr, lib.loc = lib)
+stopifnot(parse_cn_quantity('约3',unit='百元')$value == 300,
+          parse_cn_range('3-5',unit='千元')$upper == 5000,
+          parse_cn_range('3-5千元',unit='千元')$upper == 5000)
 stopifnot(identical(parse_cn_number(c('3', '3百元'), unit='百元'), c(300,300)),
           parse_cn_quantity('50余百元')$value == 5000,
           parse_cn_range('3-5百元')$upper == 500)

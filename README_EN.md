@@ -206,6 +206,21 @@ parse_cn_range("3-5百元")$upper          # 500
 ```
 
 Only the complete monetary unit `百元` is supported, not bare `百` or `百块`.
+
+Since 0.2.22, quantities and ranges also accept a table-header `unit`
+(default `NULL`, no conversion):
+
+```r
+parse_cn_quantity("约3", unit = "百元")$value   # 300
+parse_cn_range("3-5", unit = "千元")$upper     # 5000
+parse_cn_range("3-5千元", unit = "千元")$upper # 5000
+```
+
+Explicit units must match the header multiplier and are not scaled twice;
+percentages conflict with header units. With `unit` supplied, numeric infinities
+and overflow become diagnosed failures, while missing values stay missing.
+Infinite open ends generated from textual bounds (such as the upper `Inf` in
+“大于3”) are unaffected.
 Bare values inherit the header unit. Explicit units with the same multiplier
 are converted only once (`万` and `万元` have the same multiplier). Different
 explicit multipliers and percentages are reported as problems, not overridden.

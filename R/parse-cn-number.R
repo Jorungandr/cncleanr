@@ -87,18 +87,7 @@ parse_cn_number <- function(
   if (!is.character(na)) {
     stop("`na` must be a character vector.", call. = FALSE)
   }
-  header_multipliers <- c(
-    "\u5143" = 1, "\u767e\u5143" = 1e2, "\u5343\u5143" = 1e3,
-    "\u4e07" = 1e4, "\u4e07\u5143" = 1e4,
-    "\u4ebf" = 1e8, "\u4ebf\u5143" = 1e8,
-    "\u4e07\u4ebf" = 1e12, "\u4e07\u4ebf\u5143" = 1e12
-  )
-  if (!is.null(unit) &&
-      (!is.character(unit) || length(unit) != 1L || is.na(unit) ||
-       !unit %in% names(header_multipliers))) {
-    stop("`unit` must be NULL or a single supported Chinese header unit.", call. = FALSE)
-  }
-  header_multiplier <- if (is.null(unit)) NULL else unname(header_multipliers[[unit]])
+  header_multiplier <- cn_header_multiplier(unit)
   x <- prepare_cn_parse_input(x)
   if (is.numeric(x)) {
     output <- cn_numeric_values(x)
@@ -350,6 +339,20 @@ has_invalid_cn_digit_spacing <- function(x, characters_normalized = FALSE) {
     perl = TRUE
   )
   has_digit_spacing
+}
+
+cn_header_multiplier <- function(unit) {
+  if (is.null(unit)) return(NULL)
+  multipliers <- c(
+    "\u5143" = 1, "\u767e\u5143" = 1e2, "\u5343\u5143" = 1e3,
+    "\u4e07" = 1e4, "\u4e07\u5143" = 1e4,
+    "\u4ebf" = 1e8, "\u4ebf\u5143" = 1e8,
+    "\u4e07\u4ebf" = 1e12, "\u4e07\u4ebf\u5143" = 1e12
+  )
+  if (!is.character(unit) || length(unit) != 1L || is.na(unit) ||
+      !unit %in% names(multipliers))
+    stop("`unit` must be NULL or a single supported Chinese header unit.", call. = FALSE)
+  unname(multipliers[[unit]])
 }
 
 format_cn_parse_failure <- function(problems) {

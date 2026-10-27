@@ -1,3 +1,14 @@
+# cncleanr 0.2.22
+
+* Adds trailing `unit = NULL` to `parse_cn_quantity()` and `parse_cn_range()`.
+  Bare values inherit a Chinese table-header unit, matching explicit units are
+  scaled once, and conflicting units/percentages remain errors. Shared suffixes,
+  grouped endpoints, bounds, missing markers and numeric inputs use the same
+  conversion rules as `parse_cn_number()`.
+* Defaults and six exported function names are unchanged. No C changes or new
+  dependencies. Header-unit numeric infinities/overflow become diagnosed
+  failures; infinite open ends generated from inequalities remain valid.
+
 # cncleanr 0.2.21
 
 * Supports hundred-yuan amounts (`百元`) in numbers, qualified quantities,
