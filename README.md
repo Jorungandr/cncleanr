@@ -18,11 +18,11 @@
 install.packages("cncleanr")
 ```
 
-也可以从 GitHub 安装版本 v0.2.21，包含百元适配、明确复合数量及诊断汇总：
+也可以从 GitHub 安装版本 v0.2.22，包含数量与区间的表头单位、百元适配及诊断汇总：
 
 ```r
 install.packages("pak")
-pak::pak("Jorungandr/cncleanr@v0.2.21")
+pak::pak("Jorungandr/cncleanr@v0.2.22")
 ```
 
 ### 开发版本与源码安装
