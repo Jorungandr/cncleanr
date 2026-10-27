@@ -18,12 +18,11 @@
 install.packages("cncleanr")
 ```
 
-也可以从 GitHub 安装版本 v0.2.20，包含明确复合数量及诊断汇总。
-百元适配目前在下述 `main` 开发版中，0.2.21 发布前请使用开发版安装方式：
+也可以从 GitHub 安装版本 v0.2.21，包含百元适配、明确复合数量及诊断汇总：
 
 ```r
 install.packages("pak")
-pak::pak("Jorungandr/cncleanr@v0.2.20")
+pak::pak("Jorungandr/cncleanr@v0.2.21")
 ```
 
 ### 开发版本与源码安装
@@ -186,7 +185,7 @@ parse_cn_number(c("123.5", "1.5千元", "暂无"), unit = "千元")
 
 支持 `元`、`百元`、`千元`、`万`、`万元`、`亿`、`亿元`、`万亿`、`万亿元`。
 
-开发版（计划 0.2.21）新增百元适配，沿用千元规则：
+GitHub 0.2.21 新增百元适配，沿用千元规则：
 
 ```r
 parse_cn_number("3百元")                 # 300
