@@ -18,11 +18,11 @@ Install from [CRAN](https://CRAN.R-project.org/package=cncleanr) (verified as 0.
 install.packages("cncleanr")
 ```
 
-Alternatively, pin GitHub v0.2.22, with quantity/range header units, hundred-yuan support and diagnostic summaries:
+Alternatively, pin GitHub v0.2.23, with more specific range failures, table-header units and diagnostic summaries:
 
 ```r
 install.packages("pak")
-pak::pak("Jorungandr/cncleanr@v0.2.22")
+pak::pak("Jorungandr/cncleanr@v0.2.23")
 ```
 
 ### Development version and source installation
