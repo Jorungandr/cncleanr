@@ -22,8 +22,10 @@ Counts successful, missing and failed rows without reparsing source data.
 NA and NaN rows count as missing unless their positions occur in
 the attached problems table, in which case they count as failed. Numeric
 infinities and textual open range bounds are valid parsed values.
-Obvious malformed results or stale problem indices cause an error. Plain R
-results do not prove provenance: diagnostics removed or made stale by other
+Obvious malformed results or stale problem indices cause an error.
+Quantity qualifiers must agree with missingness, and range bounds and
+inclusivity must be internally consistent. Plain R results do not prove
+provenance: diagnostics removed or made stale by other
 transformations cannot always be detected or recovered. Summarize before
 ordinary subsetting, mutation, binding or CSV export, or use \code{\link[=cn_subset]{cn_subset()}}.
 Only this explicit summary scans result values; existing parsers do no extra

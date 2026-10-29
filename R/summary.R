@@ -10,8 +10,10 @@
 #' @details NA and NaN rows count as missing unless their positions occur in
 #'   the attached problems table, in which case they count as failed. Numeric
 #'   infinities and textual open range bounds are valid parsed values.
-#'   Obvious malformed results or stale problem indices cause an error. Plain R
-#'   results do not prove provenance: diagnostics removed or made stale by other
+#'   Obvious malformed results or stale problem indices cause an error.
+#'   Quantity qualifiers must agree with missingness, and range bounds and
+#'   inclusivity must be internally consistent. Plain R results do not prove
+#'   provenance: diagnostics removed or made stale by other
 #'   transformations cannot always be detected or recovered. Summarize before
 #'   ordinary subsetting, mutation, binding or CSV export, or use [cn_subset()].
 #'   Only this explicit summary scans result values; existing parsers do no extra
@@ -34,6 +36,18 @@ cn_summary <- function(x) {
         any(is.na(primary) != is.na(x$upper)))))
     stop("`x` must be an unmodified cncleanr result with valid columns.", call. = FALSE)
   absent <- is.na(primary)
+  if (frame && length(x) == 2L &&
+      (!is.null(dim(x$qualifier)) || any(is.na(x$qualifier) != absent) ||
+       any(!is.na(x$qualifier) & !x$qualifier %in%
+         c("exact", "approx", "greater_than", "at_least", "less_than", "at_most"))))
+    stop("`x` must be an unmodified cncleanr result with valid qualifiers.", call. = FALSE)
+  if (frame && length(x) == 4L &&
+      (!is.null(dim(x$lower_inclusive)) || !is.null(dim(x$upper_inclusive)) ||
+       any(absent & (!is.na(x$lower_inclusive) | !is.na(x$upper_inclusive))) ||
+       any(!absent & (is.na(x$lower_inclusive) | is.na(x$upper_inclusive))) ||
+       any(!absent & (primary > x$upper |
+         (primary == x$upper & !(x$lower_inclusive & x$upper_inclusive))), na.rm = TRUE)))
+    stop("`x` must be an unmodified cncleanr result with valid bounds and inclusivity.", call. = FALSE)
   if (!is.character(problems$value) || !is.character(problems$reason) ||
       !is.null(dim(problems$value)) || !is.null(dim(problems$reason)) ||
       anyNA(problems$reason) || any(!nzchar(problems$reason)) ||

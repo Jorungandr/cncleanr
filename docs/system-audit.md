@@ -46,6 +46,11 @@ still do not automatically maintain diagnostics. An accounting-unit range such
 as `(3万)-5` retains existing behavior; changing unit inheritance here requires a
 separate semantic decision and is not silently included in this bug fix.
 
+Later policy update (0.2.24, 2026-10-29): accounting suffix inheritance was
+explicitly unified in the requested batch repair; `(3万)-5` now spans -30000 to
+50000. The paragraph above records the historical 0.2.15/0.2.16 audit scope,
+not the current grammar. See the current batch audit and NEWS compatibility note.
+
 Publication and final validation evidence follows after completion. No CRAN upload.
 
 ## 修复后复测 / Post-repair recheck (2026-10-17)

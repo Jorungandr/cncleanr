@@ -16,6 +16,10 @@ Avoid speculative additions; no agents/worktrees needed for this existing checko
 1. Accounting endpoints: trailing units inside parentheses are not recognized,
    while inferred suffixes are appended outside parentheses. This rejects valid
    ranges and can silently give the opposite bare endpoint the wrong scale.
+   Historical docs/system-audit.md explicitly deferred outward accounting-unit
+   inheritance; this update deliberately unifies that policy as part of the
+   requested accounting adaptation, not as a fourth defect. Document the resulting
+   change to `(3万)-5` in NEWS/README rather than silently rewriting the old record.
 2. Dimensioned inputs: numeric/character matrices and arrays silently flatten
    although parsers document a vector API. Missing-marker arguments also need
    the documented dimension-free vector check.

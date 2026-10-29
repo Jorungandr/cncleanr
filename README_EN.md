@@ -228,6 +228,15 @@ overflow. Uniquely split candidates identify the `left range endpoint` or
 but `reason` strings and `cn_summary()` reason groups can become more specific;
 do not rely on previous generic reason text. Missing endpoints, multiple split
 candidates and digit-grouping failures retain conservative diagnostics.
+
+0.2.24 unifies shared units in accounting ranges: `(3万)-5万` and `(3)-5万`
+both mean -30000 to 50000. **Compatibility note:** `(3万)-5` now has that
+same interpretation, rather than an upper bound of 5. Explicit units are not
+appended twice; compound quantities still do not infer shared units.
+Parser input and `na` must be dimension-free vectors; explicitly select a column
+from matrices/arrays first. `cn_summary()` rejects reversed bounds, invalid
+qualifiers and inconsistent missing/inclusivity flags, but plain R objects still
+cannot prove diagnostic provenance: summarize before modifying results.
 Bare values inherit the header unit. Explicit units with the same multiplier
 are converted only once (`万` and `万元` have the same multiplier). Different
 explicit multipliers and percentages are reported as problems, not overridden.

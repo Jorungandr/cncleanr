@@ -15,7 +15,8 @@ parse_cn_number(
 )
 }
 \arguments{
-\item{x}{A character, factor, or numeric vector. When \code{unit = NULL}, numeric
+\item{x}{A character, factor, or numeric vector. Matrices and arrays are
+rejected; select one column explicitly. When \code{unit = NULL}, numeric
 input is converted to double and otherwise passed through unchanged,
 including \code{Inf}, \code{-Inf}, and \code{NaN}.
 Numeric input uses \code{as.double()} (including applicable S3 methods) before
@@ -26,7 +27,8 @@ SPSS user-defined missing metadata is respected. Objects with class \code{units}
 are rejected: convert units explicitly, then call \code{units::drop_units()}.}
 
 \item{na}{A character vector containing values that should be interpreted as
-missing. Matching happens after whitespace and full-width normalization.}
+missing, without dimensions (matrices and arrays are rejected).
+Matching happens after whitespace and full-width normalization.}
 
 \item{strict}{A single logical value. If \code{FALSE}, invalid values become
 \code{NA_real_}, a warning is emitted, and a data frame is stored in the

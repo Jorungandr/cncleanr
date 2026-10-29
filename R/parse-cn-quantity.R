@@ -9,7 +9,8 @@
 #' mixed inequality qualifiers are rejected.
 #'
 #' @inheritParams parse_cn_number
-#' @param x A character, factor, or numeric vector. Numeric input is converted
+#' @param x A character, factor, or numeric vector. Matrices and arrays are
+#'   rejected; select one column explicitly. Numeric input is converted
 #'   to double and otherwise passed through unchanged when `unit = NULL`,
 #'   including `Inf`, `-Inf`, and `NaN`. Header-unit conversion follows
 #'   [parse_cn_number()].
@@ -189,8 +190,8 @@ validate_cn_parse_arguments <- function(x, na, strict) {
   if (!is.logical(strict) || length(strict) != 1L || is.na(strict)) {
     stop("`strict` must be a single TRUE or FALSE value.", call. = FALSE)
   }
-  if (!is.character(na)) {
-    stop("`na` must be a character vector.", call. = FALSE)
+  if (!is.character(na) || !is.null(dim(na))) {
+    stop("`na` must be a character vector without dimensions.", call. = FALSE)
   }
   if (!is.numeric(x) && !is.factor(x) && !is.character(x)) {
     stop("`x` must be a character, factor, or numeric vector.", call. = FALSE)
@@ -202,6 +203,8 @@ validate_cn_parse_arguments <- function(x, na, strict) {
 prepare_cn_parse_input <- function(x) {
   if (inherits(x, "units"))
     stop("`x` has units; convert to the intended unit and explicitly call units::drop_units() first.", call. = FALSE)
+  if (!is.null(dim(x)))
+    stop("`x` must be a vector without dimensions; select one column explicitly.", call. = FALSE)
   if (!inherits(x, "haven_labelled_spss")) return(x)
   if (!is.numeric(x) && !is.character(x))
     stop("SPSS input must contain numeric or character values.", call. = FALSE)

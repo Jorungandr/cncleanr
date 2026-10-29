@@ -7,12 +7,15 @@
 #' Digit grouping is validated independently at each range endpoint, so
 #' `"1 234-2 345"` is accepted but `"1 23-2 345"` is not.
 #' Endpoint missing markers are checked before and after shared-unit propagation.
+#' Shared suffixes are recognized and inserted inside accounting parentheses,
+#' preserving their negative sign. For example, `"(3\u4e07)-5"` spans -30000 to 50000.
 #' Specific scalar failures retain their original reason. Uniquely split failed
 #' ranges identify left/right endpoint causes where available; ambiguous splits,
 #' missing endpoints and digit-grouping failures retain conservative diagnostics.
 #'
 #' @inheritParams parse_cn_number
-#' @param x A character, factor, or numeric vector. Numeric input is converted
+#' @param x A character, factor, or numeric vector. Matrices and arrays are
+#'   rejected; select one column explicitly. Numeric input is converted
 #'   to double and otherwise passed through unchanged when `unit = NULL`,
 #'   including `Inf`, `-Inf`, and `NaN`. Header-unit conversion follows
 #'   [parse_cn_number()].
@@ -307,6 +310,8 @@ propagate_cn_range_suffix <- function(left, right, normalize_suffix = FALSE, na 
   text <- c(left, right)
   if (normalize_suffix) text <- normalize_cn_number_text(text)
   missing <- text %in% na
+  wrapped <- startsWith(text, "(") & endsWith(text, ")")
+  if (any(wrapped)) text[wrapped] <- substring(text[wrapped], 2L, nchar(text[wrapped]) - 1L)
   matches <- regexpr(suffix_pattern, text, perl = TRUE)
   suffixes <- rep("", length(text))
   present <- which(matches > 0L)
@@ -328,6 +333,19 @@ propagate_cn_range_suffix <- function(left, right, normalize_suffix = FALSE, na 
     add_right <- add_right & !explicit_right
     ambiguous <- (compound[seq_along(left)] & !explicit_right) |
       (compound[length(left) + seq_along(right)] & !explicit_left)
+  }
+  if (any(wrapped)) {
+    rows <- which(wrapped & c(add_left, add_right))
+    if (length(rows)) {
+      raw <- trimws(c(left, right)[rows], whitespace = "[[:space:]\u3000\u00a0\u202f]")
+      suffix <- c(right_suffix, left_suffix)[rows]
+      fixed <- paste0(substr(raw, 1L, nchar(raw) - 1L), suffix, ")")
+      in_left <- rows <= length(left)
+      left[rows[in_left]] <- fixed[in_left]
+      right[rows[!in_left] - length(left)] <- fixed[!in_left]
+    }
+    add_left <- add_left & !wrapped[seq_along(left)]
+    add_right <- add_right & !wrapped[length(left) + seq_along(right)]
   }
   left[add_left] <- paste0(left[add_left], right_suffix[add_left])
   right[add_right] <- paste0(right[add_right], left_suffix[add_right])

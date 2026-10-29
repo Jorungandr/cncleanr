@@ -1,3 +1,18 @@
+# cncleanr 0.2.24
+
+* Repairs accounting endpoint suffix handling: explicit units inside parentheses
+  are not appended twice, and shared units are inserted inside bare wrappers.
+  Accounting units now propagate in both directions, so `(3万)-5` means
+  -30000 to 50000 (previously its upper bound was 5). This deliberate policy
+  change was deferred by earlier audits and is documented, not silently applied.
+* Rejects dimensioned parser input and missing-marker arguments instead of
+  flattening matrices/arrays. Select a column explicitly before parsing.
+* `cn_summary()` rejects unknown/inconsistent qualifiers, reversed or empty
+  point ranges, and inconsistent missing/inclusivity flags. Valid parser results
+  are unchanged; the extra value checks stay in the explicit summary function.
+* Adds independent arithmetic combination tests and regressions for three
+  confirmed root-cause families. No new exports, arguments, C or dependencies.
+
 # cncleanr 0.2.23
 
 * Improves range failure reasons without changing parsed values or accepted

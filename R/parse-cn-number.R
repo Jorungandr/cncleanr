@@ -6,7 +6,8 @@
 #' must match the supported syntax in full. Spaces between digits are accepted
 #' only when they form valid three-digit grouping.
 #'
-#' @param x A character, factor, or numeric vector. When `unit = NULL`, numeric
+#' @param x A character, factor, or numeric vector. Matrices and arrays are
+#'   rejected; select one column explicitly. When `unit = NULL`, numeric
 #'   input is converted to double and otherwise passed through unchanged,
 #'   including `Inf`, `-Inf`, and `NaN`.
 #'   Numeric input uses `as.double()` (including applicable S3 methods) before
@@ -16,7 +17,8 @@
 #'   SPSS user-defined missing metadata is respected. Objects with class `units`
 #'   are rejected: convert units explicitly, then call `units::drop_units()`.
 #' @param na A character vector containing values that should be interpreted as
-#'   missing. Matching happens after whitespace and full-width normalization.
+#'   missing, without dimensions (matrices and arrays are rejected).
+#'   Matching happens after whitespace and full-width normalization.
 #' @param strict A single logical value. If `FALSE`, invalid values become
 #'   `NA_real_`, a warning is emitted, and a data frame is stored in the
 #'   `problems` attribute. If `TRUE`, invalid values cause an error.
@@ -84,8 +86,8 @@ parse_cn_number <- function(
   if (!is.logical(strict) || length(strict) != 1L || is.na(strict)) {
     stop("`strict` must be a single TRUE or FALSE value.", call. = FALSE)
   }
-  if (!is.character(na)) {
-    stop("`na` must be a character vector.", call. = FALSE)
+  if (!is.character(na) || !is.null(dim(na))) {
+    stop("`na` must be a character vector without dimensions.", call. = FALSE)
   }
   header_multiplier <- cn_header_multiplier(unit)
   x <- prepare_cn_parse_input(x)
