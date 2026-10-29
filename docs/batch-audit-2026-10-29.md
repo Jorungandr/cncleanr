@@ -58,4 +58,45 @@ as a fourth defect or silently retroactively relabelled as an old bug.
   transformations is still not fully detectable. No promise of zero possible
   remaining defects. No new native sanitizer result or fresh data-source claim.
 
-Release/package/platform evidence is appended after final verification. No CRAN.
+## Verified package and platform evidence
+
+* Fixed source: edc176ba6a675b52336b6b0ce0d8acc5ff180244, version 0.2.24.
+* Clean-source local R CMD check --as-cran --no-manual: Status OK on Windows,
+  R 4.6.1/UCRT GCC 15.2. Incoming checks disabled; no local PDF check.
+* Full suite: 1789 passed, 0 failures/errors/warnings/skips (137 new assertions).
+  Counts are test assertions, not the 8748+7392 independently calculated cases.
+* CI run 40901813520: all five platform jobs successful. GitHub connector logs
+  confirm Status OK and 1789 passes on Ubuntu release/devel/oldrel, Windows,
+  and macOS. Ubuntu release PDF reference manual check is OK.
+* Both literal README editions: 14 runnable blocks each; three installation
+  blocks deliberately not run, one expected error, no missing optional skips.
+* Real imported-type checks: 77 passed (haven 2.5.5, units 1.0.1, bit64 4.8.6).
+  Existing generated audit: 2454 consistency and 28 optional bit64 checks passed.
+* Existing real/multi-source/broad-data audits passed; all nine retained input
+  hashes matched. This is regression coverage, not newly collected data.
+* Exact checkout/archive/installed-source/version verifier passed.
+* Seven-run warmed 100000-success-row medians (old/new): number 0.01/0.02,
+  quantity 0.10/0.11, range 0.81/0.84 seconds. Coarse timers are noisy. A paired
+  same-process number comparison, 40 calls/sample with alternating order and
+  identical native code, measured 0.0125/0.01175 seconds per call (five pairs).
+  These are smoke checks, not a speedup or universal no-regression guarantee.
+
+## Publication
+
+* Annotated tag v0.2.24: 6927e870e64a8c8c6d0a2317826b7c0856584121.
+* Public release: https://github.com/Jorungandr/cncleanr/releases/tag/v0.2.24
+* Release ID 428052320; asset 689005302, cncleanr_0.2.24.tar.gz, 70726 bytes.
+* SHA256: 706ED3ECE9B5EB0483AB209962185FA0C88D1A7CBB05FD0D970964E959C8782D.
+  Server size/digest match the locally checked archive. Public-download tests
+  used an unauthenticated download resumed after transient connection failures;
+  only the final complete, hash-matching file was independently compiled/installed.
+* Public installed-package full suite: 1789 passed, 0 failures/errors/warnings/
+  skips. Exact release staging checkout/archive/installed-source verifier passed.
+  Final README pins point to v0.2.24; both editions' 14 runnable blocks and
+  imported/system/optional-bit64 checks (77/2454/28) passed again. The final
+  README/report-only commit does not change the fixed release archive.
+
+本轮按根因统计共 3 类（此前 1 类＋新增 2 类），不是 1728 个独立缺陷。
+三类均已修复，扩大复测中没有再复现第四类根因；有限范围测试不等于证明整个
+项目不存在任何其他缺陷。历史括号继承策略的统一是明确列出的兼容性变化。
+No CRAN submission. Previous tags and release assets are unchanged.

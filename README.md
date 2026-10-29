@@ -18,11 +18,11 @@
 install.packages("cncleanr")
 ```
 
-也可以从 GitHub 安装版本 v0.2.23，包含更具体的区间失败诊断、表头单位及诊断汇总：
+也可以从 GitHub 安装版本 v0.2.24，包含括号区间单位、输入形状与汇总校验的合并修复：
 
 ```r
 install.packages("pak")
-pak::pak("Jorungandr/cncleanr@v0.2.23")
+pak::pak("Jorungandr/cncleanr@v0.2.24")
 ```
 
 ### 开发版本与源码安装
