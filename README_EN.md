@@ -470,6 +470,9 @@ interval bounds and summary counts.
 See the [real business workflow tutorial](docs/business-workflows_EN.md) for
 import, review and export of financial spans, distinct pay modes and statistical
 fields. Small source-derived cases run offline in CI.
+The literal R blocks in both financial and business tutorial editions also run
+on all five platforms. Financial CSV exports are checked for source text, units
+and original problem rows.
 
 For a local Windows R shutdown crash caused by `cli`, use
 [`docs/run-r.ps1`](docs/run-r.ps1) to launch R. It supplies the architecture

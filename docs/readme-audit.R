@@ -52,4 +52,55 @@
         '; missing optional units blocks:',optional,'\n')
     stopifnot(errors==1L,installs==3L)
   }
+  # Execute literal tutorial code too. Business import examples use the small
+  # attributed fixture, not an invented full snapshot or a network download.
+  tutorials <- c('docs/financial-table-example.md', 'docs/financial-table-example_EN.md',
+                 'docs/business-workflows.md', 'docs/business-workflows_EN.md')
+  for (file in tutorials) {
+    tutorial_directory <- file.path(directory, basename(file))
+    dir.create(tutorial_directory)
+    setwd(tutorial_directory)
+    business <- grepl('business-workflows', file, fixed = TRUE)
+    if (business) {
+      inputs <- 'outputs/business-validation-2026-10-30'
+      dir.create(inputs, recursive = TRUE)
+      stopifnot(file.copy(file.path(root, 'docs/fixtures/business-cases.csv'),
+                          file.path(inputs, 'cases.csv')))
+    }
+    environment <- new.env(parent = globalenv())
+    passed <- installs <- 0L
+    for (lines in blocks(file.path(root, file))) {
+      code <- paste(lines, collapse = '\n')
+      if (grepl('install.packages|pak::pak', code)) {
+        installs <- installs + 1L
+        next
+      }
+      withCallingHandlers(invisible(capture.output(eval(parse(text = code), environment))),
+        warning = function(w) stop(conditionMessage(w), call. = FALSE))
+      passed <- passed + 1L
+    }
+    if (business) {
+      stopifnot(passed == 2L, installs == 0L, nrow(environment$cases) == 22L,
+                !anyDuplicated(environment$cases$case_id))
+    } else {
+      stopifnot(passed == 3L, installs == 1L)
+      exported <- read.csv('cleaned.csv', colClasses = 'character',
+        na.strings = character(), check.names = FALSE, fileEncoding = 'UTF-8')
+      review <- read.csv('problems.csv', colClasses = 'character',
+        na.strings = character(), check.names = FALSE, fileEncoding = 'UTF-8')
+      exported_value <- exported$value
+      exported_value[exported_value == 'NA'] <- NA_character_
+      exported_value <- withCallingHandlers(as.double(exported_value),
+        warning = function(w) stop(conditionMessage(w), call. = FALSE))
+      stopifnot(identical(exported$text, environment$raw$text),
+                identical(exported$source_row, as.character(environment$raw$source_row)),
+                identical(exported$output_unit, environment$cleaned$output_unit),
+                identical(review$source_row, c('6', '7')),
+                identical(review$text, environment$problem_rows$text),
+                identical(review$reason, environment$problem_rows$reason),
+                isTRUE(all.equal(exported_value, environment$cleaned$value)))
+    }
+    cat('PASS: literal tutorial:', file, '; runnable blocks:', passed,
+        '; installation blocks not executed:', installs, '\n')
+  }
 })()
