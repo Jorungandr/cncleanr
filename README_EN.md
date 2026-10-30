@@ -448,7 +448,7 @@ The `reason` returned by `cn_problems()` can be used directly to locate these pr
 | Invalid whitespace grouping between digits | `1 2` | `digits use invalid whitespace grouping` |
 | Repeated or conflicting qualifiers | `超过3万左右` | `multiple or conflicting qualifiers` |
 | Reversed range bounds | `5万-3万` | `range lower bound is greater than its upper bound` |
-| Invalid range endpoint | `3万-abc` | `one or both range endpoints are invalid` |
+| Invalid range endpoint | `3万-abc` | `right range endpoint: value does not match the supported number syntax` |
 | Value outside the finite double range | `1e308万` | `value is outside the finite double range` |
 
 When parsing fails, first use ordinary mode and inspect `cn_problems()`. Use `strict = TRUE` only when the cleaning workflow must stop if any row fails.

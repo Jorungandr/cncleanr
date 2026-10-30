@@ -409,7 +409,7 @@ sorted <- cn_subset(parsed, order(parsed, na.last = TRUE))
 | 数字空格分组无效 | `1 2` | `digits use invalid whitespace grouping` |
 | 限定词重复或冲突 | `超过3万左右` | `multiple or conflicting qualifiers` |
 | 区间上下界颠倒 | `5万-3万` | `range lower bound is greater than its upper bound` |
-| 区间端点无效 | `3万-abc` | `one or both range endpoints are invalid` |
+| 区间端点无效 | `3万-abc` | `right range endpoint: value does not match the supported number syntax` |
 | 数值超出有限双精度范围 | `1e308万` | `value is outside the finite double range` |
 
 遇到失败时，先在普通模式下调用解析函数并查看 `cn_problems()`；只有在清洗流程要求“任意一行失败就停止”时，才使用 `strict = TRUE`。
