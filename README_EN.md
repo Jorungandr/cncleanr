@@ -464,6 +464,9 @@ Every push is checked on Linux, macOS, and Windows with GitHub Actions.
 Ubuntu R-release also independently installs the current source and runs the
 extended consistency and haven/units/bit64 imported-type audits. These are CI
 dependencies, not package runtime dependencies.
+The extended audits also combine header units, custom missing markers and
+repeated/reordered chunks, checking source rows, strict mode, qualifiers,
+interval bounds and summary counts.
 
 For a local Windows R shutdown crash caused by `cli`, use
 [`docs/run-r.ps1`](docs/run-r.ps1) to launch R. It supplies the architecture

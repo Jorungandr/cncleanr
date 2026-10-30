@@ -52,6 +52,74 @@ for(kind in c('number','quantity','range')) {
     check(!is.null(outcome(f,x)$error),paste(kind,'unsupported type error'))
 }
 cat('PASS:',checks,'generated consistency checks (not independent semantic gold cases).\n')
+before <- checks
+for (kind in c('number', 'quantity', 'range')) {
+  f <- get(paste0('parse_cn_', kind))
+  for (unit in c('百元', '千元', '万元')) {
+    scale <- c(100, 1000, 10000)[match(unit, c('百元', '千元', '万元'))]
+    conflict <- if (unit == '百元') '千元' else '百元'
+    atom <- c('3', paste0('4', unit), 'bad', '999', '暂 无', '１２',
+              NA_character_, '-0', '1e309', '1e-999', paste0('5', conflict), '1 2')
+    input <- rep(atom, 400L)
+    gold <- rep(c(3 * scale, 4 * scale, NA, NA, NA, 12 * scale,
+                  NA, -0, NA, NA, NA, NA), 400L)
+    failed <- rep(seq_along(atom) %in% c(3L, 9L, 10L, 11L, 12L), 400L)
+    missing <- rep(seq_along(atom) %in% c(4L, 5L, 7L), 400L)
+    marker <- c('９９９', '暂 无')
+    full <- suppressWarnings(f(input, unit = unit, na = marker))
+    primary <- if (is.data.frame(full)) full[[1L]] else as.numeric(full)
+    label <- paste(kind, unit)
+    check(identical(primary, gold), paste(label, 'independent header values'))
+    check(identical(1 / primary, 1 / gold), paste(label, 'signed zero'))
+    if (kind == 'quantity')
+      check(identical(full$qualifier, ifelse(is.na(gold), NA_character_, 'exact')),
+        paste(label, 'independent qualifiers'))
+    if (kind == 'range') {
+      check(identical(full$upper, gold), paste(label, 'independent upper bounds'))
+      check(identical(full$lower_inclusive, ifelse(is.na(gold), NA, TRUE)),
+        paste(label, 'independent lower inclusivity'))
+      check(identical(full$upper_inclusive, ifelse(is.na(gold), NA, TRUE)),
+        paste(label, 'independent upper inclusivity'))
+    }
+    check(identical(cn_problems(full)$index, which(failed)), paste(label, 'independent failures'))
+    check(identical(cn_problems(full)$value, input[failed]), paste(label, 'original text'))
+    report <- cn_summary(full)
+    check(identical(as.double(unlist(report$counts)),
+      as.double(c(length(input), sum(!failed & !missing), sum(missing), sum(failed)))),
+      paste(label, 'independent summary'))
+    good <- which(!failed)
+    check(identical(values(f(input[good], unit = unit, na = marker, strict = TRUE)),
+      values(cn_subset(full, good))), paste(label, 'strict valid rows'))
+    error <- tryCatch(f(input[c(1L, 3L, 4L)], unit = unit, na = marker, strict = TRUE),
+                      error = identity)
+    check(inherits(error, 'error') && grepl('positions 2.', conditionMessage(error), fixed = TRUE),
+      paste(label, 'strict original position'))
+    schedules <- list(
+      partition = list(integer(), 1L, 2:511, 512:1023, integer(), 1024:length(input)),
+      repeated = list(c(length(input), 3L, 4L, 3L, 2L), integer(),
+                      seq.int(1L, length(input), by = 7L), c(8L, 9L)))
+    for (schedule in schedules) {
+      source <- unlist(schedule, use.names = FALSE)
+      chunks <- lapply(schedule, function(rows) {
+        parsed <- suppressWarnings(f(input[rows], unit = unit, na = marker))
+        problems <- cn_problems(parsed)
+        problems$index <- rows[problems$index]
+        data <- if (is.data.frame(parsed)) parsed else data.frame(value = as.numeric(parsed))
+        attr(data, 'problems') <- NULL
+        list(data = data, problems = problems)
+      })
+      data <- do.call(rbind, lapply(chunks, `[[`, 'data'))
+      problems <- do.call(rbind, lapply(chunks, `[[`, 'problems'))
+      expected <- cn_subset(full, source)
+      wanted <- if (is.data.frame(expected)) values(expected) else data.frame(value = as.numeric(expected))
+      check(identical(values(data), wanted), paste(label, 'chunked values'))
+      check(identical(problems$index, source[failed[source]]), paste(label, 'chunked source rows'))
+      check(identical(problems$value, input[source[failed[source]]]), paste(label, 'chunked original text'))
+      check(identical(problems$reason, cn_problems(expected)$reason), paste(label, 'chunked reasons'))
+    }
+  }
+}
+cat('PASS:', checks - before, 'header/custom-missing/chunk workflow checks.\n')
 if (requireNamespace('bit64', quietly=TRUE)) {
   before <- checks
   for (f in list(parse_cn_number,parse_cn_quantity,parse_cn_range)) {

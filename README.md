@@ -424,6 +424,8 @@ sorted <- cn_subset(parsed, order(parsed, na.last = TRUE))
 每次推送都会在 Linux、macOS 和 Windows 上运行 GitHub Actions 检查。
 Ubuntu R-release 还会独立安装当前源码，并运行扩大一致性检查及 haven、units、
 bit64 导入类型检查；这些依赖仅用于 CI，不是包的运行时依赖。
+扩大检查还覆盖表头单位、自定义缺失标记与重复／乱序分块同时使用的情况，
+核对原始行号、严格模式、限定词、区间边界及汇总数量。
 
 Windows 本地开发若在 R 退出时遇到 `cli` 引发的崩溃，可使用
 [`docs/run-r.ps1`](docs/run-r.ps1) 启动 R：它仅在缺失时补齐架构环境变量，
