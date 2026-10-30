@@ -15,3 +15,15 @@ The tests restore RNG state and do not add runtime work or dependencies.
 No confirmed new parser defect was reproduced in this batch. Production R/C
 algorithms, supported grammar and six public interfaces are unchanged. Finite
 tests do not establish the absence of every possible defect. No CRAN submission.
+
+验证：最终提交的五平台 CI 均为 Status OK，各通过 1832 项断言；Ubuntu
+release 的 PDF 手册通过。公开附件校验和一致，重新编译安装后的完整测试
+也通过。本地最终检查有 1 个远程时间校验不可用的 NOTE，0 errors / 0 warnings。
+
+Validation: final-source CI has Status OK and 1832 passing assertions on all five
+platform jobs, including the Ubuntu release PDF manual check. The public asset's
+SHA256 matches; independent compilation/installation and all 1832 assertions
+passed. Final local check: 0 errors, 0 warnings, 1 NOTE for unavailable remote
+clock verification. No new sanitizer or speedup claim.
+
+SHA256: `5cac55025b15ce3ee1afcd0d86160247309cb1809600d05c1f4f7e092beedae6`
