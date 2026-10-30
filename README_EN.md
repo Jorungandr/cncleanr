@@ -473,6 +473,9 @@ fields. Small source-derived cases run offline in CI.
 The literal R blocks in both financial and business tutorial editions also run
 on all five platforms. Financial CSV exports are checked for source text, units
 and original problem rows.
+For salary K notation, pay periods and advertised installments, see the
+[independent salary example adapter](docs/salary-adapter-guide_EN.md). It returns
+data/review tables without changing the six exports or inferring annual income.
 
 For a local Windows R shutdown crash caused by `cli`, use
 [`docs/run-r.ps1`](docs/run-r.ps1) to launch R. It supplies the architecture

@@ -55,12 +55,18 @@
   # Execute literal tutorial code too. Business import examples use the small
   # attributed fixture, not an invented full snapshot or a network download.
   tutorials <- c('docs/financial-table-example.md', 'docs/financial-table-example_EN.md',
-                 'docs/business-workflows.md', 'docs/business-workflows_EN.md')
+                 'docs/business-workflows.md', 'docs/business-workflows_EN.md',
+                 'docs/salary-adapter-guide.md', 'docs/salary-adapter-guide_EN.md')
   for (file in tutorials) {
     tutorial_directory <- file.path(directory, basename(file))
     dir.create(tutorial_directory)
     setwd(tutorial_directory)
     business <- grepl('business-workflows', file, fixed = TRUE)
+    salary <- grepl('salary-adapter-guide', file, fixed = TRUE)
+    if (salary) {
+      dir.create('docs')
+      stopifnot(file.copy(file.path(root, 'docs/salary-adapter.R'), 'docs/salary-adapter.R'))
+    }
     if (business) {
       inputs <- 'outputs/business-validation-2026-10-30'
       dir.create(inputs, recursive = TRUE)
@@ -82,6 +88,14 @@
     if (business) {
       stopifnot(passed == 2L, installs == 0L, nrow(environment$cases) == 22L,
                 !anyDuplicated(environment$cases$case_id))
+    } else if (salary) {
+      stopifnot(passed == 4L, installs == 0L,
+                identical(readRDS('salary-example.rds'), environment$result))
+      review <- read.csv('salary-review.csv', colClasses = 'character',
+        na.strings = character(), fileEncoding = 'UTF-8')
+      stopifnot(identical(review$index, c('2','3','4')),
+                identical(review$raw, environment$result$review$raw),
+                identical(review$reason, environment$result$review$reason))
     } else {
       stopifnot(passed == 3L, installs == 1L)
       exported <- read.csv('cleaned.csv', colClasses = 'character',

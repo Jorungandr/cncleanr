@@ -1,0 +1,20 @@
+id,source,input,context_period,status,lower,upper,period,advertised_payments
+S01,visionstar,6-9K·13薪,,needs_context,,,,13
+S02,visionstar,9-12K·14薪,,needs_context,,,,14
+S03,visionstar,6-8K,,needs_context,,,,
+S04,visionstar,15-25K·13薪,,needs_context,,,,13
+S05,visionstar,2-3K,,needs_context,,,,
+S06,dujiao,12K-20K/月,,parsed,12000,20000,month,
+S07,dujiao,8K-15K/月,,parsed,8000,15000,month,
+S08,dujiao,140-160/天,,parsed,140,160,day,
+S09,dujiao,15K-20K/月,,parsed,15000,20000,month,
+S10,dujiao,15K-25K/月 · 13薪,,parsed,15000,25000,month,13
+S11,bnu,20-30万元,year,parsed,200000,300000,year,
+S12,bnu,10-20万元,year,parsed,100000,200000,year,
+S13,bnu,月薪3-5万元（按实际工作时间计算）,,conditional,,,,
+S14,xunwu,每小时35—40元,,parsed,35,40,hour,
+S15,xunwu,4000-6000元/月,,parsed,4000,6000,month,
+S16,xunwu,试用期3500元/月，转正后3700-4500元/月,,conditional,,,,
+S17,xunwu,无责任底薪4000元/月起 + 高额销售额提成 + 月度/季度奖金,,conditional,,,,
+S18,mmpt,4000-8000 元底薪+提成 6%~10%+激励奖金（上不封顶）,,conditional,,,,
+S19,mmpt,待遇面议,,negotiated,,,,
