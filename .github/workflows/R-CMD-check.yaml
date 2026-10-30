@@ -103,3 +103,8 @@ jobs:
               c(shQuote(script), shQuote(lib), shQuote(.libPaths()[1L])))
             if (status != 0L) stop("Installed-package audit failed: ", script)
           }
+          # Small source-derived cases are offline; full snapshots stay local.
+          status <- system2(file.path(R.home("bin"), "Rscript"),
+            c("docs/business-validation.R", shQuote(lib),
+              "docs/fixtures/business-cases.csv", shQuote(tempfile("cncleanr-business-"))))
+          if (status != 0L) stop("Business import/review/export audit failed")

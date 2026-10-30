@@ -1,0 +1,23 @@
+case_id,domain,source,source_row,record_id,field,raw_input,parse_input,parser,parser_unit,source_unit,pay_period,transformation,expected_status,expected_value,expected_upper,expected_qualifier,review_note
+finance:000001,finance,CFQA:test,1,70,answer_span,6.38%,6.38%,quantity,,%,,extracted_span_not_full_answer,parsed,0.0638,,exact,Lexical span only; original answer ID retained; not a financial fact-check
+finance:000034,finance,CFQA:test,9,78,answer_span,210935262.33元,210935262.33元,quantity,,元,,extracted_span_not_full_answer,parsed,210935262.33,,exact,Lexical span only; original answer ID retained; not a financial fact-check
+finance:000052,finance,CFQA:test,65,490,answer_span,超过160万,超过160万,quantity,,万,,extracted_span_not_full_answer,parsed,1.60E+6,,greater_than,Lexical span only; original answer ID retained; not a financial fact-check
+finance:000101,finance,CFQA:test,309,1350,answer_span,9842955千元,9842955千元,quantity,,千元,,extracted_span_not_full_answer,parsed,9.842955E+9,,exact,Lexical span only; original answer ID retained; not a financial fact-check
+finance:000106,finance,CFQA:test,334,1375,answer_span,171495259万元,171495259万元,quantity,,万元,,extracted_span_not_full_answer,parsed,1.71495259E+12,,exact,Lexical span only; original answer ID retained; not a financial fact-check
+finance:000167,finance,CFQA:test,442,1943,answer_span,"368,75万元","368,75万元",quantity,,万元,,extracted_span_not_full_answer,reject,,,,Lexical span only; original answer ID retained; not a financial fact-check
+finance:000273,finance,CFQA:test,547,2460,answer_span,超41亿,超41亿,quantity,,亿,,extracted_span_not_full_answer,parsed,4.1E+9,,greater_than,Lexical span only; original answer ID retained; not a financial fact-check
+finance:000279,finance,CFQA:test,555,2468,answer_span,2.27万亿,2.27万亿,quantity,,万亿,,extracted_span_not_full_answer,parsed,2.27E+12,,exact,Lexical span only; original answer ID retained; not a financial fact-check
+finance:000282,finance,CFQA:test,556,2469,answer_span,约为3.43万亿元,约为3.43万亿元,quantity,,万亿元,,extracted_span_not_full_answer,parsed,3.43E+12,,approx,Lexical span only; original answer ID retained; not a financial fact-check
+finance:000343,finance,CFQA:test,659,2841,answer_span,2 亿元,2 亿元,quantity,,亿元,,extracted_span_not_full_answer,parsed,2E+8,,exact,Lexical span only; original answer ID retained; not a financial fact-check
+finance:000662,finance,CFQA:test,1138,5084,answer_span,"人民币10,0000000元","人民币10,0000000元",quantity,,元,,extracted_span_not_full_answer,reject,,,,Lexical span only; original answer ID retained; not a financial fact-check
+finance:001027,finance,CFQA:test,1468,6420,answer_span,8％,8％,quantity,,％,,extracted_span_not_full_answer,parsed,0.08,,exact,Lexical span only; original answer ID retained; not a financial fact-check
+salary:001419,salary,TW:44062,1,000001,NT_L,35000,35000,number,元,TWD per source pay period,月薪,none,parsed,35000,,,
+salary:001421,salary,TW:44062,1,000001,salary_interval,35000 | 45000,35000~45000,range,,TWD per source pay period,月薪,derived_from_two_endpoint_fields,parsed,35000,45000,,
+salary:001462,salary,TW:44062,15,000015,NT_L,-,-,number,元,TWD per source pay period,依學經歷、證照核薪(每月經常性薪資達4萬元以上),none,missing,,,,
+salary:001464,salary,TW:44062,15,000015,salary_interval,- | -,,range,,TWD per source pay period,依學經歷、證照核薪(每月經常性薪資達4萬元以上),derived_from_two_endpoint_fields,business_review,,,,No defensible closed interval: missing/zero/reversed endpoint; retain source pay mode
+salary:001465,salary,TW:44062,15,000015,SALARYCD,依學經歷、證照核薪(每月經常性薪資達4萬元以上),依學經歷、證照核薪(每月經常性薪資達4萬元以上),range,,,依學經歷、證照核薪(每月經常性薪資達4萬元以上),none,reject,,,,Pay-rule description is not a complete numeric interval
+statistics:004498,statistics,TW:34112:114,1,000001,總計_Total_千人,11626,11626,number,,thousand persons,,retain_source_thousands,parsed,11626,,,
+statistics:004519,statistics,TW:34112:114,1,000001,總計_Total_百分比,100,100%,number,,proportion,,append_percent_to_percentage_points,parsed,1.00,,,
+money_header:005548,money_header,TW:tourism,1,000001,經濟效益_萬元,316,316,number,万元,TWD,,explicit_header_scale,parsed,3160000,,,Estimated tourism benefit; source text requiring interpretation is not a scalar
+money_header:005549,money_header,TW:tourism,2,000002,經濟效益_萬元, - , - ,number,万元,TWD,,explicit_header_scale,missing,,,,Estimated tourism benefit; source text requiring interpretation is not a scalar
+money_header:005558,money_header,TW:tourism,11,000011,經濟效益_萬元," 單日銷售總額最高逾9,000萬元/第10屆MIT銷售58件作品成交金額約221萬元 "," 單日銷售總額最高逾9,000萬元/第10屆MIT銷售58件作品成交金額約221萬元 ",number,万元,TWD,,explicit_header_scale,reject,,,,Estimated tourism benefit; source text requiring interpretation is not a scalar

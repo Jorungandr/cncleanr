@@ -467,6 +467,9 @@ dependencies, not package runtime dependencies.
 The extended audits also combine header units, custom missing markers and
 repeated/reordered chunks, checking source rows, strict mode, qualifiers,
 interval bounds and summary counts.
+See the [real business workflow tutorial](docs/business-workflows_EN.md) for
+import, review and export of financial spans, distinct pay modes and statistical
+fields. Small source-derived cases run offline in CI.
 
 For a local Windows R shutdown crash caused by `cli`, use
 [`docs/run-r.ps1`](docs/run-r.ps1) to launch R. It supplies the architecture

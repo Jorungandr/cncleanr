@@ -66,6 +66,25 @@ cases must remain distinguished. These lexical samples do not certify financial
 facts, arbitrary prose or all domains. Small independent regressions in
 `tests/testthat/test-systematic-hardening.R` run without these downloads.
 
+## 业务流程验证 / Business workflow validation
+
+完整业务流程（导入、解析、复核、CSV/RDS 导出读回）见
+[中文教程](business-workflows.md) / [English tutorial](business-workflows_EN.md)。
+它复用已锁定的四份快照，Python 构建器会再次核对输入校验和：
+
+```sh
+python docs/business-validation.py
+Rscript docs/business-validation.R <installed-library>
+```
+
+The full audit reuses four retained snapshots; it is not a new data collection.
+For the 22-case offline CI sample without downloads, write into a separate output
+directory:
+
+```sh
+Rscript docs/business-validation.R <installed-library> docs/fixtures/business-cases.csv <output-directory>
+```
+
 ## 历史性能脚本 / Historical benchmarks
 
 Performance work is closed. Old benchmark source, baseline libraries and DLLs
