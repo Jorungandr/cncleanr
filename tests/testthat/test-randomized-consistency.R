@@ -67,6 +67,8 @@ test_that('seeded mixed batches agree with the complete R number fallback', {
     r_parser <- parse_cn_number
     environment(r_parser) <- list2env(list(.Call = function(symbol, x, unit)
       rep(NA_real_, length(x))), parent = environment(parse_cn_number))
+    # Deduplication recursively calls parse_cn_number: keep that call R-only too.
+    environment(r_parser)$parse_cn_number <- r_parser
     pool <- c('3万', '１２．５％', '(2百元)', 'RMB1,234', '-0', '1e-330万亿',
       '1e309', '1e-999', '1 2', 'bad', '3万abc', NA_character_, '暂无',
       '1亿2000万', ' 1\u202f234千元 ', '0.00000000000000001', '1.7976931348623157e308')
