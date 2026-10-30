@@ -18,11 +18,11 @@ Install from [CRAN](https://CRAN.R-project.org/package=cncleanr) (verified as 0.
 install.packages("cncleanr")
 ```
 
-Alternatively, pin GitHub v0.2.24, with combined accounting-range, input-shape and summary-integrity repairs:
+Alternatively, pin GitHub v0.2.25, adding fixed-seed independent arithmetic, C/R consistency and subset-diagnostic regression tests without changing parsing algorithms:
 
 ```r
 install.packages("pak")
-pak::pak("Jorungandr/cncleanr@v0.2.24")
+pak::pak("Jorungandr/cncleanr@v0.2.25")
 ```
 
 ### Development version and source installation

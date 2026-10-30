@@ -1,3 +1,13 @@
+# cncleanr 0.2.25
+
+* Adds fixed-seed independent arithmetic tests for 3000 scalar values, 3000
+  qualified quantities and 3000 accounting intervals, with per-cell tolerances.
+* Compares complete native-enabled and R-fallback results and diagnostics for
+  4096 mixed rows under seven header settings, including repeated fallback rows.
+* Tests repeated selection and summary counts against independently labelled
+  inputs for all three parsers. Test RNG state is restored. No production
+  algorithm, accepted grammar, public interface or runtime dependency changes.
+
 # cncleanr 0.2.24
 
 * Repairs accounting endpoint suffix handling: explicit units inside parentheses

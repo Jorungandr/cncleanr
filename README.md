@@ -18,11 +18,11 @@
 install.packages("cncleanr")
 ```
 
-也可以从 GitHub 安装版本 v0.2.24，包含括号区间单位、输入形状与汇总校验的合并修复：
+也可以从 GitHub 安装版本 v0.2.25，增加固定随机种子的独立算术、C/R 一致性与筛选诊断回归测试，解析算法保持不变：
 
 ```r
 install.packages("pak")
-pak::pak("Jorungandr/cncleanr@v0.2.24")
+pak::pak("Jorungandr/cncleanr@v0.2.25")
 ```
 
 ### 开发版本与源码安装
