@@ -422,6 +422,8 @@ sorted <- cn_subset(parsed, order(parsed, na.last = TRUE))
 - `tests/testthat/`：覆盖边界条件和错误行为的完整开发测试。
 
 每次推送都会在 Linux、macOS 和 Windows 上运行 GitHub Actions 检查。
+Ubuntu R-release 还会独立安装当前源码，并运行扩大一致性检查及 haven、units、
+bit64 导入类型检查；这些依赖仅用于 CI，不是包的运行时依赖。
 
 Windows 本地开发若在 R 退出时遇到 `cli` 引发的崩溃，可使用
 [`docs/run-r.ps1`](docs/run-r.ps1) 启动 R：它仅在缺失时补齐架构环境变量，
@@ -436,8 +438,8 @@ Windows 本地开发若在 R 退出时遇到 `cli` 引发的崩溃，可使用
 区间候选分隔符超过八个时明确拒绝，以限制异常文本的资源消耗。
 
 筛选或排序时用 `cn_subset()`；若使用普通 `[]` 或合并、修改结果，请事先提取 `cn_problems()`，这些操作不会自动维护诊断属性。
-缺失标记按文本匹配，不按数值相等匹配；限定数量仍匹配整格文本。矩阵/数组沿用展平行为，建议显式传入目标列。
-原有单项会计括号的单位共享规则、无效 UTF-8 的整批中断策略保持不变。
+缺失标记按文本匹配，不按数值相等匹配；限定数量仍匹配整格文本。矩阵/数组会被拒绝，须显式传入目标列。
+单项会计括号区间支持双向共享单位，例如 `(3万)-5` 表示 −30000 到 50000；无效 UTF-8 会中断整批解析。
 
 当前 CI 覆盖 Linux 的 R release/devel/oldrel-1，以及 Windows/macOS 的 R release；并未验证每个旧 R 版本、区域设置或硬件架构。
 

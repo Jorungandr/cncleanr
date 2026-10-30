@@ -21,7 +21,8 @@ jobs:
             r: release
             manual: true
             check-args: 'c("--as-cran")'
-            extra-packages: "any::rcmdcheck"
+            extra-packages: "any::rcmdcheck any::haven any::units any::bit64"
+            extended-audits: true
           - os: ubuntu-latest
             r: devel
             manual: false
@@ -82,3 +83,23 @@ jobs:
       - uses: r-lib/actions/check-r-package@v2
         with:
           args: ${{ matrix.config.check-args }}
+
+      - name: Check installed-package consistency and imported types
+        if: matrix.config.extended-audits
+        timeout-minutes: 15
+        shell: Rscript {0}
+        run: |
+          # Audit an independent installation, rather than pkgload's dev namespace.
+          lib <- tempfile("cncleanr-audit-library-")
+          dir.create(lib)
+          status <- system2(file.path(R.home("bin"), "R"),
+            c("CMD", "INSTALL", paste0("--library=", shQuote(lib)), "."))
+          stopifnot(status == 0L)
+          for (package in c("haven", "units", "bit64"))
+            stopifnot(requireNamespace(package, quietly = TRUE))
+          scripts <- c("docs/system-audit.R", "docs/import-types-audit.R")
+          for (script in scripts) {
+            status <- system2(file.path(R.home("bin"), "Rscript"),
+              c(shQuote(script), shQuote(lib), shQuote(.libPaths()[1L])))
+            if (status != 0L) stop("Installed-package audit failed: ", script)
+          }

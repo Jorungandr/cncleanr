@@ -461,6 +461,9 @@ The project includes two test suites:
 - `tests/testthat/`: the complete development suite for edge cases and error behavior.
 
 Every push is checked on Linux, macOS, and Windows with GitHub Actions.
+Ubuntu R-release also independently installs the current source and runs the
+extended consistency and haven/units/bit64 imported-type audits. These are CI
+dependencies, not package runtime dependencies.
 
 For a local Windows R shutdown crash caused by `cli`, use
 [`docs/run-r.ps1`](docs/run-r.ps1) to launch R. It supplies the architecture
@@ -481,9 +484,9 @@ range separators are rejected to bound malformed-input resource use.
 Use `cn_subset()` to filter/sort, or extract `cn_problems()` before ordinary
 `[]`, mutation or binding, which can drop the attribute or retain stale indices.
 Missing markers match text, not numerical equality; qualified quantities still
-match the whole cell. Matrix/array flattening is unchanged; pass the target column
-explicitly. Existing single-term accounting-parenthesis suffix propagation and whole-batch errors on
-malformed UTF-8 retain their existing policies.
+match the whole cell. Matrices/arrays are rejected; pass the target column
+explicitly. Single-term accounting intervals share suffixes in either direction:
+`(3万)-5` means −30000 to 50000. Malformed UTF-8 stops the whole batch.
 
 CI covers Linux R release/devel/oldrel-1 and Windows/macOS R release, not every
 older R version, locale or hardware architecture.
