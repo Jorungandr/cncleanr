@@ -81,14 +81,18 @@ salary_example <- function(x, context_period = NULL, currency = NULL,
   candidates <- which(!conflict & valid_pay & !currency_conflict)
   if (length(candidates)) {
     amount <- gsub('(?<=[0-9.])[Kk]', '千元', text[candidates], perl = TRUE)
+    # In salary fields a trailing plus can hide an unspecified pay component.
+    trailing_plus <- grepl('[+][[:space:]]*$', amount)
     # All candidates share a single core call. No private cncleanr symbols.
     parsed <- suppressWarnings(cncleanr::parse_cn_range(amount))
     problems <- cncleanr::cn_problems(parsed)
     invalid <- is.na(parsed$lower) | is.na(parsed$upper) | grepl('%', amount, fixed = TRUE)
     nonpositive <- (is.finite(parsed$lower) & parsed$lower <= 0) |
       (is.finite(parsed$upper) & parsed$upper <= 0)
-    invalid <- invalid | nonpositive
+    invalid <- invalid | nonpositive | trailing_plus
     indices <- active[candidates]
+    data$status[indices[trailing_plus]] <- 'conditional'
+    reason[indices[trailing_plus]] <- 'A trailing plus may denote unspecified pay components; review the source.'
     reason[indices[problems$index]] <- problems$reason
     reason[indices[nonpositive]] <- 'Zero or negative salary amounts need source review.'
     missing_period <- is.na(period[candidates]) & !invalid

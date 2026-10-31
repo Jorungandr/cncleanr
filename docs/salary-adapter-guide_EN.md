@@ -48,6 +48,11 @@ representable integer N. No default 12 payments is supplied. Advertised payments
 do not establish equal installments or guaranteed annual income. Combined
 annual/daily/hourly bases and N-payment declarations require review.
 
+A trailing bare plus (including its full-width form) may hide unspecified pay
+components, so salary amounts are withheld with conditional review. Use explicit
+以上 for a lower bound, such as 月薪3000元以上. This is example-only policy;
+the ordinary parse_cn_range("10万+") behavior is unchanged.
+
 K/k is translated to 1000 only inside this example, followed by a batched call
 to parse_cn_range(). Point ranges, closed intervals and existing open inequalities
 retain their inclusivity flags; no zero lower bound is invented. Listed dash and

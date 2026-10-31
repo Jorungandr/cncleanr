@@ -94,6 +94,14 @@ check(all(z$advertised_payments[grid$payments]==13L) &&
 cat('PASS:',nrow(grid),'independent generated wrapper/unit/payment cases\n')
 cat('PASS:', checks, 'salary example boundary/workflow checks\n')
 
+plus <- salary_example(c('月薪3000元+', '3000+/月', '月薪３０００元＋',
+  '月薪3-5K+', '月薪3000元+ ·13薪', '月薪3000元以上'))
+check(identical(plus$data$status, c(rep('conditional',5), 'parsed')), 'salary trailing plus policy')
+check(all(is.na(plus$data$lower[1:5])) && all(is.na(plus$data$upper[1:5])), 'plus amounts withheld')
+check(identical(plus$review$index, 1:5), 'plus review indices')
+check(plus$data$lower[6] == 3000 && plus$data$upper[6] == Inf, 'explicit lower bound retained')
+check(cncleanr::parse_cn_range('10万+')$lower == 100000, 'core plus semantics unchanged')
+
 cases <- read.csv('docs/fixtures/salary-source-cases.csv', colClasses='character',
   na.strings=character(), fileEncoding='UTF-8', check.names=FALSE)
 numeric_or_na <- function(x) { x[x==''] <- NA_character_; as.double(x) }
