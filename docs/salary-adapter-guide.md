@@ -27,7 +27,7 @@ stopifnot(identical(result$review$index, 2:4))
 仅 `status == "parsed"` 的金额可以用于后续业务处理；比较时还须确认 period 和 currency 相同。
 
 `currency` 是调用方提供的三位大写来源标签，不验证 ISO 登记、不换汇、不自动识别币种。
-留空则不推断 CNY/TWD；明显的 RMB／币种标签冲突会被拒绝。
+留空则不推断 CNY/TWD；明显的 RMB／币种标签冲突会被拒绝，RMB 标记不区分大小写。
 
 ## 明确的字段上下文
 

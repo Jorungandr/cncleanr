@@ -73,7 +73,7 @@ salary_example <- function(x, context_period = NULL, currency = NULL,
   data$period[active] <- period
   currency_conflict <- rep(FALSE, length(active))
   if (!is.null(currency))
-    currency_conflict <- (currency != 'CNY' & grepl('人民币|RMB', text)) |
+    currency_conflict <- (currency != 'CNY' & grepl('人民币|RMB', text, ignore.case = TRUE)) |
       (!currency %in% c('CNY','JPY') & grepl('[¥￥]', text))
   reason[active[conflict]] <- 'Explicit pay periods conflict with each other or the supplied context.'
   reason[active[!valid_pay]] <- 'Advertised payment count must be a positive representable integer.'

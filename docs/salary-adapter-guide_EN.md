@@ -28,7 +28,7 @@ conditions and negotiated pay need review; the genuinely missing row does not.
 Use monetary values only where status is parsed and compare like periods and
 currencies. Currency is a caller-supplied three-uppercase-letter source label,
 not ISO validation or currency conversion. NULL does not infer CNY/TWD. Obvious
-RMB/supplied-label conflicts are rejected.
+RMB/supplied-label conflicts are rejected; the RMB marker is case-insensitive.
 
 ## Explicit field context
 
