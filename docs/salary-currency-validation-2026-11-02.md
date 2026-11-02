@@ -18,3 +18,12 @@ Local validation: 146 cumulative salary assertions, including 13 new assertions;
 288 generated wrapper/unit/payment cases and 19 attributed source cases.
 Bilingual executable guides and README blocks also pass (46 runnable blocks).
 Package version remains 0.2.25; no CRAN submission or release archive change.
+
+## Cross-platform verification
+
+Audited source: `52d6297f5a22054fb3e28d716e92b4f04fd4c5ae`.
+[GitHub Actions run 41402050577](https://github.com/Jorungandr/cncleanr/actions/runs/41402050577)
+completed successfully on Ubuntu release/devel/oldrel-1, Windows release and
+macOS release. Ubuntu release logs confirm 146 salary assertions, 1832 package
+assertions, `Status: OK`, and a successful PDF manual check. The local log copy
+is retained in ignored `outputs/salary-adapter/currency-ci.log`.
