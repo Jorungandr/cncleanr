@@ -43,11 +43,12 @@ check(identical(r$data$currency, c('CNY','CNY')), 'explicit currency')
 check(salary_example('时薪20元', context_period='month')$data$status == 'invalid', 'context conflict')
 check(salary_example('月薪RMB3000', currency='USD')$data$status == 'invalid', 'currency conflict')
 check(salary_example('月薪￥3000', currency='USD')$data$status == 'invalid', 'currency symbol conflict')
-currency_tokens <- c('RMB','RMb','RmB','Rmb','rMB','rMb','rmB','rmb')
+currency_tokens <- c('RMB','RMb','RmB','Rmb','rMB','rMb','rmB','rmb',
+  'CNY','CNy','CnY','Cny','cNY','cNy','cnY','cny','人民币')
 currency_fields <- paste0('月薪', currency_tokens, '3000')
 for (label in c('USD','JPY','EUR')) {
   z <- salary_example(currency_fields, currency=label)
-  check(all(z$data$status == 'invalid'), paste(label, 'rejects all RMB case variants'))
+  check(all(z$data$status == 'invalid'), paste(label, 'rejects all explicit CNY markers'))
   check(all(is.na(z$data$lower)) && all(is.na(z$data$upper)), paste(label, 'withholds conflicting amounts'))
   check(identical(z$review$index, seq_along(currency_fields)) &&
         identical(z$review$raw, currency_fields), paste(label, 'conflict provenance'))
@@ -55,9 +56,17 @@ for (label in c('USD','JPY','EUR')) {
 for (label in list(NULL, 'CNY')) {
   z <- salary_example(currency_fields, currency=label)
   check(all(z$data$status == 'parsed') && all(z$data$lower == 3000) &&
-        all(z$data$upper == 3000), 'RMB case variants remain supported')
-  check(nrow(z$review) == 0L, 'compatible RMB has no review rows')
+        all(z$data$upper == 3000), 'explicit CNY markers remain supported')
+  check(nrow(z$review) == 0L, 'compatible CNY markers have no review rows')
 }
+for (label in c('CNY','JPY')) {
+  z <- salary_example(c('月薪¥3000','月薪￥3000'), currency=label)
+  check(all(z$data$status == 'parsed') && all(z$data$lower == 3000),
+        paste(label, 'retains caller-labelled ambiguous yen/yuan symbols'))
+}
+z <- salary_example(c('月薪CNY3000','月薪¥3000','月薪￥3000','月薪人民币3000'),currency='USD')
+check(all(z$review$reason == 'Explicit currency marker conflicts with the supplied currency label.'),
+      'currency review reason covers codes and ambiguous symbols')
 check(identical(salary_example(c('月薪3\n000元','3\n000元/月'))$data$lower,c(3000,3000)), 'multiline grouping retains period')
 for (input in list(character(), factor(character()))) {
   z <- salary_example(input)
