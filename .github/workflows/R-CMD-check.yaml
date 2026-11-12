@@ -98,7 +98,8 @@ jobs:
           stopifnot(status == 0L)
           for (package in c("haven", "units", "bit64"))
             stopifnot(requireNamespace(package, quietly = TRUE))
-          scripts <- c("docs/system-audit.R", "docs/import-types-audit.R")
+          scripts <- c("docs/system-audit.R", "docs/import-types-audit.R",
+                       "docs/business-boundary-audit.R")
           for (script in scripts) {
             status <- system2(file.path(R.home("bin"), "Rscript"),
               c(shQuote(script), shQuote(lib), shQuote(.libPaths()[1L])))

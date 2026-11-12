@@ -37,16 +37,36 @@ for (indices in groups) {
 }
 equal <- function(actual, expected) {
   gold <- suppressWarnings(as.double(expected))
-  !is.na(actual) & !is.na(gold) & abs(actual - gold) <= 1e-12 * pmax(1, abs(gold))
+  result <- rep(FALSE,length(actual))
+  present <- which(!is.na(actual) & !is.na(gold))
+  same <- actual[present] == gold[present]
+  finite <- is.finite(actual[present]) & is.finite(gold[present])
+  same[finite] <- abs(actual[present][finite] - gold[present][finite]) <=
+    1e-12 * pmax(1,abs(gold[present][finite]))
+  result[present] <- same
+  result
 }
 ok <- equal(x$value, x$expected_value) & !x$parser_failed
 quantity <- x$parser == 'quantity'
 ok[quantity] <- ok[quantity] & !is.na(x$qualifier[quantity]) &
   x$qualifier[quantity] == x$expected_qualifier[quantity]
 range <- x$parser == 'range'
+# Historical fixtures define closed ranges. New fixtures can state each flag.
+expected_inclusivity <- function(column) {
+  flags <- rep(TRUE,nrow(x))
+  if (column %in% names(x)) {
+    supplied <- x[[column]] != ''
+    if (any(!x[[column]][supplied] %in% c('TRUE','FALSE')))
+      stop('Expected inclusivity must be TRUE, FALSE or blank.')
+    flags[supplied] <- as.logical(x[[column]][supplied])
+  }
+  flags
+}
+expected_lower <- expected_inclusivity('expected_lower_inclusive')
+expected_upper <- expected_inclusivity('expected_upper_inclusive')
 ok[range] <- ok[range] & equal(x$upper[range], x$expected_upper[range]) &
-  !is.na(x$lower_inclusive[range]) & x$lower_inclusive[range] &
-  !is.na(x$upper_inclusive[range]) & x$upper_inclusive[range]
+  !is.na(x$lower_inclusive[range]) & x$lower_inclusive[range] == expected_lower[range] &
+  !is.na(x$upper_inclusive[range]) & x$upper_inclusive[range] == expected_upper[range]
 x$outcome <- 'wrong'
 x$outcome[x$expected_status == 'parsed' & ok] <- 'correct_parse'
 x$outcome[x$expected_status == 'missing' & is.na(x$value) & !x$parser_failed] <- 'missing_ok'

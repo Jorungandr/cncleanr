@@ -81,6 +81,11 @@ parse_cn_range("35000~45000")
 源单位、限定词、上下界包含标志。读回时以文本读取，逐列检查原文和来源字段，
 数值按每行相对容差 1e-12 比较。
 
+验证脚本支持 `Inf`／`-Inf` 开放边界，比较时同时核对无穷值的符号。
+案例表可用 `expected_lower_inclusive` 和 `expected_upper_inclusive` 两列声明
+端点包含标志，填写 `TRUE` 或 `FALSE`。省略列或留空时按闭区间预期校验。
+例如“大于3”的下界为 3、上界为 `Inf`，两个包含标志均为 `FALSE`。
+
 `parsed-objects.rds` 保存分组解析对象及 case_id，读回必须与原对象完全一致，
 包括诊断属性。CSV 不保存 R 属性，也不保证 double 尾数、负零或 NA/NaN 无损，
 见 [CSV 保存边界](csv-cleaning.md#csv-不是无损的-r-对象备份)。

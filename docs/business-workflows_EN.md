@@ -95,6 +95,12 @@ Each domain writes separate `*-cleaned.csv` and `*-review.csv` files. Pay modes,
 source units, qualifiers and inclusive bounds remain explicit. Read-back checks
 all character columns and compares numeric values with per-row tolerance 1e-12.
 
+The validator supports open `Inf`/`-Inf` bounds and checks infinity signs.
+Case tables can declare endpoint flags in `expected_lower_inclusive` and
+`expected_upper_inclusive` using `TRUE` or `FALSE`. Omitted columns or blank
+cells retain closed-interval expectations. For example, “大于3” has lower bound
+3, upper bound `Inf`, and both inclusivity flags set to `FALSE`.
+
 `parsed-objects.rds` stores grouped results with case IDs and must read back
 identically, including diagnostics. CSV does not store R attributes or guarantee
 binary64 tail bits, negative zero or NA/NaN distinctions. See
