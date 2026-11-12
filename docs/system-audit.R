@@ -120,6 +120,109 @@ for (kind in c('number', 'quantity', 'range')) {
   }
 }
 cat('PASS:', checks - before, 'header/custom-missing/chunk workflow checks.\n')
+before <- checks
+header_units <- c('元','百元','千元','万','万元','亿','亿元','万亿','万亿元')
+header_scales <- c(1,100,1000,10000,10000,1e8,1e8,1e12,1e12)
+coefficient_text <- c('0','1','1.25','1e-3','1e3','1 234','１２','1,234')
+coefficient_value <- c(0,1,1.25,.001,1000,1234,12,1234)
+for (header in seq_along(header_units)) {
+  unit <- header_units[header]
+  scale <- header_scales[header]
+  scalar_text <- c(coefficient_text, paste0('+',coefficient_text),
+                   paste0('-',coefficient_text), paste0('(',coefficient_text,')'),
+                   paste0('RMB',coefficient_text,unit))
+  scalar_gold <- c(coefficient_value,coefficient_value,-coefficient_value,
+                   -coefficient_value,coefficient_value) * scale
+  number <- parse_cn_number(scalar_text,unit=unit,strict=TRUE)
+  quantity <- parse_cn_quantity(scalar_text,unit=unit,strict=TRUE)
+  range <- parse_cn_range(scalar_text,unit=unit,strict=TRUE)
+  check(isTRUE(all.equal(as.numeric(number),scalar_gold,tolerance=1e-15)),
+        paste(unit,'independent scalar arithmetic'))
+  check(identical(quantity$value,as.numeric(number)) &&
+        identical(quantity$qualifier,rep('exact',length(scalar_text))),
+        paste(unit,'exact quantity contract'))
+  check(identical(range$lower,as.numeric(number)) && identical(range$upper,as.numeric(number)) &&
+        all(range$lower_inclusive & range$upper_inclusive),paste(unit,'point range contract'))
+  check(identical(1 / quantity$value,1 / as.numeric(number)) &&
+        identical(1 / range$lower,1 / as.numeric(number)),paste(unit,'cross-parser zero sign'))
+
+  bound_text <- c('约3','大于3','不小于3','小于3','不大于3','3以上','3以下')
+  bound_qualifier <- c('approx','greater_than','at_least','less_than','at_most','at_least','at_most')
+  quantity <- parse_cn_quantity(bound_text,unit=unit,strict=TRUE)
+  check(identical(quantity$value,rep(3*scale,7)) && identical(quantity$qualifier,bound_qualifier),
+        paste(unit,'independent qualified values'))
+  range <- suppressWarnings(parse_cn_range(bound_text,unit=unit))
+  check(identical(range$lower,c(NA,3*scale,3*scale,-Inf,-Inf,3*scale,-Inf)) &&
+        identical(range$upper,c(NA,Inf,Inf,3*scale,3*scale,Inf,3*scale)),
+        paste(unit,'independent open bounds'))
+  check(identical(range$lower_inclusive,c(NA,FALSE,TRUE,FALSE,FALSE,TRUE,FALSE)) &&
+        identical(range$upper_inclusive,c(NA,FALSE,FALSE,FALSE,TRUE,FALSE,TRUE)),
+        paste(unit,'independent bound inclusivity'))
+  check(identical(cn_problems(range)$index,1L),paste(unit,'approximation review position'))
+
+  interval_text <- c('1e-3-2e-3','-5--3','(5)-(3)',paste0('3-', '5',unit),
+                     paste0('3',unit,'-5'),'1 234-2 345')
+  interval_lower <- c(.001,-5,-5,3,3,1234)*scale
+  interval_upper <- c(.002,-3,-3,5,5,2345)*scale
+  range <- parse_cn_range(interval_text,unit=unit,strict=TRUE)
+  check(isTRUE(all.equal(range$lower,interval_lower,tolerance=1e-15)) &&
+        isTRUE(all.equal(range$upper,interval_upper,tolerance=1e-15)) &&
+        all(range$lower_inclusive & range$upper_inclusive),paste(unit,'independent interval arithmetic'))
+
+  # Expected failure/missing positions are specified before calling a parser.
+  conflicting_unit <- if (unit=='百元') '千元' else '百元'
+  input <- c('3',NA_character_,'bad','保 密','5%','1 23','1e309','1e-999',
+             paste0('4',conflicting_unit),'保密','-2','３')
+  failed <- c(3L,5L,6L,7L,8L,9L)
+  absent <- c(2L,4L,10L)
+  gold <- c(3*scale,rep(NA_real_,9),-2*scale,3*scale)
+  selection <- c(9L,3L,1L,2L,9L,10L,12L,6L,11L,4L)
+  for (kind in c('number','quantity','range')) {
+    parser <- get(paste0('parse_cn_',kind))
+    result <- suppressWarnings(parser(input,unit=unit,na='保密'))
+    primary <- if(is.data.frame(result)) result[[1L]] else as.numeric(result)
+    check(identical(primary,gold),paste(unit,kind,'independent mixed values'))
+    problems <- cn_problems(result)
+    check(identical(problems$index,failed) && identical(problems$value,input[failed]),
+          paste(unit,kind,'original failure rows'))
+    selected <- cn_subset(result,selection)
+    selected <- cn_subset(selected,c(10:1,1L,3L))
+    source <- selection[c(10:1,1L,3L)]
+    expected_failures <- which(source %in% failed)
+    check(identical(cn_problems(selected)$index,expected_failures) &&
+          identical(cn_problems(selected)$value,input[source[expected_failures]]),
+          paste(unit,kind,'nested selection provenance'))
+    report <- cn_summary(selected)
+    expected_counts <- c(length(source),sum(!source %in% c(failed,absent)),
+                         sum(source %in% absent),sum(source %in% failed))
+    check(identical(as.double(unlist(report$counts)),as.double(expected_counts)),
+          paste(unit,kind,'independent nested summary'))
+    check(sum(report$reasons$count)==length(expected_failures),
+          paste(unit,kind,'failure reason totals'))
+    for (rows in list(integer(),which(!seq_along(input) %in% failed),
+                      !seq_along(input) %in% failed,-failed)) {
+      selected <- cn_subset(result,rows)
+      check(nrow(cn_problems(selected))==0L && cn_summary(selected)$counts$failed==0,
+            paste(unit,kind,'empty or failure-free selection'))
+    }
+  }
+}
+cat('PASS:', checks-before,'cross-parser/all-header/nested-diagnostic checks.\n')
+before <- checks
+percent_text <- c('3%','1e-3%','-5%','（３％）','1 234%')
+percent_gold <- c(.03,.00001,-.05,-.03,12.34)
+for (parser in list(parse_cn_number,parse_cn_quantity,parse_cn_range)) {
+  result <- parser(percent_text,strict=TRUE)
+  primary <- if(is.data.frame(result)) result[[1L]] else as.numeric(result)
+  check(isTRUE(all.equal(primary,percent_gold,tolerance=1e-15)),
+        'independent percentage arithmetic')
+  check(cn_summary(result)$counts$parsed==length(percent_text), 'percentage success summary')
+}
+range <- parse_cn_range(c('1e-3%-2e-3%','-5%--3%','3%-5%'),strict=TRUE)
+check(isTRUE(all.equal(range$lower,c(.00001,-.05,.03),tolerance=1e-15)) &&
+      isTRUE(all.equal(range$upper,c(.00002,-.03,.05),tolerance=1e-15)),
+      'independent percentage interval arithmetic')
+cat('PASS:',checks-before,'percentage/scientific/accounting checks.\n')
 if (requireNamespace('bit64', quietly=TRUE)) {
   before <- checks
   for (f in list(parse_cn_number,parse_cn_quantity,parse_cn_range)) {
