@@ -36,6 +36,13 @@ not problem rows. Different fields in the same source row can produce separate
 problems; do not deduplicate by row. Warnings are suppressed only because the
 complete structured problem table is subsequently inspected.
 
+The example helper `clean_csv_fields(raw)` accepts the text-imported `id`,
+`amount`, `headcount` and `share` columns and returns `cleaned` and `review`
+tables. Empty inputs retain the full column schema. With no failures, `review`
+has zero rows and fixed headers. Repeated IDs retain each occurrence, and each
+failed field has its own review row. Chunked processing tracks both the current
+output position and original source position.
+
 After export, the script reads the files back and checks original text, leading
 zeros, proportions and problem text. Numeric missing values are exported as empty
 cells; original columns retain the source markers.
