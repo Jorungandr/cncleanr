@@ -31,6 +31,8 @@ not ISO validation or currency conversion. NULL does not infer CNY/TWD. Obvious
 人民币, RMB and CNY markers conflict with supplied labels other than CNY;
 English markers are case-insensitive. The ambiguous `¥`/`￥` symbols are compatible
 with caller-supplied CNY/JPY labels only; they do not determine the currency.
+Currency conflict checks also cover markers containing spaces, tabs, newlines
+and supported Unicode whitespace.
 
 ## Explicit field context
 

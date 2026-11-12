@@ -72,9 +72,13 @@ salary_example <- function(x, context_period = NULL, currency = NULL,
   }
   data$period[active] <- period
   currency_conflict <- rep(FALSE, length(active))
-  if (!is.null(currency))
-    currency_conflict <- (currency != 'CNY' & grepl('人民币|RMB|CNY', text, ignore.case = TRUE)) |
-      (!currency %in% c('CNY','JPY') & grepl('[¥￥]', text))
+  if (!is.null(currency)) {
+    # The core strips these spaces inside currency markers. Keep amount text
+    # intact so digit grouping is still validated by the core parser.
+    currency_text <- gsub('[ \t\n\r\f\v\u00a0\u202f\u3000]', '', text, perl = TRUE)
+    currency_conflict <- (currency != 'CNY' & grepl('人民币|RMB|CNY', currency_text, ignore.case = TRUE)) |
+      (!currency %in% c('CNY','JPY') & grepl('[¥￥]', currency_text))
+  }
   reason[active[conflict]] <- 'Explicit pay periods conflict with each other or the supplied context.'
   reason[active[!valid_pay]] <- 'Advertised payment count must be a positive representable integer.'
   reason[active[currency_conflict]] <- 'Explicit currency marker conflicts with the supplied currency label.'

@@ -45,7 +45,12 @@ check(salary_example('月薪RMB3000', currency='USD')$data$status == 'invalid', 
 check(salary_example('月薪￥3000', currency='USD')$data$status == 'invalid', 'currency symbol conflict')
 currency_tokens <- c('RMB','RMb','RmB','Rmb','rMB','rMb','rmB','rmb',
   'CNY','CNy','CnY','Cny','cNY','cNy','cnY','cny','人民币')
-currency_fields <- paste0('月薪', currency_tokens, '3000')
+currency_spaces <- c('', ' ', '\t', '\n', '\r', '\f', '\v', '\u00a0', '\u202f', '\u3000')
+currency_fields <- unlist(lapply(currency_spaces, function(space) {
+  markers <- vapply(strsplit(currency_tokens, '', fixed=TRUE), paste,
+                    collapse=space, FUN.VALUE=character(1))
+  paste0('月薪', markers, '3000')
+}), use.names=FALSE)
 for (label in c('USD','JPY','EUR')) {
   z <- salary_example(currency_fields, currency=label)
   check(all(z$data$status == 'invalid'), paste(label, 'rejects all explicit CNY markers'))
@@ -67,6 +72,9 @@ for (label in c('CNY','JPY')) {
 z <- salary_example(c('月薪CNY3000','月薪¥3000','月薪￥3000','月薪人民币3000'),currency='USD')
 check(all(z$review$reason == 'Explicit currency marker conflicts with the supplied currency label.'),
       'currency review reason covers codes and ambiguous symbols')
+z <- salary_example(c('月薪R M B1 23元', '月薪C N Y1 234元'),currency='CNY')
+check(identical(z$data$status,c('invalid','parsed')) && is.na(z$data$lower[1]) &&
+      z$data$lower[2] == 1234, 'currency inspection preserves original digit grouping')
 check(identical(salary_example(c('月薪3\n000元','3\n000元/月'))$data$lower,c(3000,3000)), 'multiline grouping retains period')
 for (input in list(character(), factor(character()))) {
   z <- salary_example(input)
