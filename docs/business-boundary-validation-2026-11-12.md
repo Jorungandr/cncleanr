@@ -40,3 +40,15 @@ The Chinese and English business guides document the extended fixture fields.
 新增 16 个合成边界案例、3 种导出场景及 4 个错误预期测试。原有 6347 个业务
 案例重新运行通过，复核表共 427 行。分块处理、CSV 导入导出、诊断行号和双语
 教程的可运行代码也已验证。
+
+## GitHub verification
+
+Source `a80f3810050c692fffad7f1fe630c493263d9018` passed all five CI jobs on
+Ubuntu release/devel/oldrel-1, Windows release and macOS release. Ubuntu release
+logs confirm the sixteen-case boundary audit, three export scenarios, four
+negative probes, existing 22-case offline sample, 1832 package assertions,
+`Status: OK` and PDF manual OK.
+[View run 43230207735](https://github.com/Jorungandr/cncleanr/actions/runs/43230207735).
+
+The downloaded log is retained in ignored
+`outputs/business-boundary-validation/ci-ubuntu.log`.
