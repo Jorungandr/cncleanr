@@ -32,6 +32,16 @@ Run the complete development suite from the repository root:
 devtools::test()
 ```
 
+For installed-package audits and performance comparisons, rebuild the native
+code from the current checkout with `--preclean`. Choose an existing, dedicated
+test library for `PATH_TO_TEST_LIBRARY`.
+
+```sh
+R CMD INSTALL --preclean --install-tests --library=PATH_TO_TEST_LIBRARY .
+```
+
+This rebuilds any compiled files left in `src/` by earlier development sessions.
+
 Before opening a pull request, build and check the package as R will check the
 source archive:
 

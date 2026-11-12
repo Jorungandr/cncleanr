@@ -94,7 +94,7 @@ jobs:
           lib <- tempfile("cncleanr-audit-library-")
           dir.create(lib)
           status <- system2(file.path(R.home("bin"), "R"),
-            c("CMD", "INSTALL", paste0("--library=", shQuote(lib)), "."))
+            c("CMD", "INSTALL", "--preclean", paste0("--library=", shQuote(lib)), "."))
           stopifnot(status == 0L)
           for (package in c("haven", "units", "bit64"))
             stopifnot(requireNamespace(package, quietly = TRUE))
