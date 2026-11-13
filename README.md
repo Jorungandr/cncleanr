@@ -8,17 +8,22 @@
 
 它不会只截取字符串中遇到的第一个数字。无法完整解释的非缺失值会变成 `NA`，同时产生警告并记录失败原因。
 
+按任务选择函数可查看[六个函数与返回值](#返回值速查)。表格清洗从
+[CSV 示例](docs/csv-cleaning.md)开始，带 K、计薪周期或“13薪”的字段使用
+[薪资示例](docs/salary-adapter-guide.md)。
+
 ## 安装
 
 ### 正式版本
 
-从 [CRAN](https://CRAN.R-project.org/package=cncleanr) 安装（2026-10-12 核对为 0.2.5；下文表头单位功能从 0.2.6 开始提供）：
+从 [CRAN](https://CRAN.R-project.org/package=cncleanr) 安装（2026-11-13 核对为 0.2.5）：
 
 ```r
 install.packages("cncleanr")
 ```
 
-也可以从 GitHub 安装版本 v0.2.25，增加固定随机种子的独立算术、C/R 一致性与筛选诊断回归测试，解析算法保持不变：
+下文示例以 GitHub v0.2.25 为基准。表头单位、`cn_subset()` 和 `cn_summary()`
+分别从 0.2.6、0.2.13 和 0.2.19 开始提供，运行这些示例请安装 GitHub 版本：
 
 ```r
 install.packages("pak")
@@ -58,11 +63,18 @@ parse_cn_number(c("3万", "１２．５％"))
 #> [1] 30000.000     0.125
 ```
 
-v0.2.8 为包含本轮优化的正式标签；源码安装需要上述编译工具。`main` 可能继续变化，需要复现时应使用固定标签或记录安装的提交 SHA。
+需要复现时使用固定标签或记录安装的完整提交 SHA。
 
-### 性能与发布准备
+### 获取 CSV 和薪资示例
 
-跨平台验收和用户可见的更新摘要见[下一版发布准备](docs/release-next.md)。
+本页链接的最新教程和独立适配器位于 GitHub 仓库的 `docs/` 目录。
+下载[完整 main 仓库](https://github.com/Jorungandr/cncleanr/archive/refs/heads/main.zip)，
+解压后在含有 `DESCRIPTION` 的仓库根目录运行教程命令。
+安装 cncleanr 后，另行获取这份仓库代码即可使用这些示例。
+
+### 性能与发布记录
+
+跨平台验收和更新摘要见[GitHub 发布与验收记录](docs/release-next.md)。
 
 开发版性能记录：[C 数值加速](docs/native-optimization.md)、[限定词与字符标准化优化](docs/qualifier-optimization.md)、[混合批次优化](docs/mixed-optimization.md)、[格式化数值优化](docs/formatted-optimization.md)。计时随格式和重复率变化，不保证所有输入达到相同耗时。
 
@@ -225,7 +237,7 @@ parse_cn_range("3-5千元", unit = "千元")$upper # 5000
 `NA`/`NaN` 作为缺失值，`Inf`、`-Inf` 和换算溢出报告问题。
 从 0.2.15 起，带类的数值输入也先调用 `as.double()`（包括适用的 S3 方法），
 再按转换后的数值判断缺失和换算，保留原始名称；见[转换一致性验收](docs/numeric-conversion.md)。
-本参数仅用于 `parse_cn_number()`，不自动读取或识别表头。
+`unit` 可用于三个解析函数，表头单位由调用方明确传入。
 仅对适用的金额行或列传入表头单位；同表中的每股收益（元/股）、
 人数或比率可能有自己的单位，不能整表统一乘以金额倍率。
 
@@ -328,6 +340,8 @@ parse_cn_range(c("3万-5万", "3-5万", "10万元以上", "低于2亿"))
 | `parse_cn_quantity()` | 含 `value` 和 `qualifier` 两列的数据框 |
 | `parse_cn_range()` | 含 `lower`、`upper`、`lower_inclusive` 和 `upper_inclusive` 四列的数据框 |
 | `cn_problems()` | 含 `index`、`value` 和 `reason` 三列的数据框；没有问题时返回零行 |
+| `cn_subset()` | 筛选、重排或重复取行后的解析结果，同时更新问题行号 |
+| `cn_summary()` | 含 `counts` 和 `reasons` 两张表的列表，分别汇总解析状态及失败原因 |
 
 数值型输入会直接转换为双精度数值并保留，包括 `Inf`、`-Inf` 和 `NaN`。
 `parse_cn_quantity()` 将有限数值及 `Inf`、`-Inf` 标记为 `exact`，而

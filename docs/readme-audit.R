@@ -5,6 +5,18 @@
   if (length(args)) .libPaths(c(normalizePath(args,mustWork=TRUE),.libPaths()))
   library(cncleanr)
   root <- getwd()
+  exports <- getNamespaceExports('cncleanr')
+  for (file in c('README.md','README_EN.md')) {
+    text <- readLines(file,encoding='UTF-8',warn=FALSE)
+    for (name in exports)
+      stopifnot(any(grepl(paste0('| `',name,'()` |'),text,fixed=TRUE)))
+    links <- unlist(regmatches(text,gregexpr('\\]\\([^)]*\\)',text,perl=TRUE)),use.names=FALSE)
+    targets <- sub('^\\]\\(', '', sub('\\)$','',links))
+    local <- targets[!grepl('^(https?://|mailto:|#)',targets)]
+    paths <- sub('#.*$','',local)
+    stopifnot(all(file.exists(file.path(root,paths))))
+  }
+  cat('PASS:',length(exports),'exported functions listed in both READMEs; local link targets exist\n')
   blocks <- function(file) {
     lines <- readLines(file,encoding='UTF-8',warn=FALSE)
     starts <- which(lines=='```r')

@@ -8,17 +8,23 @@
 
 It does not merely extract the first number it encounters. A non-missing value that cannot be interpreted in full becomes `NA`, produces a warning, and records a structured reason.
 
+Choose a function using the [six-function reference](#return-value-reference).
+Start table cleaning with the [CSV example](docs/csv-cleaning_EN.md). Fields with
+K, pay periods or “13薪” use the [salary example](docs/salary-adapter-guide_EN.md).
+
 ## Installation
 
 ### Released versions
 
-Install from [CRAN](https://CRAN.R-project.org/package=cncleanr) (verified as 0.2.5 on 2026-10-12; table-header units were introduced in 0.2.6):
+Install from [CRAN](https://CRAN.R-project.org/package=cncleanr) (verified as 0.2.5 on 2026-11-13):
 
 ```r
 install.packages("cncleanr")
 ```
 
-Alternatively, pin GitHub v0.2.25, adding fixed-seed independent arithmetic, C/R consistency and subset-diagnostic regression tests without changing parsing algorithms:
+The examples below target GitHub v0.2.25. Table-header units, `cn_subset()` and
+`cn_summary()` were introduced in 0.2.6, 0.2.13 and 0.2.19 respectively.
+Install the GitHub version to run those examples:
 
 ```r
 install.packages("pak")
@@ -59,11 +65,20 @@ parse_cn_number(c("3万", "１２．５％"))
 #> [1] 30000.000     0.125
 ```
 
-The v0.2.8 release tag contains this optimization round; source installation requires the build tools above. Since `main` can still change, use a fixed tag or record the installed commit SHA for reproducibility.
+Use a fixed tag or record the full installed commit SHA for reproducibility.
 
-### Performance and release preparation
+### Get the CSV and salary examples
 
-See the [next-release preparation](docs/release-next.md) for cross-platform validation and a user-facing change summary.
+The current linked tutorials and independent adapters live in the GitHub
+repository's `docs/` directory. Download the
+[complete main repository](https://github.com/Jorungandr/cncleanr/archive/refs/heads/main.zip),
+extract it, and run tutorial commands from the repository root containing
+`DESCRIPTION`. After installing cncleanr, obtain this repository checkout to
+use those examples.
+
+### Performance and release records
+
+See the [GitHub release validation records](docs/release-next.md) for cross-platform validation and change summaries.
 
 Development benchmarks: [native numeric acceleration](docs/native-optimization.md), [qualifier/character-normalization optimization](docs/qualifier-optimization.md), [mixed-batch optimization](docs/mixed-optimization.md), and [formatted-number optimization](docs/formatted-optimization.md). Timing depends on input format and repetition; no universal latency is guaranteed.
 
@@ -242,8 +257,8 @@ are converted only once (`万` and `万元` have the same multiplier). Different
 explicit multipliers and percentages are reported as problems, not overridden.
 Omitting `unit` preserves existing behavior. With `unit`, numeric input is also
 scaled, `NA`/`NaN` remain missing, and `Inf`, `-Inf`, or conversion overflow are
-reported as problems. This argument is only available in `parse_cn_number()`;
-it does not read or infer table headers.
+reported as problems. All three parsers accept `unit`, supplied explicitly
+by the caller from the table header.
 Since 0.2.15, numeric input also respects applicable `as.double()` S3 methods
 before header scaling and missing detection, retaining original names. See
 [conversion consistency validation](docs/numeric-conversion.md).
@@ -359,6 +374,8 @@ Every parser preserves input order and returns one result for each input. Proble
 | `parse_cn_quantity()` | A data frame with `value` and `qualifier` columns |
 | `parse_cn_range()` | A data frame with `lower`, `upper`, `lower_inclusive`, and `upper_inclusive` columns |
 | `cn_problems()` | A data frame with `index`, `value`, and `reason` columns; zero rows when there are no problems |
+| `cn_subset()` | A selected, reordered or repeated parser result with remapped problem indices |
+| `cn_summary()` | A list containing `counts` and `reasons` tables for parsing outcomes and failure causes |
 
 Numeric input is converted directly to doubles and preserved, including `Inf`,
 `-Inf`, and `NaN`. `parse_cn_quantity()` marks finite values, `Inf`, and `-Inf`

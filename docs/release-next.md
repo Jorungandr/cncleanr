@@ -1,4 +1,15 @@
-# 下一版发布准备 / Next-release preparation
+# GitHub 发布与验收记录 / GitHub release validation
+
+GitHub v0.2.25 的源码、附件和跨平台测试记录见
+[0.2.25 验收](randomized-consistency-2026-10-30.md)。
+仓库 main 继续维护教程和独立示例，当前用法以仓库 README 为准。
+
+Source, archive and cross-platform checks for GitHub v0.2.25 are recorded in
+the [0.2.25 validation](randomized-consistency-2026-10-30.md). The main branch
+also maintains tutorials and independent examples. Use the repository README
+for their current instructions.
+
+## 历史发布记录 / Historical release records
 
 0.2.20 已完成 GitHub 发布，复合数量语法及验收见[复合数量记录](compound-validation.md)。
 GitHub 0.2.20 is published; explicit compound-magnitude validation is recorded
