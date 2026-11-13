@@ -47,3 +47,12 @@ headings, then was corrected to inspect Rd section tags and rerun successfully.
 
 Local downloads, installation libraries and the help-audit script are retained
 under ignored `outputs/onboarding-2026-11-13/`.
+
+## GitHub verification
+
+Source `e9fa0a2d8bf221401ee956affea593d49423e944` passed all five jobs on Ubuntu
+release/devel/oldrel-1, Windows release and macOS release. Ubuntu release logs
+confirm the six-export/local-link checks, fourteen runnable blocks per README,
+1832 package assertions, `Status: OK` and PDF manual OK.
+[View run 43393148151](https://github.com/Jorungandr/cncleanr/actions/runs/43393148151).
+The downloaded log is retained in `outputs/onboarding-2026-11-13/ci-ubuntu.log`.
