@@ -56,3 +56,33 @@ confirm the six-export/local-link checks, fourteen runnable blocks per README,
 1832 package assertions, `Status: OK` and PDF manual OK.
 [View run 43393148151](https://github.com/Jorungandr/cncleanr/actions/runs/43393148151).
 The downloaded log is retained in `outputs/onboarding-2026-11-13/ci-ubuntu.log`.
+
+## 2026-11-14 pak 在线安装 / Online pak installation
+
+两个 README 中的 GitHub 安装目标均已通过实际在线验证，在两个独立新建的 R 库中
+完成下载、构建、安装和加载。目标提交由安装后的 DESCRIPTION 核对。
+
+| Target | Installed commit |
+| --- | --- |
+| `Jorungandr/cncleanr@v0.2.25` | `821d560eff049dd953ba393dac2bb76d7a63541f` |
+| `Jorungandr/cncleanr@main` | `549d973ae0152c54bbc9ab941d415428d025cc4f` |
+
+Each target was downloaded, built and installed with `pak::pak()` into a
+separate new library. The loaded package path and version were verified, along
+with six exported functions, hundred-yuan parsing, quantity header conversion
+and range header conversion. Both installations passed their six extracted help
+examples and all 46 current README/tutorial blocks with optional dependencies.
+
+另外从 CRAN 在线下载并向独立库安装了 pak 0.11.2，再用这份 pak 向第三个新建库
+安装 main 成功。这个额外安装复用了前面已构建的 pak 缓存。pak 的 Windows 二进制
+包在加载时提示由 R 4.6.2 构建，本机 R 4.6.1 上加载与安装实测通过。
+
+A separate CRAN binary installation of pak 0.11.2 also succeeded. That fresh pak
+installation installed main into a third new library using its existing build
+cache. Loading pak reported that its binary was built under R 4.6.2. The local
+R 4.6.1 installation and package smoke checks succeeded.
+
+The Windows environment used the existing GCC 15.2 compiler configuration.
+Repository main resolves to a moving commit, so the exact tested SHA is recorded
+above. Installation scripts and full logs are retained under ignored
+`outputs/pak-install-2026-11-14/`.
