@@ -31,6 +31,7 @@ preservation of an earlier completed output.
 The workflow passed 21 parser fields from the attributed offline business
 fixture and 6039 parser fields from the retained 6347-case business fixture.
 The other 308 cases represent upstream business-review decisions in that fixture.
+The 21 offline fields are selected from the retained fixture.
 Source transformations are retained in the input columns. Existing source
 attribution is recorded in `docs/fixtures/business-cases-README.md` and
 `docs/business-validation-2026-10-30.md`.
@@ -74,3 +75,15 @@ ignored `outputs/table-cleaning-2026-11-14/`.
 本机十万行、三列数据按一万行分批，含读取及全部文件写出的三次中位耗时为
 1.24 秒，返回对象约 20.71 MiB。输入和最终结果整体保留在内存中。双语教程
 均可直接执行，完整文档审计通过 52 个代码块。
+
+## GitHub verification
+
+Source `658ded0a2beabe3cd4d7c2e5b7a3012131125cfb` passed all five jobs on
+Ubuntu release/devel/oldrel-1, Windows release and macOS release. Ubuntu release
+logs confirm literal execution of both new guides, 21 offline parser fields,
+the configurable workflow edge-case audit, 1832 package assertions,
+`Status: OK` and PDF manual OK.
+[View run 43596135949](https://github.com/Jorungandr/cncleanr/actions/runs/43596135949).
+
+The downloaded log is retained in
+`outputs/table-cleaning-2026-11-14/ci-ubuntu.log`.

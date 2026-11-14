@@ -57,6 +57,8 @@ Malformed encoding, quoting or field counts stop the import.
 Generated names include `amount__value`, `estimate__qualifier`, `interval__lower`,
 `interval__upper_inclusive` and `amount__status`. Status is parsed, missing or
 needs_review. Collisions with generated names or `.source_row` raise an error.
+Monetary hundred/thousand-yuan headers produce yuan values. The summary unit
+column retains the configured source header unit.
 Review rows follow configuration and source-row order. Repeated IDs retain
 their positions. source_row identifies data records, while multiline CSV cells
 may occupy multiple physical lines. With `id_column = NULL`, review IDs are missing.
