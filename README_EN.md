@@ -11,6 +11,8 @@ It does not merely extract the first number it encounters. A non-missing value t
 Choose a function using the [six-function reference](#return-value-reference).
 Start table cleaning with the [CSV example](docs/csv-cleaning_EN.md). Fields with
 K, pay periods or “13薪” use the [salary example](docs/salary-adapter-guide_EN.md).
+For per-column configuration with cleaned data, review tables and quality
+summaries, use the [complete CSV workflow](docs/table-cleaning-guide_EN.md).
 
 ## Installation
 

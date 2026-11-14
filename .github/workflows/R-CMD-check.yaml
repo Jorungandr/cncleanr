@@ -80,6 +80,7 @@ jobs:
           source("inst/examples/chunked-cleaning.R", encoding = "UTF-8")
           source("docs/readme-audit.R", encoding = "UTF-8")
           source("docs/salary-adapter-audit.R", encoding = "UTF-8")
+          source("docs/table-cleaning-audit.R", encoding = "UTF-8")
 
       - uses: r-lib/actions/check-r-package@v2
         with:

@@ -68,16 +68,24 @@
   # attributed fixture, not an invented full snapshot or a network download.
   tutorials <- c('docs/financial-table-example.md', 'docs/financial-table-example_EN.md',
                  'docs/business-workflows.md', 'docs/business-workflows_EN.md',
-                 'docs/salary-adapter-guide.md', 'docs/salary-adapter-guide_EN.md')
+                 'docs/salary-adapter-guide.md', 'docs/salary-adapter-guide_EN.md',
+                 'docs/table-cleaning-guide.md', 'docs/table-cleaning-guide_EN.md')
+  stopifnot(identical(canonical(blocks(file.path(root,'docs/table-cleaning-guide.md'))),
+                      canonical(blocks(file.path(root,'docs/table-cleaning-guide_EN.md')))))
   for (file in tutorials) {
     tutorial_directory <- file.path(directory, basename(file))
     dir.create(tutorial_directory)
     setwd(tutorial_directory)
     business <- grepl('business-workflows', file, fixed = TRUE)
     salary <- grepl('salary-adapter-guide', file, fixed = TRUE)
+    table <- grepl('table-cleaning-guide',file,fixed=TRUE)
     if (salary) {
       dir.create('docs')
       stopifnot(file.copy(file.path(root, 'docs/salary-adapter.R'), 'docs/salary-adapter.R'))
+    }
+    if (table) {
+      dir.create('docs')
+      stopifnot(file.copy(file.path(root,'docs/table-cleaning.R'),'docs/table-cleaning.R'))
     }
     if (business) {
       inputs <- 'outputs/business-validation-2026-10-30'
@@ -100,6 +108,10 @@
     if (business) {
       stopifnot(passed == 2L, installs == 0L, nrow(environment$cases) == 22L,
                 !anyDuplicated(environment$cases$case_id))
+    } else if (table) {
+      stopifnot(passed==3L,installs==0L,
+        identical(readRDS(file.path(environment$output_dir,'result.rds')),environment$result),
+        identical(environment$result$review$source_row,c(2L,4L,4L)))
     } else if (salary) {
       stopifnot(passed == 4L, installs == 0L,
                 identical(readRDS('salary-example.rds'), environment$result))

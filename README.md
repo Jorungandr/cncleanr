@@ -11,6 +11,8 @@
 按任务选择函数可查看[六个函数与返回值](#返回值速查)。表格清洗从
 [CSV 示例](docs/csv-cleaning.md)开始，带 K、计薪周期或“13薪”的字段使用
 [薪资示例](docs/salary-adapter-guide.md)。
+需要按列配置并一次输出清洗表、复核表和质量汇总时，使用
+[完整 CSV 清洗示例](docs/table-cleaning-guide.md)。
 
 ## 安装
 
